@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="18" android:translateY="18"
+           android:scaleX="0.72" android:scaleY="0.72">
+        <!-- page gauche -->
+        <path android:fillColor="#FFFFFF"
+              android:pathData="M21.6,36.7 L52.9,31.3 L52.9,76.7 L21.6,71.3 Z" />
+        <!-- page droite -->
+        <path android:fillColor="#DFF0E6"
+              android:pathData="M86.4,36.7 L55.1,31.3 L55.1,76.7 L86.4,71.3 Z" />
+        <!-- reliure -->
+        <path android:fillColor="#166B3F"
+              android:pathData="M52.1,31.3 h3.8 v45.4 h-3.8 z" />
+        <!-- lignes de texte -->
+        <path android:fillColor="#7FBF9C"
+              android:pathData="M27,44.3 h20.5 v2.3 h-20.5 z M27,53.5 h20.5 v2.3 h-20.5 z M27,62.7 h13 v2.3 h-13 z" />
+        <!-- marque-page -->
+        <path android:fillColor="#C47D15"
+              android:pathData="M66.9,31.8 L75.6,33.3 L75.6,54 L71.3,48.6 L66.9,50.8 Z" />
+    </group>
+</vector>
