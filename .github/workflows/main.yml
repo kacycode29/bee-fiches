@@ -31,12 +31,25 @@ jobs:
       - name: Restaurer la clé de signature
         env:
           CLE_BASE64: ${{ secrets.BEE_KEYSTORE_BASE64 }}
+          MDP: ${{ secrets.BEE_KEYSTORE_PASSWORD }}
         run: |
           if [ -z "$CLE_BASE64" ]; then
-            echo "Le secret BEE_KEYSTORE_BASE64 est absent." && exit 1
+            echo "::error::Le secret BEE_KEYSTORE_BASE64 est vide ou absent."
+            exit 1
           fi
-          printf '%s' "$CLE_BASE64" | base64 -d > "$RUNNER_TEMP/bee-release.jks"
-          echo "Clé restaurée : $(stat -c%s "$RUNNER_TEMP/bee-release.jks") octets"
+          printf '%s' "$CLE_BASE64" | tr -d '[:space:]' | base64 -di > "$RUNNER_TEMP/bee-release.jks"
+          TAILLE=$(stat -c%s "$RUNNER_TEMP/bee-release.jks")
+          echo "Clé restaurée : $TAILLE octets (attendu : 4418)"
+          if [ "$TAILLE" -lt 4000 ]; then
+            echo "::error::Clé incomplète. Le contenu du secret BEE_KEYSTORE_BASE64 a été tronqué au copier-coller."
+            exit 1
+          fi
+          if keytool -list -keystore "$RUNNER_TEMP/bee-release.jks" -storepass "$MDP" -storetype PKCS12 > /dev/null 2>&1; then
+            echo "Clé lisible, mot de passe correct."
+          else
+            echo "::error::Clé illisible, ou mot de passe BEE_KEYSTORE_PASSWORD incorrect."
+            exit 1
+          fi
 
       - name: Compiler l'APK signée
         env:
