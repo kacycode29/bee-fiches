@@ -16,6 +16,22 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v4
 
+      - name: Normaliser le nom du générateur
+        run: |
+          cd app/src/main/assets
+          if [ -f "index.html.html" ]; then
+            mv -f "index.html.html" "index.html"
+            echo "index.html.html renomme en index.html"
+          elif [ -f "index" ]; then
+            mv -f "index" "index.html"
+            echo "index renomme en index.html"
+          fi
+          rm -f "index" "index.html.html"
+          echo "Generateur retenu : $(stat -c%s index.html) octets"
+          if [ "$(stat -c%s index.html)" -lt 1326000 ]; then
+            echo "::warning::Le generateur semble etre une version anterieure a la 13.2."
+          fi
+
       - name: Installer Java 17
         uses: actions/setup-java@v4
         with:
