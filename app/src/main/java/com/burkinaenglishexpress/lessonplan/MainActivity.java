@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.print.PrintAttributes;
 import android.print.PrintManager;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Base64;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
@@ -356,6 +357,28 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void saveBase64(String dataUrl, String suggestedName) {
             saveDataUrl(dataUrl, suggestedName);
+        }
+
+        /**
+         * Identifiant d'installation stable, propre à cet appareil et à la clé
+         * de signature de l'application. Contrairement à une valeur rangée dans
+         * le stockage de la page, il survit à la désinstallation puis à la
+         * réinstallation : le code d'autorisation de l'enseignant reste valable.
+         * Il n'est remis à zéro que par une réinitialisation d'usine.
+         */
+        @JavascriptInterface
+        public String stableDeviceId() {
+            try {
+                String id = Settings.Secure.getString(
+                        getContentResolver(), Settings.Secure.ANDROID_ID);
+                if (id == null) return "";
+                id = id.trim();
+                // Valeur défectueuse connue sur certains appareils anciens.
+                if (id.isEmpty() || "9774d56d682e549c".equals(id)) return "";
+                return "android-" + id;
+            } catch (Exception e) {
+                return "";
+            }
         }
     }
 }
