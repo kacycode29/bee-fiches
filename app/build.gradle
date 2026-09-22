@@ -14,10 +14,26 @@ android {
         versionName "13.1"
     }
 
+    // Clé de signature permanente. Elle est fournie par GitHub au moment de la
+    // compilation ; aucun mot de passe n'est écrit dans ce fichier.
+    signingConfigs {
+        release {
+            def fichierCle = System.getenv("BEE_KEYSTORE_FILE")
+            if (fichierCle) {
+                storeFile file(fichierCle)
+                storePassword System.getenv("BEE_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("BEE_KEY_ALIAS")
+                keyPassword System.getenv("BEE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (System.getenv("BEE_KEYSTORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
