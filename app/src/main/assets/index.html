@@ -731,8 +731,18 @@ function beePemToDer(pem){const b64=pem.replace(/-----[^-]+-----/g,'').replace(/
 function beeJsonB64u(s){return new TextDecoder().decode(beeB64uToBytes(s));}
 const BEE_INSTALL_ID_KEY='bee.installation.id.v2';
 function beeNewRandomId(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();return 'bee-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);}
-function beeDeviceId(){let id='';try{id=localStorage.getItem(BEE_INSTALL_ID_KEY)||'';if(!id){id=beeNewRandomId();localStorage.setItem(BEE_INSTALL_ID_KEY,id);}}catch(e){id=beeNewRandomId();}return id;}
+function beeDeviceId(){try{if(window.AndroidBridge&&typeof AndroidBridge.stableDeviceId==='function'){const aid=AndroidBridge.stableDeviceId();if(aid)return aid;}}catch(e){}let id='';try{id=localStorage.getItem(BEE_INSTALL_ID_KEY)||'';if(!id){id=beeNewRandomId();localStorage.setItem(BEE_INSTALL_ID_KEY,id);}}catch(e){id=beeNewRandomId();}return id;}
 function beeDeviceType(){const w=navigator.userAgent.toLowerCase();if(/iphone|ipad|ipod/.test(w))return 'apple-mobile';if(/android/.test(w))return 'android-mobile';if(/tablet/.test(w))return 'tablet';return 'computer';}
+// Traduction des causes d'échec en phrases compréhensibles par l'enseignant.
+const BEE_MESSAGES={
+ code_dautorisation_invalide:"le code d\u2019autorisation est incomplet ou ab\u00eem\u00e9. Recopiez-le en entier, sans rien ajouter ni retirer.",
+ signature_invalide:"ce code d\u2019autorisation n\u2019est pas authentique. V\u00e9rifiez que vous l\u2019avez coll\u00e9 en entier ; si le probl\u00e8me persiste, contactez BEE.",
+ autorisation_non_permanente:"ce code d\u2019autorisation n\u2019est pas permanent. Contactez BEE pour en obtenir un nouveau.",
+ ce_code_est_destine_a_un_autre_appareil:"ce code a \u00e9t\u00e9 \u00e9mis pour un autre appareil. Refaites une demande depuis celui-ci.",
+ cle_de_licence_incorrecte:"la cl\u00e9 de licence ne correspond pas au code re\u00e7u. V\u00e9rifiez-la, sans espace avant ni apr\u00e8s.",
+ verification_cryptographique_indisponible:"ce navigateur ne peut pas v\u00e9rifier l\u2019autorisation. Essayez un autre navigateur, ou l\u2019application Android."
+};
+function beeMessage(e){const k=String((e&&e.message)||'');return BEE_MESSAGES[k]||('une erreur inattendue est survenue. Contactez BEE en indiquant ce d\u00e9tail : '+k.slice(0,60));}
 function beeSetStatus(msg,err=false,ok=false){const e=document.getElementById('beeLicenseStatus');e.textContent=msg;e.className='bee-license-status'+(err?' err':ok?' ok':'');}
 // Vérifie une signature Ed25519 : WebCrypto natif en priorité, repli JavaScript
 // pur si le navigateur ne connaît pas Ed25519 (WebView / Chrome antérieurs à 137).
@@ -749,10 +759,10 @@ async function beeEd25519Verify(sigBytes,msgBytes,derKey){
   }
   throw new Error('verification_cryptographique_indisponible');
 }
-async function beeVerifyToken(token){const parts=String(token||'').trim().split('.');if(parts.length!==3)throw new Error('code_dautorisation_invalide');const [h,p,s]=parts;let header,payload;try{header=JSON.parse(beeJsonB64u(h));payload=JSON.parse(beeJsonB64u(p));}catch(e){throw new Error('code_dautorisation_invalide');}if(header.alg!=='Ed25519'||header.typ!=='BEE-LICENSE')throw new Error('signature_invalide');if(payload.permanent!==true)throw new Error('autorisation_non_permanente');if(payload.installation_id!==await beeDeviceId())throw new Error('ce_code_est_destine_a_un_autre_appareil');if(payload.license_key!==document.getElementById('beeLicenseKey').value.trim())throw new Error('cle_de_licence_incorrecte');const ok=await beeEd25519Verify(beeB64uToBytes(s),new TextEncoder().encode(h+'.'+p),beePemToDer(BEE_PUBLIC_KEY_PEM));if(!ok)throw new Error('signature_invalide');return payload;}
+async function beeVerifyToken(token){const parts=String(token||'').trim().split('.');if(parts.length!==3)throw new Error('code_dautorisation_invalide');const [h,p,s]=parts;let header,payload;try{header=JSON.parse(beeJsonB64u(h));payload=JSON.parse(beeJsonB64u(p));}catch(e){throw new Error('code_dautorisation_invalide');}if(header.alg!=='Ed25519'||header.typ!=='BEE-LICENSE')throw new Error('signature_invalide');if(payload.permanent!==true)throw new Error('autorisation_non_permanente');if(payload.installation_id!==await beeDeviceId())throw new Error('ce_code_est_destine_a_un_autre_appareil');if(payload.license_key!==document.getElementById('beeLicenseKey').value.trim())throw new Error('cle_de_licence_incorrecte');let sigBytes;try{sigBytes=beeB64uToBytes(s);}catch(err){throw new Error('code_dautorisation_invalide');}if(!sigBytes||sigBytes.length!==64)throw new Error('code_dautorisation_invalide');const ok=await beeEd25519Verify(sigBytes,new TextEncoder().encode(h+'.'+p),beePemToDer(BEE_PUBLIC_KEY_PEM));if(!ok)throw new Error('signature_invalide');return payload;}
 async function beeCheckStoredLicense(){const raw=localStorage.getItem(BEE_LICENSE_STORAGE);if(!raw)return false;try{const obj=JSON.parse(raw);if(!obj||!obj.token||!obj.license_key)throw new Error('stored_license_incomplete');const keyEl=document.getElementById('beeLicenseKey');if(keyEl)keyEl.value=obj.license_key;await beeVerifyToken(obj.token);return true;}catch(e){localStorage.removeItem(BEE_LICENSE_STORAGE);return false;}}
 function beeShowDevice(payload){const e=document.getElementById('beeLicenseDevice');e.hidden=false;e.innerHTML='<b>Identifiant de cette installation</b><br><span class="bee-license-small">'+String(payload.installation_id).replace(/[<>&]/g,'')+'</span>';}
-async function beeActivate(){const key=document.getElementById('beeLicenseKey').value.trim(),token=document.getElementById('beeActivationCode').value.trim();if(!key||!token){beeSetStatus('Veuillez renseigner la clé de licence et le code d’autorisation.',true);return;}const btn=document.getElementById('beeActivateBtn');btn.disabled=true;beeSetStatus('Vérification de l’autorisation…');try{const payload=await beeVerifyToken(token);localStorage.setItem(BEE_LICENSE_STORAGE,JSON.stringify({token,license_key:key,activated_at:new Date().toISOString()}));beeShowDevice(payload);beeSetStatus('Activation réussie. Ce appareil est autorisé définitivement et peut fonctionner hors ligne.',false,true);setTimeout(()=>document.getElementById('beeLicenseGate').hidden=true,700);}catch(e){beeSetStatus('Activation impossible : '+e.message,true);}finally{btn.disabled=false;}}
+async function beeActivate(){const key=document.getElementById('beeLicenseKey').value.trim(),token=document.getElementById('beeActivationCode').value.trim();if(!key||!token){beeSetStatus('Veuillez renseigner la clé de licence et le code d’autorisation.',true);return;}const btn=document.getElementById('beeActivateBtn');btn.disabled=true;beeSetStatus('Vérification de l’autorisation…');try{const payload=await beeVerifyToken(token);localStorage.setItem(BEE_LICENSE_STORAGE,JSON.stringify({token,license_key:key,activated_at:new Date().toISOString()}));beeShowDevice(payload);beeSetStatus('Activation réussie. Cet appareil est autorisé définitivement et peut fonctionner hors ligne.',false,true);setTimeout(()=>document.getElementById('beeLicenseGate').hidden=true,700);}catch(e){beeSetStatus('Activation impossible : '+beeMessage(e),true);}finally{btn.disabled=false;}}
 function beeBuildWhatsAppUrl(){const id=beeDeviceId();const msg=`Bonjour BEE, je viens d’acheter le Lesson Plan Generator et je souhaite demander mon activation.
 
 Identifiant d’installation : ${id}
@@ -6488,157 +6498,354 @@ function actorNames(text) {
    les entrées ne sont proposées que si le texte s'y prête, et l'ordre
    est tiré au sort à partir du texte lui-même. */
 function exQuestions(ctx) {
+  /* ---------------------------------------------------------------------
+     Moteur de questions BEE v13.3 — deux exigences réunies :
+       1. les questions citent le contenu réel du texte (personnes, lieux,
+          chiffres, causes, contrastes, solutions réellement présents) et
+          ne sont donc pas des formules passe-partout ;
+       2. leur exigence cognitive suit le niveau de la classe :
+          6e–5e   prélèvement d'informations explicites ;
+          4e–3e   mise en relation des idées, justification simple ;
+          lycée   analyse, inférence, évaluation avec preuves.
+     --------------------------------------------------------------------- */
   const text = ctx.text, sents = sentencesOf(text), rnd = ctx.rnd;
-  const { names } = properNames(text);
-  const places = placeNames(text);
-  const persons = actorNames(text);
-  const isName = w => names.has(w) || persons.includes(w) || places.has(w);
-  const terms = keyTerms(text, 6, ctx.topic);
   const low = text.toLowerCase();
-  const derived = [], used = new Set();
-  /* Une question dérivée doit rester courte : on coupe la phrase à la
-     première subordonnée, et on l'abandonne si elle reste trop longue. */
-  const trim = r => r.replace(/[.!?]+$/, '')
+  const { names } = properNames(text);
+  /* Le repérage des noms propres du logiciel confond parfois une personne et
+     un lieu : « According to Aminata » fait passer Aminata pour un lieu, ce qui
+     produit « What is a young farmer…? » au lieu de « Who is…? ». On tranche
+     ici sur un critère simple et fiable : un nom suivi d'un verbe conjugué
+     quelque part dans le texte désigne une personne. */
+  const VERBE_SUIVANT = /^(is|are|was|were|has|have|had|does|do|did|will|can|could|should|would|must|says|said|explains|explained|thinks|thought|wants|wanted|grows|grew|joined|learned|learnt|lives|lived|works|worked|goes|went|comes|came|takes|took|makes|made|gets|got|decided|started|began|becomes|became|feels|felt|knows|knew|sells|sold|buys|bought|teaches|taught)$/i;
+  const suiviDunVerbe = nom => {
+    const re = new RegExp('\\b' + String(nom).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+([A-Za-z\u2019\'-]+)', 'g');
+    let m;
+    while ((m = re.exec(text))) { if (VERBE_SUIVANT.test(m[1])) return true; }
+    return false;
+  };
+  const persons = [...new Set([...actorNames(text), ...names])].filter(suiviDunVerbe);
+  const places = [...placeNames(text)].filter(n => !persons.includes(n));
+  const isName = w => names.has(w) || persons.includes(w) || places.includes(w);
+  const bruts = keyTerms(text, 14, ctx.topic);
+  /* Un nom propre ou un verbe n'est pas un mot-clé thématique : « Aminata »,
+     « Burkina Faso » ou « provides » ne peuvent pas servir à formuler
+     « How are X and Y related in the text? ». On ne garde que des noms communs. */
+  const NON_THEME = new Set(('near about after before during through between among under over '
+    + 'provides gives makes shows takes comes goes says means becomes remains includes allows '
+    + 'very much many some other another every each').split(' '));
+  const estNomPropre = t => String(t).split(/[^A-Za-z'\u2019-]+/).filter(Boolean)
+      .some(w => isName(w.charAt(0).toUpperCase() + w.slice(1)));
+  const terms = bruts.filter(t => !estNomPropre(t) && !NON_THEME.has(String(t).toLowerCase()));
+  const t0 = terms[0] || 'the topic', t1 = terms[1] || t0, t2 = terms[2] || t1;
+  const aDeuxTermes = terms.length >= 2;
+
+  /* Niveau de la classe. ctx.c est transmis par le générateur ; ctx.early
+     sert de filet de sécurité si jamais la classe manquait. */
+  const cls = String(ctx.c || '').trim();
+  const level = ['6e', '5e'].includes(cls) ? 'foundation'
+              : ['4e', '3e'].includes(cls) ? 'developing'
+              : cls ? 'upper'
+              : (ctx.early ? 'foundation' : 'developing');
+
+  const PROFIL = {
+    foundation: {
+      instruction: 'Answer the following questions in complete sentences, using information from the text.',
+      note: 'Answers must be correct and taken from the text.',
+      maxHard: 0, minAnchored: 4
+    },
+    developing: {
+      instruction: 'Answer the following questions in complete sentences. Use evidence from the text and explain the links between the ideas.',
+      note: 'Answers must be supported by details taken from the text.',
+      maxHard: 1, minAnchored: 3
+    },
+    upper: {
+      instruction: 'Answer the following questions in complete sentences. Justify each answer with relevant evidence from the text and explain the relationships between the ideas.',
+      note: 'Answers should be justified with relevant evidence; accept any well-argued response supported by the text.',
+      maxHard: 3, minAnchored: 2
+    }
+  }[level];
+
+  /* --------------------------- petits outils --------------------------- */
+  // Raccourcit une phrase en un fragment citable et lisible.
+  const frag = (s, max) => {
+    let t = String(s || '').trim()
+      .replace(/^[“”"']+|[“”"']+$/g, '')
+      .replace(/[.!?]+$/, '')
+      .replace(/[,;:]\s*$/, '')
+      .trim();
+    const w = wordsOf(t);
+    if (w.length > (max || 14)) {
+      const cut = t.split(/\s+/).slice(0, max || 14).join(' ');
+      t = cut.replace(/[,;:]$/, '') + '…';
+    }
+    return t;
+  };
+  // Décapitalise une proposition, sauf si elle commence par un nom propre.
+  const lower1 = s => {
+    const head = (String(s).match(WORD_RE) || [])[0] || '';
+    return isName(head) ? s : s.charAt(0).toLowerCase() + s.slice(1);
+  };
+  const trim = r => String(r).replace(/[.!?]+$/, '')
     .replace(/,?\s+(because|since|which|whereas|while|although|so that|in order to|rather than)\b[^]*$/i, '')
     .replace(/[,;:]\s*$/, '').trim();
-  const add = (q, i) => { if (wordsOf(q).length <= 22) { derived.push(q); used.add(i); return true; } return false; };
-  const free = i => !used.has(i);
 
-  // 1. Question sur le sujet, avec un nom propre : l'ordre ne change pas.
-  for (let i = 0; i < sents.length; i++) {
-    const m = sents[i].match(/^([A-Z][A-Za-z'\u2019-]+)\s+([a-z][A-Za-z'\u2019-]*\s+[^]*)$/);
-    if (!m || !free(i) || !isName(m[1])) continue;
-    // On s'arrête avant la subordonnée de cause : la question reste courte.
+  const seen = new Set(), pool = [];
+  /* anchored = la question cite un élément réel du texte ; hard = question
+     d'analyse, réservée aux niveaux qui peuvent la traiter. */
+  const add = (family, hard, anchored, q) => {
+    q = String(q || '').replace(/\s+/g, ' ').trim();
+    if (!q || seen.has(q)) return;
+    if (wordsOf(q).length > 32) return;
+    seen.add(q);
+    pool.push({ family, hard: !!hard, anchored: !!anchored, q });
+  };
+
+  /* ------------------ repérage de la structure du texte ----------------- */
+  const pick = re => sents.filter(s => re.test(s));
+  const causeS   = pick(/\bbecause\b|\bsince\b|\bdue to\b|\bowing to\b|\bas a result of\b/i);
+  const conseqS  = pick(/\btherefore\b|\bas a result\b|\bconsequently\b|\bthus\b/i);
+  const contrastS= pick(/\bhowever\b|\bwhereas\b|\balthough\b|\bunlike\b|\bon the contrary\b|\bin contrast\b|\binstead of\b/i);
+  const solutionS= pick(/\bsolution\b|\bpropose[sd]?\b|\bsuggest(?:s|ed)?\b|\bmeasure[s]?\b|\brecommend(?:s|ed)?\b|\bshould\b|\bmust\b/i);
+  const exampleS = pick(/\bfor example\b|\bsuch as\b|\bfor instance\b/i);
+  const defS     = pick(/\bmeans\b|\bis defined as\b|\brefers to\b|\bis called\b|\bis known as\b/i);
+  const seqS     = pick(/\bfirst\b|\bsecond\b|\bthen\b|\bnext\b|\bfinally\b|\bafter that\b/i);
+  const reportS  = pick(/\baccording to\b|\bsays?\b|\bsaid\b|\bexplains?\b|\bexplained\b|\breports?\b|\bdeclares?\b/i);
+  const years    = (text.match(/\b(?:19|20)\d{2}\b/g) || []).slice(0, 4);
+  const figures  = (text.match(/\b\d+(?:[.,]\d+)?\s*(?:percent|%|kilometres|kilometers|km|years?|months?|days?|hours?|CFA|francs?)?\b/g) || [])
+                    .map(x => x.trim()).filter(x => !years.includes(x)).slice(0, 4);
+
+  /* =====================================================================
+     1. QUESTIONS TIRÉES DES PHRASES DU TEXTE
+     Elles existent à tous les niveaux : c'est leur formulation et leur
+     exigence qui changent, pas leur ancrage dans le contenu.
+     ===================================================================== */
+
+  // --- sujet + verbe : « What provides seeds and training to its members? »
+  for (const s of sents) {
+    const m = s.match(/^([A-Z][A-Za-z'’-]+)\s+([a-z][A-Za-z'’-]*\s+[^]*)$/);
+    if (!m || !isName(m[1])) continue;
     const rest = trim(m[2]);
     if (wordsOf(rest).length < 4) continue;
-    const human = persons.includes(m[1]) || /\b(he|she|him|her|his|hers)\b/i.test(rest);
-    if (add(`${human ? 'Who' : 'What'} ${rest}?`, i)) break;
+    /* « Who » dès que le sujet désigne visiblement une personne : le texte
+       reprend le nom par he/she, ou le nom est un acteur identifié. */
+    const human = persons.includes(m[1])
+      || (!places.includes(m[1]) && /\b(he|she|him|her|his)\b/i.test(text));
+    if (level === 'foundation') add('subject', false, true, `${human ? 'Who' : 'What'} ${rest}?`);
+    else add('subject', false, true, `${human ? 'Who' : 'What'} ${rest}? Quote the sentence that gives the answer.`);
+    break;
   }
-  // 2. Question sur le sujet, avec un groupe nominal : « What has no
-  //    single cause? », « What can worsen a person's health? »
-  for (let i = 0; i < sents.length; i++) {
-    const m = sents[i].match(/^((?:The|A|An|This|These|Many|Some|Most|Several|Every|Each)\s+[A-Za-z][A-Za-z\s'\u2019-]{2,40}?)\s+(has|have|can|must|will|should|may)\s+(.+?)\.$/);
-    if (!m || !free(i)) continue;
+  const S_VERBS = new Set(('creates makes gives shows offers requires allows provides causes leads helps includes '
+    + 'affects explains reduces increases prevents encourages produces represents receives brings combines '
+    + 'describes presents supports protects improves threatens limits').split(' '));
+  for (const s of sents) {
+    const m = s.match(/^((?:The|A|An|This|These|Many|Some|Most|Several|Every|Each)\s+[A-Za-z][A-Za-z\s'’-]{2,40}?)\s+([a-z]+s)\s+(.+?)\.$/);
+    if (!m || !S_VERBS.has(m[2])) continue;
     const rest = trim(`${m[2]} ${m[3]}`);
     if (wordsOf(rest).length < 4) continue;
-    if (add(`What ${rest}?`, i)) break;
-  }
-  // 2b. Question sur le sujet, avec un verbe d'action au présent :
-  //     « What provides grants to young entrepreneurs? »
-  const S_VERBS = new Set(('creates makes gives shows offers requires allows provides causes leads '
-    + 'helps includes affects explains reduces increases prevents encourages produces depends remains '
-    + 'becomes exists contributes represents concerns receives brings pushes forces obliges '
-    + 'combines describes presents supports protects improves threatens limits').split(' '));
-  for (let i = 0; i < sents.length; i++) {
-    const m = sents[i].match(/^((?:The|A|An|This|These|Many|Some|Most|Several|Every|Each)\s+[A-Za-z][A-Za-z\s'\u2019-]{2,40}?)\s+([a-z]+s)\s+(.+?)\.$/);
-    if (!m || !free(i) || !S_VERBS.has(m[2])) continue;
-    const rest = trim(`${m[2]} ${m[3]}`);
-    if (wordsOf(rest).length < 4) continue;
-    if (add(`What ${rest}?`, i)) break;
-  }
-  // 3. Question sur une définition ou une caractérisation.
-  for (let i = 0; i < sents.length; i++) {
-    const m = sents[i].match(/^(The\s+[a-z][a-z\s'\u2019-]{2,34}?)\s+(is|are)\s+(.+?)\.$/);
-    // « The economy is growing », « The difficulty is not… » ne sont pas
-    // des définitions ; « What is the population? » est trop vague.
-    if (!m || !free(i)) continue;
-    if (/^(not|no longer|never|being|becoming)\b/i.test(m[3]) || /^[a-z]+ing\b/.test(m[3])) continue;
-    if (wordsOf(m[1]).length < 3) continue;
-    if (add(`What ${m[2]} ${m[1].toLowerCase()}?`, i)) break;
-  }
-  // 4. Terme défini dans le texte : « is called », « means », « refers to ».
-  for (let i = 0; i < sents.length; i++) {
-    if (!free(i)) continue;
-    let m = sents[i].match(/\bis (?:often |sometimes |usually |commonly )?called\s+([a-z][a-z\s'\u2019-]{2,30})[.,]/i);
-    if (m) { add(`What does the text call \u201c${m[1].trim()}\u201d?`, i); break; }
-    m = sents[i].match(/^([A-Z][A-Za-z'\u2019-]+(?:\s+[a-z][A-Za-z'\u2019-]+){0,2})\s+(?:means|refers to)\s+/);
-    if (m) { add(`What does \u201c${m[1].trim()}\u201d mean, according to the text?`, i); break; }
-  }
-  // 5. Obligation : « According to the text, what must candidates do? »
-  for (let i = 0; i < sents.length; i++) {
-    const m = sents[i].match(/^((?:The|A|An|Many|Some|Most|Every|Each|Young)\s+[a-z][a-z\s'\u2019-]{2,34}?|[A-Z][a-z'\u2019-]+)\s+(?:must|have to|has to)\s+[a-z]/);
-    if (!m || !free(i)) continue;
-    if (add(`According to the text, what must ${m[1].toLowerCase()} do?`, i)) break;
-  }
-  // 6. Question sur une cause exprimée avec « because ».
-  for (let i = 0; i < sents.length; i++) {
-    if (!free(i)) continue;
-    const k = sents[i].toLowerCase().indexOf(' because ');
-    if (k < 0) continue;
-    let main = sents[i].slice(0, k).trim().replace(/[,;:]$/, '');
-    if (wordsOf(main).length < 4 || ANAPHORA.test(main)) continue;
-    main = main.replace(/\s+(therefore|however|also|meanwhile|thus)\s+/i, ' ');
-    const head = (main.match(WORD_RE) || [])[0] || '';
-    // On ne décapitalise pas un nom propre en tête de proposition.
-    if (!isName(head)) main = main.charAt(0).toLowerCase() + main.slice(1);
-    if (add(`What is the reason why ${trim(main)}?`, i)) break;
-  }
-  // 7. Exemples introduits par « such as ».
-  for (let i = 0; i < sents.length; i++) {
-    const m = sents[i].match(/([a-z][a-z'\u2019-]{3,20})\s+such as\s+/i);
-    if (!m || !free(i)) continue;
-    if (add(`Which examples of ${m[1].toLowerCase()} does the text give?`, i)) break;
+    add('subject2', false, true, `What ${rest}?`);
+    break;
   }
 
-  const t0 = terms[0] || 'the topic', t1 = terms[1] || t0;
-  // Chaque entrée porte une famille : une seule question par famille est
-  // retenue, pour éviter que les mêmes formules reviennent ensemble.
-  const bank = [
-    [true, 'lexis', `What does the text say about ${t0}?`],
-    [true, 'lexis', `Find in the text the sentence where ${t1} appears and explain it in your own words.`],
-    [true, 'lexis', `Find in the text three words that belong to the field of ${/^(at|in|on|a|the)\b/i.test(String(ctx.theme || '').trim()) ? t0 : (String(ctx.theme || '').toLowerCase() || t0)}.`],
-    [true, 'reflect', 'Give the main idea of each paragraph in one sentence.'],
-    [true, 'reflect', 'Which sentence of the text best summarises the whole passage?'],
-    [true, 'reflect', 'Say in your own words what the last paragraph means.'],
-    [true, 'reflect', 'Do you agree with the last sentence of the text? Justify your answer.'],
-    [persons.length > 0, 'person', `What happens to ${persons[0]} in the text?`],
-    [persons.length > 0, 'person', `What does ${persons[0]} do, and why?`],
-    [persons.length > 0, 'person', `In a few words, describe the situation of ${persons[0]}.`],
-    [persons.length > 1, 'person', `Compare the situation of ${persons[0]} and that of ${persons[1]}.`],
-    [places.size > 0, 'place', 'Where does the situation described in the text take place?'],
-    [places.size > 0, 'place', 'Find in the text the words that say where the scene happens.'],
-    [/\bbecause\b|\bsince\b|as a result|for this reason|therefore/.test(low), 'struct', 'Which causes does the text give? List them.'],
-    [/\bbecause\b|\bsince\b|as a result|for this reason|therefore/.test(low), 'struct', 'Give two causes mentioned in the text, in your own words.'],
-    [/consequence|effect|result|impact/.test(low), 'struct', 'Which consequences does the text mention?'],
-    [/consequence|effect|result|impact/.test(low), 'struct', 'Explain one consequence described in the text and say who it affects.'],
-    [/solution|answer|propose|suggest|measure|reform/.test(low), 'struct', 'Which solutions does the text propose?'],
-    [/solution|answer|propose|suggest|measure|reform/.test(low), 'struct', 'Which solution of the text seems the most useful to you? Why?'],
-    [/\bmust\b|have to|has to|should|necessary|need to/.test(low), 'struct', 'Which obligations or necessities does the text mention?'],
-    [/whereas|unlike|however|meanwhile|on the contrary|instead of|rather than/.test(low), 'struct', 'Which two situations does the text compare? Say what opposes them.'],
-    [/first|second|third|fourth/.test(low), 'struct', 'Which points does the text present, and in which order?'],
-    [/\d|\b(one|two|three|four|five|six|ten|hundred|thousand)\b/i.test(text), 'number', 'Find a number in the text and say what it refers to.'],
-    [/\d|\b(one|two|three|four|five|six|ten|hundred|thousand)\b/i.test(text), 'number', 'Which quantities or dates does the text give? What do they show?'],
-    [/\bsays?\b|explains?|declares?|according to/.test(low), 'report', 'Report in your own words what one person says in the text.'],
-    [/\bsays?\b|explains?|declares?|according to/.test(low), 'report', 'Quote the words of one person in the text, then rewrite them in your own words.'],
-    [/\bsays?\b|explains?|declares?|according to/.test(low), 'report', 'Who is speaking in the text, and what does he or she say?'],
-    [true, 'reflect', 'What is your own opinion on the subject of this text? Give two reasons.'],
-    [true, 'reflect', 'What did you learn in this text that you did not know before?']
-  ].filter(x => x[0]);
-
-  // Les questions tirées du texte passent en premier ; la banque ne
-  // complète que les places restantes, une question par famille.
-  const items = [], seen = new Set(), fam = new Set();
-  for (const q of shuffledBy(derived, rnd)) {
-    if (items.length >= Math.max(1, ctx.n - 1) || seen.has(q)) continue;
-    seen.add(q); items.push(esc(q));
-  }
-  // Les questions liées au contenu passent avant les questions de
-  // réaction, qui ne viennent que s'il reste de la place.
-  const LIMIT = { lexis: 2, struct: 2 };
-  const count = {};
-  const tiers = [shuffledBy(bank.filter(x => x[1] !== 'reflect'), rnd),
-                 shuffledBy(bank.filter(x => x[1] === 'reflect'), rnd)];
-  for (const tier of tiers) {
-    for (const [, f, q] of tier) {
-      if (items.length >= ctx.n) break;
-      if (seen.has(q) || (count[f] || 0) >= (LIMIT[f] || 1)) continue;
-      seen.add(q); count[f] = (count[f] || 0) + 1; items.push(esc(q));
+  // --- personnes réellement nommées
+  if (persons.length) {
+    const a = persons[0];
+    if (level === 'foundation') {
+      add('person', false, true, `Who is ${a}? Say what ${a} does in the text.`);
+    } else if (level === 'developing') {
+      add('person', false, true, `What does ${a} do in the text, and why? Use two details from the text.`);
+    } else {
+      add('person', true, true, `What position or attitude does the text give to ${a}? Justify with evidence from the text.`);
+    }
+    if (persons.length > 1 && level !== 'foundation') {
+      add('person2', level === 'upper', true, `Compare the situation of ${persons[0]} and that of ${persons[1]}. What does this comparison show?`);
     }
   }
+
+  // --- lieux réellement nommés
+  if (places.length) {
+    if (level === 'foundation') add('place', false, true, `The text mentions ${places[0]}. What happens there?`);
+    else add('place', false, true, `Why is ${places[0]} important in the text? Give one detail.`);
+  }
+
+  // --- dates et chiffres réellement présents
+  if (years.length) {
+    if (level === 'foundation') add('date', false, true, `What happened in ${years[0]}, according to the text?`);
+    else add('date', false, true, `What happened in ${years[0]}, and what did it change? Use the text.`);
+  }
+  if (figures.length) {
+    const f0 = figures[0];
+    if (level === 'foundation') add('number', false, true, `What does \u201c${f0}\u201d refer to in the text?`);
+    else add('number', false, true, `What does \u201c${f0}\u201d refer to, and what does this figure show about ${t0}?`);
+  }
+
+  // --- définitions données par le texte
+  for (const s of defS) {
+    let m = s.match(/\bis (?:often |sometimes |usually |commonly )?called\s+([a-z][a-z\s'’-]{2,30})[.,]/i)
+         || s.match(/^([A-Z][A-Za-z'’-]+(?:\s+[a-z][A-Za-z'’-]+){0,2})\s+(?:means|refers to|is known as)\s+/);
+    const w = m ? m[1].trim() : '';
+    if (!w) continue;
+    if (level === 'foundation') add('definition', false, true, `What does \u201c${w}\u201d mean, according to the text?`);
+    else if (level === 'developing') add('definition', false, true, `How does the text explain \u201c${w}\u201d? Say it in your own words.`);
+    else add('definition', false, true, `How does the text define \u201c${w}\u201d, and why is this definition useful to the argument?`);
+    break;
+  }
+
+  // --- causes explicites
+  for (const s of causeS) {
+    const k = s.toLowerCase().indexOf(' because ');
+    let main = k > 0 ? s.slice(0, k).trim().replace(/[,;:]$/, '') : '';
+    if (main && wordsOf(main).length >= 4 && !ANAPHORA.test(main)) {
+      const mf = frag(lower1(trim(main)), 14);
+      /* Formulation nominale : elle reste correcte quel que soit le temps du
+         verbe, contrairement à « Why the rains came late? ». */
+      if (level === 'foundation') add('cause', false, true, `The text says that ${mf}. What is the reason given?`);
+      else if (level === 'developing') add('cause', false, true, `The text says that ${mf}. What is the reason, and what does it change for the people concerned?`);
+      else add('cause', true, true, `The text states that ${mf}. Explain the cause given and say whether the text supports it convincingly.`);
+      break;
+    }
+    const cf = frag(s, 16);
+    if (level === 'foundation') add('cause', false, true, `Find in the text the sentence that gives a reason, and say what the reason is.`);
+    else add('cause', true, true, `Explain the cause-and-effect link expressed in: \u201c${cf}\u201d.`);
+    break;
+  }
+
+  // --- conséquences explicites
+  for (const s of conseqS) {
+    const cf = frag(s, 16);
+    if (level === 'foundation') add('consequence', false, true, `What happened as a result? Use the text to answer.`);
+    else if (level === 'developing') add('consequence', false, true, `The text says: \u201c${cf}\u201d. What are the consequences, and who do they affect?`);
+    else add('consequence', true, true, `Explain the consequence described in \u201c${cf}\u201d and say why the writer considers it important.`);
+    break;
+  }
+
+  // --- contrastes explicites
+  for (const s of contrastS) {
+    if (level === 'foundation') continue;          // trop exigeant pour 6e–5e
+    /* Si le marqueur ouvre la phrase, l'opposition n'est visible qu'avec la
+       phrase précédente : on cite les deux. */
+    const idx = sents.indexOf(s);
+    const ouvre = /^(however|whereas|although|unlike|on the contrary|in contrast|instead of)\b/i.test(s.trim());
+    const cf = (ouvre && idx > 0) ? frag(sents[idx - 1], 11) + ' \u2014 ' + frag(s, 11) : frag(s, 16);
+    if (level === 'developing') add('contrast', false, true, `The text opposes two ideas in: \u201c${cf}\u201d. Explain the difference in your own words.`);
+    else add('contrast', true, true, `What contrast does the writer establish in \u201c${cf}\u201d, and what does it bring to the message of the text?`);
+    break;
+  }
+
+  // --- solutions, obligations, recommandations
+  for (const s of solutionS) {
+    const sf = frag(s, 16);
+    if (level === 'foundation') add('solution', false, true, `What does the text say people should do?`);
+    else if (level === 'developing') add('solution', false, true, `Which solution does the text propose in \u201c${sf}\u201d? Say whether it seems useful to you and why.`);
+    else add('solution', true, true, `Assess the measure proposed in \u201c${sf}\u201d: does the text give enough evidence to support it? Justify.`);
+    break;
+  }
+
+  // --- exemples introduits par « such as » / « for example »
+  for (const s of exampleS) {
+    const m = s.match(/([a-z][a-z'’-]{3,20})\s+(?:such as|for example|for instance)\s+/i);
+    const head = m ? m[1].toLowerCase() : '';
+    if (level === 'foundation') add('example', false, true, head ? `Which examples of ${head} does the text give?` : `Which example does the text give? Copy it.`);
+    else add('example', false, true, head ? `Which examples of ${head} does the text give, and what do they show?` : `Which example does the text give, and which idea does it illustrate?`);
+    break;
+  }
+
+  // --- déroulement, étapes
+  if (seqS.length >= 2) {
+    if (level === 'foundation') add('sequence', false, true, `Put the events of the text in order. Use first, then, finally.`);
+    else add('sequence', false, true, `What are the main stages presented in the text? Give them in order and say what each one changes.`);
+  }
+
+  // --- paroles rapportées
+  for (const s of reportS) {
+    const m = s.match(/\baccording to\s+([A-Z][A-Za-z'’-]+(?:\s+[A-Z][A-Za-z'’-]+)?)/);
+    const who = m ? m[1] : (persons[0] || '');
+    if (!who) break;
+    if (level === 'foundation') add('report', false, true, `What does ${who} say in the text?`);
+    else if (level === 'developing') add('report', false, true, `What does ${who} say about ${t0}? Report it in your own words.`);
+    else add('report', true, true, `Why does the writer report the words of ${who}? Explain what this adds to the text.`);
+    break;
+  }
+
+  /* =====================================================================
+     2. QUESTIONS DE COMPLÉMENT, elles aussi accrochées aux mots-clés
+     réellement extraits du texte. Elles ne servent qu'à compléter.
+     ===================================================================== */
+  if (level === 'foundation') {
+    add('topic', false, true, `What does the text say about ${t0}?`);
+    if (terms[1]) add('topic2', false, true, `What does the text tell us about ${t1}?`);
+    if (terms[2]) add('copie', false, true, `Copy from the text one sentence where ${t2} appears. Say what it tells you.`);
+    /* « AT SCHOOL » donnerait « the field of at school » : on retombe alors
+       sur un mot-clé du texte. */
+    const champ = (() => { const th = String(ctx.theme || '').trim();
+      return (!th || /^(at|in|on|a|an|the|my|our)\b/i.test(th)) ? t0 : th.toLowerCase(); })();
+    add('lexis', false, true, `Find in the text three words that belong to the field of ${champ}.`);
+    if (persons.length) add('personne2', false, true, `Find in the text two pieces of information about ${persons[0]}.`);
+    add('copie2', false, true, `Copy from the text one sentence about ${t0}, then say what it means.`);
+    add('gist', false, false, `What is the text about? Answer in one sentence.`);
+  } else if (level === 'developing') {
+    if (aDeuxTermes) add('relation', false, true, `How are ${t0} and ${t1} linked in the text? Give one detail for each.`);
+    add('topic', false, true, `What does the text tell us about ${t0}? Give two details.`);
+    add('gist', false, false, `Give the main idea of each paragraph in one sentence.`);
+    add('inference', true, false, `What can you understand from the text that is not said directly? Give one detail that supports your answer.`);
+    add('opinion', false, false, `Do you agree with the last sentence of the text? Justify your answer.`);
+  } else {
+    if (aDeuxTermes) add('relation', true, true, `What relationship does the text establish between ${t0} and ${t1}? Justify with evidence.`);
+    add('topic', false, true, `Which two details in the text best explain the writer's position on ${t0}?`);
+    add('gist', false, false, `What is the central idea of the text, and which two details support it best?`);
+    add('purpose', true, false, `What is the writer's purpose, and how does the organisation of the text serve it?`);
+    add('inference', true, false, `What can the reader reasonably infer from the text? Support the inference with two details.`);
+    add('opinion', false, false, `Which idea of the text do you find the most strongly supported? Justify your choice.`);
+  }
+
+  /* =====================================================================
+     3. SÉLECTION : les questions citant le texte passent d'abord ; une
+     seule question par famille ; les questions d'analyse sont plafonnées
+     selon le niveau.
+     ===================================================================== */
+  const n = Math.max(1, ctx.n || 5);
+  const items = [], fams = new Set();
+  let hard = 0, anchored = 0;
+
+  const prendre = liste => {
+    for (const it of liste) {
+      if (items.length >= n) return;
+      if (fams.has(it.family)) continue;
+      if (it.hard && hard >= PROFIL.maxHard) continue;
+      items.push(it.q); fams.add(it.family);
+      if (it.hard) hard++;
+      if (it.anchored) anchored++;
+    }
+  };
+
+  const melange = shuffledBy(pool, rnd);
+  const ancreesSimples = melange.filter(x => x.anchored && !x.hard);
+  const ancreesDures   = melange.filter(x => x.anchored && x.hard);
+  const complements    = melange.filter(x => !x.anchored);
+  if (level === 'upper') {
+    /* Au lycée l'analyse passe devant : sans cela les questions de
+       prélèvement remplissent la fiche avant les questions d'analyse. */
+    prendre(ancreesDures); prendre(ancreesSimples); prendre(complements);
+  } else {
+    prendre(ancreesSimples); prendre(ancreesDures); prendre(complements);
+  }
+  // Dernier filet : compléter sans la contrainte de famille.
+  if (items.length < n) {
+    for (const it of melange) {
+      if (items.length >= n) break;
+      if (items.includes(it.q)) continue;
+      if (it.hard && hard >= PROFIL.maxHard) continue;
+      items.push(it.q);
+      if (it.hard) hard++;
+    }
+  }
+
   if (!items.length) return null;
-  return { instruction: 'Answer the following questions in complete sentences, using the text.',
-           body: ol(items), key: '',
-           note: 'Answers vary; they must be correct and supported by the text.' };
+  return {
+    instruction: PROFIL.instruction,
+    body: ol(items.slice(0, n).map(q => esc(q))),
+    key: '',
+    note: PROFIL.note
+  };
 }
 
 function exPrompts(ctx) {
@@ -7143,7 +7350,7 @@ function generate() {
     const topic = [cleanTheme(u.label), d.lesson, d.session, d.fn].join(' ');
     const intro = splitMinutes(t[0][1], [['Warm-up', 3], ['Revision of the previous lesson / prerequisites', 5], ['Learning context and announcement of the lesson', 7]]);
     const exCtx = {
-      text: d.supportText, n: d.exCount, grammar, topic,
+      text: d.supportText, n: d.exCount, grammar, topic, c: d.c,
       theme: cleanTheme(u.label), writing: info.writing,
       early: ['6e', '5e'].includes(d.c),
       fnPhrase: `use the language function studied today (${d.fn})`,
@@ -7151,8 +7358,9 @@ function generate() {
     };
     const ctrlNames = d.dynamicActivities.controlled.length ? d.dynamicActivities.controlled : flow.controlled;
     const semiNames = d.dynamicActivities.semi.length ? d.dynamicActivities.semi : flow.semi;
-    const p3 = practiceBlock(ctrlNames, t[2][1], exCtx, d.exAuto);
-    const p4 = practiceBlock(semiNames, t[3][1], exCtx, d.exAuto);
+    const buildFromText = d.exAuto && !!d.supportText && sentencesOf(d.supportText).length >= 2;
+    const p3 = practiceBlock(ctrlNames, t[2][1], exCtx, buildFromText);
+    const p4 = practiceBlock(semiNames, t[3][1], exCtx, buildFromText);
     lastAnswerKey = d.exKey ? answerKeyBox([...p3.keys, ...p4.keys]) : '';
     body = `
       <div class="cols">
