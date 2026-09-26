@@ -273,6 +273,7 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
       <button id="beeActivateBtn" type="button">Activer ce logiciel</button>
       <a id="beePrepareWhatsAppLink" class="bee-secondary bee-whatsapp-btn" href="#">📱 Ouvrir WhatsApp avec ma demande</a>
     </div>
+    <div id="beeCurrentId" class="bee-license-status" hidden></div>
     <div id="beeLicenseStatus" class="bee-license-status" role="status">Veuillez activer le logiciel pour commencer.</div>
     <div id="beeLicenseDevice" class="bee-license-device"></div>
     <div class="bee-license-instruction">
@@ -731,7 +732,81 @@ function beePemToDer(pem){const b64=pem.replace(/-----[^-]+-----/g,'').replace(/
 function beeJsonB64u(s){return new TextDecoder().decode(beeB64uToBytes(s));}
 const BEE_INSTALL_ID_KEY='bee.installation.id.v2';
 function beeNewRandomId(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();return 'bee-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);}
-function beeDeviceId(){try{if(window.AndroidBridge&&typeof AndroidBridge.stableDeviceId==='function'){const aid=AndroidBridge.stableDeviceId();if(aid)return aid;}}catch(e){}let id='';try{id=localStorage.getItem(BEE_INSTALL_ID_KEY)||'';if(!id){id=beeNewRandomId();localStorage.setItem(BEE_INSTALL_ID_KEY,id);}}catch(e){id=beeNewRandomId();}return id;}
+/* ------------------------------------------------------------------
+   Identifiant d'installation — écrit à deux endroits indépendants.
+   Sur Android, l'identifiant de l'appareil fait foi et rien n'est stocké.
+   Sur ordinateur, l'identifiant vit dans le navigateur : on l'écrit à la
+   fois dans localStorage et dans IndexedDB, et au démarrage on répare
+   celui qui manque à partir de celui qui a survécu. localStorage reste
+   prioritaire : c'est lui qui a servi à émettre les codes déjà en
+   circulation, et un code est lié à cet identifiant-là.
+   ------------------------------------------------------------------ */
+const BEE_IDB_NAME='bee.identity', BEE_IDB_STORE='id', BEE_IDB_KEY='installation';
+let BEE_ID_CACHE='';
+
+function beeIdLocalGet(){try{return localStorage.getItem(BEE_INSTALL_ID_KEY)||'';}catch(e){return '';}}
+function beeIdLocalSet(v){try{localStorage.setItem(BEE_INSTALL_ID_KEY,v);return true;}catch(e){return false;}}
+
+function beeIdbOpen(){return new Promise(function(ok){
+  var fini=false, finir=function(v){if(!fini){fini=true;ok(v);}};
+  try{
+    if(!window.indexedDB)return finir(null);
+    var rq=indexedDB.open(BEE_IDB_NAME,1);
+    rq.onupgradeneeded=function(){try{rq.result.createObjectStore(BEE_IDB_STORE);}catch(e){}};
+    rq.onsuccess=function(){finir(rq.result);};
+    rq.onerror=function(){finir(null);};
+    rq.onblocked=function(){finir(null);};
+    setTimeout(function(){finir(null);},2500);
+  }catch(e){finir(null);}
+});}
+
+function beeIdbGet(){return new Promise(function(ok){
+  beeIdbOpen().then(function(db){
+    if(!db)return ok('');
+    try{
+      var rq=db.transaction(BEE_IDB_STORE,'readonly').objectStore(BEE_IDB_STORE).get(BEE_IDB_KEY);
+      rq.onsuccess=function(){ok(typeof rq.result==='string'?rq.result:'');try{db.close();}catch(e){}};
+      rq.onerror=function(){ok('');try{db.close();}catch(e){}};
+    }catch(e){ok('');try{db.close();}catch(e2){}}
+  });
+});}
+
+function beeIdbSet(v){return new Promise(function(ok){
+  beeIdbOpen().then(function(db){
+    if(!db)return ok(false);
+    try{
+      var tx=db.transaction(BEE_IDB_STORE,'readwrite');
+      tx.objectStore(BEE_IDB_STORE).put(v,BEE_IDB_KEY);
+      tx.oncomplete=function(){ok(true);try{db.close();}catch(e){}};
+      tx.onerror=function(){ok(false);try{db.close();}catch(e){}};
+      tx.onabort=function(){ok(false);try{db.close();}catch(e){}};
+    }catch(e){ok(false);try{db.close();}catch(e2){}}
+  });
+});}
+
+/* Réconciliation au démarrage : à appeler avant toute vérification. */
+async function beeInitIdentity(){
+  try{if(window.AndroidBridge&&typeof AndroidBridge.stableDeviceId==='function'){const aid=AndroidBridge.stableDeviceId();if(aid){BEE_ID_CACHE=aid;return aid;}}}catch(e){}
+  const local=beeIdLocalGet();
+  let base='';
+  try{base=await beeIdbGet();}catch(e){base='';}
+  let id=local||base;
+  if(!id)id=beeNewRandomId();
+  if(local!==id)beeIdLocalSet(id);
+  if(base!==id){try{await beeIdbSet(id);}catch(e){}}
+  BEE_ID_CACHE=id;
+  return id;
+}
+
+function beeDeviceId(){
+  try{if(window.AndroidBridge&&typeof AndroidBridge.stableDeviceId==='function'){const aid=AndroidBridge.stableDeviceId();if(aid){BEE_ID_CACHE=aid;return aid;}}}catch(e){}
+  if(BEE_ID_CACHE)return BEE_ID_CACHE;
+  let id=beeIdLocalGet();
+  if(!id){id=beeNewRandomId();beeIdLocalSet(id);}
+  BEE_ID_CACHE=id;
+  try{beeIdbSet(id);}catch(e){}
+  return id;
+}
 function beeDeviceType(){const w=navigator.userAgent.toLowerCase();if(/iphone|ipad|ipod/.test(w))return 'apple-mobile';if(/android/.test(w))return 'android-mobile';if(/tablet/.test(w))return 'tablet';return 'computer';}
 // Traduction des causes d'échec en phrases compréhensibles par l'enseignant.
 const BEE_MESSAGES={
@@ -763,6 +838,38 @@ async function beeVerifyToken(token){const parts=String(token||'').trim().split(
 async function beeCheckStoredLicense(){const raw=localStorage.getItem(BEE_LICENSE_STORAGE);if(!raw)return false;try{const obj=JSON.parse(raw);if(!obj||!obj.token||!obj.license_key)throw new Error('stored_license_incomplete');const keyEl=document.getElementById('beeLicenseKey');if(keyEl)keyEl.value=obj.license_key;await beeVerifyToken(obj.token);return true;}catch(e){localStorage.removeItem(BEE_LICENSE_STORAGE);return false;}}
 function beeShowDevice(payload){const e=document.getElementById('beeLicenseDevice');e.hidden=false;e.innerHTML='<b>Identifiant de cette installation</b><br><span class="bee-license-small">'+String(payload.installation_id).replace(/[<>&]/g,'')+'</span>';}
 async function beeActivate(){const key=document.getElementById('beeLicenseKey').value.trim(),token=document.getElementById('beeActivationCode').value.trim();if(!key||!token){beeSetStatus('Veuillez renseigner la clé de licence et le code d’autorisation.',true);return;}const btn=document.getElementById('beeActivateBtn');btn.disabled=true;beeSetStatus('Vérification de l’autorisation…');try{const payload=await beeVerifyToken(token);localStorage.setItem(BEE_LICENSE_STORAGE,JSON.stringify({token,license_key:key,activated_at:new Date().toISOString()}));beeShowDevice(payload);beeSetStatus('Activation réussie. Cet appareil est autorisé définitivement et peut fonctionner hors ligne.',false,true);setTimeout(()=>document.getElementById('beeLicenseGate').hidden=true,700);}catch(e){beeSetStatus('Activation impossible : '+beeMessage(e),true);}finally{btn.disabled=false;}}
+/* Affiche l'identifiant de cet ordinateur, avec un bouton de copie :
+   l'enseignant doit pouvoir le transmettre à BEE sans avoir à le recopier
+   à la main, et le retrouver s'il doit un jour redemander une autorisation. */
+function beeShowCurrentId(){
+  var e=document.getElementById('beeCurrentId');if(!e)return;
+  var id='';try{id=beeDeviceId();}catch(err){}
+  if(!id){e.hidden=true;return;}
+  e.hidden=false;
+  e.innerHTML='<b>Identifiant de cet appareil</b><br>'
+    +'<span id="beeCurrentIdValue" style="font:12px Consolas,monospace;word-break:break-all">'+String(id).replace(/[&<>"]/g,'')+'</span><br>'
+    +'<button id="beeCopyIdBtn" type="button" class="bee-secondary" style="margin-top:8px">Copier l’identifiant</button>';
+  var b=document.getElementById('beeCopyIdBtn');
+  if(b)b.addEventListener('click',function(){
+    var t=String(id);
+    var ok=function(){b.textContent='Identifiant copié';setTimeout(function(){b.textContent='Copier l’identifiant';},2000);};
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){beeCopyFallback(t,ok);});}
+      else beeCopyFallback(t,ok);
+    }catch(err){beeCopyFallback(t,ok);}
+  });
+}
+function beeCopyFallback(t,ok){
+  try{
+    var z=document.createElement('textarea');z.value=t;z.setAttribute('readonly','');
+    z.style.position='fixed';z.style.left='-9999px';document.body.appendChild(z);
+    z.select();document.execCommand('copy');document.body.removeChild(z);ok();
+  }catch(e){
+    var v=document.getElementById('beeCurrentIdValue');
+    if(v){var r=document.createRange();r.selectNodeContents(v);
+      var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);}
+  }
+}
 function beeBuildWhatsAppUrl(){const id=beeDeviceId();const msg=`Bonjour BEE, je viens d’acheter le Lesson Plan Generator et je souhaite demander mon activation.
 
 Identifiant d’installation : ${id}
@@ -770,8 +877,8 @@ Identifiant d’installation : ${id}
 Merci de me transmettre ma clé de licence et mon autorisation d’activation.`;return 'https://wa.me/22606625292?text='+encodeURIComponent(msg);}
 function beePrepareWhatsApp(){const link=document.getElementById('beePrepareWhatsAppLink');if(!link)return;const url=beeBuildWhatsAppUrl();link.href=url;beeSetStatus('WhatsApp est prêt avec votre identifiant d’installation. Appuyez sur le bouton puis sur « Envoyer » dans WhatsApp.',false,true);}
 function beeInitWhatsAppLink(){const link=document.getElementById('beePrepareWhatsAppLink');if(!link)return;try{link.href=beeBuildWhatsAppUrl();link.addEventListener('click',function(ev){ev.preventDefault();window.location.href=beeBuildWhatsAppUrl();});}catch(e){link.removeAttribute('href');link.classList.add('disabled');}}
-document.getElementById('beeActivateBtn').addEventListener('click',beeActivate);beeInitWhatsAppLink();
-(async()=>{try{const active=await beeCheckStoredLicense();if(active){const raw=localStorage.getItem(BEE_LICENSE_STORAGE);if(raw){const obj=JSON.parse(raw);beeShowDevice(JSON.parse(beeJsonB64u(obj.token.split('.')[1])));}document.getElementById('beeLicenseGate').hidden=true;}}catch(e){console.warn('BEE licence persistante:',e);}})();
+document.getElementById('beeActivateBtn').addEventListener('click',beeActivate);
+(async()=>{try{await beeInitIdentity();}catch(e){}beeInitWhatsAppLink();beeShowCurrentId();try{const active=await beeCheckStoredLicense();if(active){const raw=localStorage.getItem(BEE_LICENSE_STORAGE);if(raw){const obj=JSON.parse(raw);beeShowDevice(JSON.parse(beeJsonB64u(obj.token.split('.')[1])));}document.getElementById('beeLicenseGate').hidden=true;}}catch(e){console.warn('BEE licence persistante:',e);}})();
 
 // ========================================================================
 // 1. CURRICULUM — COMPLETE DATA (from "fiches lecons logiciel.html")
@@ -5780,8 +5887,13 @@ function inferGrammar(...parts) {
 
 /* ---------------- minutage ---------------- */
 const PHASES = {
-  learning: [['Preparation, warm-up and learning context', 15], ['Input / Discovery', 15], ['Controlled practice', 7],
-             ['Semi-controlled practice', 8], ['Follow-up, note-taking and administrative tasks', 10]],
+  /* Canevas officiel (session d'amendement DG-QEF, 19 juillet 2024) :
+     DISCOVERY PHASE 30 mn = Introductory stage 15 + Input stage 15
+     PRACTICE PHASE  15 mn = Manipulation stage (controlled 7 + semi-controlled 8)
+     puis Follow up 3 mn et Copying and executing administrative tasks 7 mn. */
+  learning: [['Introductory stage', 15], ['Input stage', 15], ['Controlled activities', 7],
+             ['Semi-controlled activity', 8], ['Follow up', 3],
+             ['Copying and executing administrative tasks', 7]],
   task: [['Preparation', 3], ['Task setting', 5], ['Task execution', 20],
          ['Performance and feedback', 20], ['Note-taking and administrative tasks', 7]]
 };
@@ -5801,6 +5913,10 @@ function timings(kind) {
   });
 }
 const phaseTitle = (n, name, min) => `<h3><span class="phase"><span>${n}. ${esc(name)}</span><span class="min">${min} min</span></span></h3>`;
+/* Bandeau des deux phases chapeaux du canevas officiel, et titre d'étape
+   numéroté en chiffres romains comme dans les fiches modèles. */
+const phaseBanner = (name, min) => `<h3><span class="phase"><span>${esc(name)}</span><span class="min">${min} min</span></span></h3>`;
+const stageHeading = (roman, name, min) => `<h4>${roman}) ${esc(name)} (${min} min)</h4>`;
 
 /* ---------------- tâches ---------------- */
 function consolidationTask(c, u, l) {
@@ -6582,7 +6698,10 @@ function exQuestions(ctx) {
   };
   // Décapitalise une proposition, sauf si elle commence par un nom propre.
   const lower1 = s => {
-    const head = (String(s).match(WORD_RE) || [])[0] || '';
+    let head = (String(s).match(WORD_RE) || [])[0] || '';
+    /* « Awa's » doit rester « Awa's » : on retire le possessif avant de
+       vérifier s'il s'agit d'un nom propre. */
+    head = head.replace(/['\u2019]s$/i, '');
     return isName(head) ? s : s.charAt(0).toLowerCase() + s.slice(1);
   };
   const trim = r => String(r).replace(/[.!?]+$/, '')
@@ -6946,83 +7065,115 @@ function answerKeyBox(groups) {
 }
 
 /* ========================================================================
-   DÉROULÉ SELON LA COMPÉTENCE PRINCIPALE
-   Le guide officiel précise que « the tools and the tasks will vary
-   according to the skill taught ». Le canevas (étapes et minutage) reste
-   celui du guide ; seul le contenu de l'étape « Input » et les activités
-   proposées changent selon la compétence.
+   DÉROULÉ DE L'ÉTAPE « INPUT » SELON LA COMPÉTENCE PRINCIPALE
+   Canevas officiel (DG-QEF, 19 juillet 2024) et fiches modèles :
+   l'Input stage se déroule en trois temps — Vocabulary, Grammar, puis
+   présentation de la compétence et des activités (question directrice
+   pour les compétences de réception). Les étapes « pre / while / post »
+   relèvent de la pédagogie par objectifs et n'ont plus cours en APC.
+   Les gestes ci-dessous reprennent la formulation des fiches modèles.
    ======================================================================== */
 const SKILL_FLOW = {
   'Reading Comprehension': {
     textLabel: 'Support text',
-    steps: [
-      ['Pre-reading', ['Exploit the title, the pictures or the first line: learners say what they expect to find in the text.',
-        'Give the reading task before the learners start reading.']],
-      ['While-reading', ['First silent reading for the general idea (skimming); learners check their expectations.',
-        'Second reading for specific information (scanning); learners underline the useful parts.',
-        'Guide learners to the target vocabulary and structures inside the text.']],
-      ['Post-reading', ['Learners react to the text and link it to their own experience.',
-        'The target language is reused orally before the practice activities.']]
-    ],
+    vocabulary: ['The teacher asks the learners to guess three words or expressions likely to be found in the text.',
+      'The teacher proposes the key words in addition to the learners’ proposals.',
+      'The teacher gives out the text, asks the learners to read it and check their predictions and the teacher’s proposals.',
+      'The teacher asks the learners to read the text and guess from the context the meaning of the words proposed.'],
+    grammar: ['The teacher proposes sentences taken from the text.',
+      'The teacher asks the learners to draw the structures of the proposed sentences.',
+      'The teacher asks the learners to give the use of the structures.',
+      'The teacher asks the learners to find in the text sentences having a similar construction.'],
+    skillLabel: 'Guiding question',
+    skillSteps: ['Teacher: Read the text and tell the main idea of the text.',
+      'Correction of the guiding question: the answer is given orally by the learners and checked by the class.'],
     controlled: ['Gap filling', 'True / False', 'Matching'],
     semi: ['WH-questions', 'Information transfer into a table or form']
   },
   'Listening Comprehension': {
     textLabel: 'Listening script — read aloud by the teacher',
     textNote: 'The script is not given to the learners. The teacher reads it aloud, clearly and at a normal pace, or plays the recording.',
-    steps: [
-      ['Pre-listening', ['Set the context with a picture, an object or a question; learners predict what they will hear.',
-        'Give the listening task before the first listening.']],
-      ['While-listening', ['First listening for the general idea; learners do not write yet.',
-        'Second listening for specific information; learners take notes or fill in the task.',
-        'A third listening may be used to let learners check their answers.']],
-      ['Post-listening', ['Answers are checked orally and justified.',
-        'Learners react to what they heard and reuse the target language.']]
-    ],
+    vocabulary: ['The teacher asks the learners to guess three words or expressions likely to be heard in the text.',
+      'The teacher proposes the key words in addition to the learners’ proposals.',
+      'The teacher reads the script once; the learners check their predictions and the teacher’s proposals.',
+      'The teacher asks the learners to give, from what they heard, the meaning of the words proposed.'],
+    grammar: ['The teacher writes on the board sentences taken from the script.',
+      'The teacher asks the learners to draw the structures of these sentences.',
+      'The teacher asks the learners to give the use of the structures.',
+      'The teacher reads the script again and asks the learners to identify sentences having a similar construction.'],
+    skillLabel: 'Guiding question',
+    skillSteps: ['Teacher: Listen to the text and tell the main idea of what you heard.',
+      'Correction of the guiding question: the answer is given orally by the learners and checked by the class.'],
     controlled: ['True / False', 'Multiple choice', 'Gap filling'],
     semi: ['WH-questions', 'Information transfer into a table or form']
   },
   'Speaking': {
     textLabel: 'Support text / model exchange',
-    steps: [
-      ['Presentation of the model', ['The teacher presents the model exchange in context (picture, mime, realia).',
-        'The meaning is checked before any repetition.']],
-      ['Repetition and pronunciation', ['Learners repeat chorally, in rows, then individually.',
-        'The teacher corrects pronunciation, word stress and intonation.']],
-      ['Guided oral practice', ['Learners use the model in pairs, changing one element each time.',
-        'A few pairs perform in front of the class; the others listen and react.']]
-    ],
+    vocabulary: ['The teacher presents the new words and expressions in context (picture, realia, mime, definition).',
+      'The meaning is checked before any repetition.',
+      'The teacher gets the learners to repeat the new words and expressions chorally, in rows and individually.',
+      'The teacher writes the new words and expressions on the board with their pronunciation.'],
+    grammar: ['The teacher proposes the sentences of the model exchange.',
+      'The teacher asks the learners to draw the structures of the proposed sentences.',
+      'The teacher asks the learners to give the use of the structures.',
+      'The teacher asks the learners to produce sentences having a similar construction.'],
+    skillLabel: 'Presenting the skill and the activities',
+    skillSteps: ['The teacher performs the model exchange with one learner in front of the class.',
+      'The learners say in which situation the exchange is used and who is speaking to whom.',
+      'The teacher checks pronunciation, word stress and intonation before the practice activities.'],
     controlled: ['Matching', 'Word or phrase ordering'],
     semi: ['Guided dialogue / exchange', 'WH-questions']
   },
   'Writing': {
     textLabel: 'Model text',
-    steps: [
-      ['Study of the model', ['Learners observe the layout, the order of the ideas and the linking words.',
-        'The teacher draws attention to what makes the text clear and correct.']],
-      ['Focus on the language needed', ['The useful expressions and the target structures are listed on the board.',
-        'Spelling and punctuation points are pointed out.']],
-      ['Joint construction', ['The class writes one model sentence or paragraph together with the teacher.',
-        'Learners then write on their own during the practice activities.']]
-    ],
+    vocabulary: ['The teacher asks the learners to guess the words and expressions needed to write on the topic.',
+      'The teacher proposes the key words and the linking words in addition to the learners’ proposals.',
+      'The teacher gives out the model text and asks the learners to find these words in it.',
+      'Spelling and punctuation points are pointed out on the board.'],
+    grammar: ['The teacher proposes sentences taken from the model text.',
+      'The teacher asks the learners to draw the structures of the proposed sentences.',
+      'The teacher asks the learners to give the use of the structures.',
+      'The teacher asks the learners to find in the model text sentences having a similar construction.'],
+    skillLabel: 'Presenting the skill and the activities',
+    skillSteps: ['The learners observe the layout of the model text, the order of the ideas and the linking words.',
+      'Teacher: Read the model text and tell how the ideas are organised.',
+      'The class writes one model sentence together with the teacher before the practice activities.'],
     controlled: ['Gap filling', 'Sentence completion'],
     semi: ['Sentence writing from prompts', 'Guided paragraph writing']
   },
   'Translation': {
     textLabel: 'Source text',
-    steps: [
-      ['Understanding the source text', ['Learners read the text and give its general meaning.',
-        'The teacher points out the difficulties: idioms, false friends, tenses, word order.']],
-      ['Translating', ['Learners translate sentence by sentence, in pairs.',
-        'They are reminded to translate the meaning, not word for word.']],
-      ['Comparing and refining', ['Two or three versions are compared on the board.',
-        'The class agrees on a correct and natural final version.']]
-    ],
+    vocabulary: ['The teacher asks the learners to give the meaning of the key words of the source text.',
+      'The teacher points out the difficulties: idioms, false friends, fixed expressions.',
+      'The teacher gives out the text and asks the learners to check their proposals in it.'],
+    grammar: ['The teacher proposes sentences taken from the source text.',
+      'The teacher asks the learners to draw the structures of the proposed sentences.',
+      'The teacher asks the learners to compare these structures with those of the target language (tenses, word order).'],
+    skillLabel: 'Guiding question',
+    skillSteps: ['Teacher: Read the text and tell the main idea of the text.',
+      'Correction of the guiding question.',
+      'The learners are reminded to translate the meaning, not word for word.'],
     controlled: ['Matching', 'Grammar transformation / substitution'],
     semi: ['WH-questions', 'Sentence writing from prompts']
   }
 };
 const skillFlow = s => SKILL_FLOW[s] || SKILL_FLOW['Reading Comprehension'];
+/* « Today, we are going to do a reading comprehension lesson… » : l'annonce
+   de la leçon telle que la formulent les fiches modèles. */
+/* « Lesson content (grammar, vocabulary, etc.) » du canevas officiel :
+   les mots-clés réellement présents dans le texte support, et le fait de langue. */
+function lessonContent(text, grammar, topic) {
+  const mots = keyTerms(String(text || ''), 6, topic).filter(w => !/^\d/.test(w));
+  const voc = mots.length ? mots.join(', ') : 'the key words of the support text';
+  return `Vocabulary: ${voc}. Grammar: ${grammar}.`;
+}
+const announceSkill = s => ({
+  'Reading Comprehension': 'a reading comprehension',
+  'Listening Comprehension': 'a listening comprehension',
+  'Speaking': 'a speaking',
+  'Writing': 'a writing',
+  'Translation': 'a translation'
+}[s] || 'an English');
 
 const INTEGRATED_STEP = {
   'Writing': 'learners write the key sentences and their answers in their notebooks.',
@@ -7348,7 +7499,10 @@ function generate() {
     const grammar = inferGrammar(d.session, d.lesson, d.fn);
     const flow = skillFlow(d.skill);
     const topic = [cleanTheme(u.label), d.lesson, d.session, d.fn].join(' ');
-    const intro = splitMinutes(t[0][1], [['Warm-up', 3], ['Revision of the previous lesson / prerequisites', 5], ['Learning context and announcement of the lesson', 7]]);
+    const intro = splitMinutes(t[0][1], [['Warm up', 3], ['Revision of the previous lesson or pre-requisites', 5],
+      ['Introducing the lesson and the learning context (situation d’apprentissage)', 7]]);
+    /* L'étape Input se répartit en 7 / 5 / 3 minutes dans les fiches modèles. */
+    const input = splitMinutes(t[1][1], [['Vocabulary', 7], ['Grammar', 5], ['Skill', 3]]);
     const exCtx = {
       text: d.supportText, n: d.exCount, grammar, topic, c: d.c,
       theme: cleanTheme(u.label), writing: info.writing,
@@ -7369,37 +7523,50 @@ function generate() {
           <p><b>Language function(s):</b> ${esc(d.fn)}<br>
              <b>Session:</b> ${esc(d.session)}<br>
              <b>Main skill:</b> ${esc(d.skill)} · <b>Integrated:</b> ${esc(d.integrated)}<br>
+             <b>Lesson content:</b> ${esc(lessonContent(d.supportText, grammar, topic))}<br>
              <b>Duration:</b> ${d.duration} min</p></div>
       </div>
       <div class="box"><b>${esc(flow.textLabel)} — ${esc(d.lesson)}</b><br><br>${esc(d.supportText).replace(/\n/g, '<br>')}
         ${flow.textNote ? `<br><br><span class="note">${esc(flow.textNote)}</span>` : ''}</div>
-      ${phaseTitle(1, t[0][0], t[0][1])}
+      ${phaseBanner('DISCOVERY PHASE', t[0][1] + t[1][1])}
+      ${stageHeading('I', t[0][0], t[0][1])}
       <p class="substep">Step 1 — ${esc(intro[0][0])} (${intro[0][1]} min)</p>
       <ul><li>Greeting, date and attendance.</li><li>Short oral warm-up (song, game, anecdote, tongue twister…).</li></ul>
       <p class="substep">Step 2 — ${esc(intro[1][0])} (${intro[1][1]} min)</p>
       <ul><li>Questions on the previous session; correction of the homework.</li></ul>
       <p class="substep">Step 3 — ${esc(intro[2][0])} (${intro[2][1]} min)</p>
-      <div class="box situation"><b>Situation d'apprentissage</b><br><br>${esc(d.situation || 'The teacher introduces a short, realistic situation appropriate to the learners’ level and leading naturally to the lesson.')}</div>
-      ${phaseTitle(2, t[1][0], t[1][1])}
-      <p class="small-note">Vocabulary, grammar and the skill are presented in an integrated way whenever possible.</p>
-      <p class="substep">Step 1 — Presenting the new vocabulary items and the structures</p>
+      <p class="substep">· Lead-in activity</p>
+      <ul><li>The teacher asks a short question related to ${esc(cleanTheme(u.label).toLowerCase())} and collects the learners’ answers orally.</li></ul>
+      <p class="substep">· Learning context</p>
+      <div class="box situation">${esc(d.situation || 'The teacher introduces a short, realistic situation appropriate to the learners’ level and leading naturally to the lesson.')}</div>
+      <p class="substep">· Lesson announcement</p>
+      <ul><li>Teacher: Today, we are going to do ${esc(announceSkill(d.skill))} lesson; we are going to study ${esc(d.lesson)}.</li></ul>
+      ${stageHeading('II', t[1][0], t[1][1])}
+      <p class="small-note">Presenting some tools necessary to perform the task related to the skill and the activities. Vocabulary, grammar and the skill are presented in an integrated way whenever possible.</p>
+      <p class="substep">Language review</p>
+      <p class="substep">Step 1 — Vocabulary (${input[0][1]} min)</p>
+      <ul>${(flow.vocabulary || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
       ${lexisChart(d.supportText, grammar, topic)}
-      <p class="substep">Step 2 — Presenting the new grammar item(s)</p>
-      <ul><li>The teacher teaches ${esc(grammar)} inductively: examples are elicited from the text and learners draw the rule.</li>
+      <p class="substep">Step 2 — Grammar (${input[1][1]} min)</p>
+      <ul><li>${/^(the grammatical pattern|the useful)/i.test(grammar) ? 'The grammar item of the lesson is taught inductively: the rule is drawn by the learners themselves.' : `The grammar item studied today is ${esc(grammar)}; it is taught inductively, the rule being drawn by the learners themselves.`}</li>
+          ${(flow.grammar || []).map(x => `<li>${esc(x)}</li>`).join('')}
           <li>Meaning, form and use are checked; model sentences are written on the board.</li></ul>
-      <p class="substep">Step 3 — Presenting the skill and the activities (${esc(d.skill)})</p>
-      ${flow.steps.map(([name, items]) => `<p class="substep">· ${esc(name)}</p><ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}
+      <p class="substep">Step 3 — ${esc(flow.skillLabel || 'Presenting the skill and the activities')} (${input[2][1]} min)</p>
+      <ul>${(flow.skillSteps || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
       ${INTEGRATED_STEP[d.integrated] ? `<p><b>Integrated skill — ${esc(d.integrated)}:</b> ${esc(INTEGRATED_STEP[d.integrated])}</p>` : ''}
-      ${phaseTitle(3, t[2][0], t[2][1])}
+      ${phaseBanner('PRACTICE PHASE', t[2][1] + t[3][1])}
+      <h4>Manipulation stage</h4>
+      <p class="substep">Step 1 — ${esc(t[2][0])} (${t[2][1]} min)</p>
       <p class="small-note">Controlled activities: only one correct answer is possible.</p>
       ${p3.html}
-      ${phaseTitle(4, t[3][0], t[3][1])}
+      <p class="substep">Step 2 — ${esc(t[3][0])} (${t[3][1]} min)</p>
       <p class="small-note">Semi-controlled activities: different good answers are possible.</p>
       ${p4.html}
-      ${phaseTitle(5, t[4][0], t[4][1])}
+      ${phaseBanner('FOLLOW UP', t[4][1])}
       ${homeworkLine(d, u)}
-      <p><b>Note-taking:</b> Students copy the learning situation and all contents at the input phase.</p>
-      <p><b>Administrative tasks:</b> The teacher checks attendance and fills in the record book.</p>`;
+      ${phaseBanner('COPYING AND EXECUTING ADMINISTRATIVE TASKS', t[5][1])}
+      <ul><li>The teacher indicates what to copy: the learning context and all the contents of the input stage, the correction of the activities and the follow-up task.</li>
+          <li>The teacher checks attendance and fills in the record book.</li></ul>`;
   } else {
     lastAnswerKey = '';
     const t = timings('task');
@@ -7453,6 +7620,7 @@ function generate() {
     </div>
     <div class="title"><h2>${esc(heading)}</h2><div class="who">${who}</div></div>
     <p class="admin-blanks">
+      <b>Provincial directorate:</b> ${esc(d.province || '…………………….')} &nbsp;&nbsp; <b>School:</b> ${esc(d.school || '…………………………')}<br>
       <b>Class size:</b> ${esc(d.classSize || '……………')} &nbsp;&nbsp; <b>Boys:</b> ${esc(d.boys || '……………')} &nbsp;&nbsp; <b>Girls:</b> ${esc(d.girls || '……………')}<br>
       <b>Attendance:</b> ${esc(d.attendance || '……………………………………………………………..')}<br>
       <b>Learners with special needs:</b> ${esc(d.specialNeeds || '……………………………………………………………..')}<br>
