@@ -177,7 +177,10 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
 .wc.out{background:var(--amber-bg);color:#8a5a0e}
 
 /* ---------- impression ---------- */
-@media print{
+.decomposition{margin-top:10px;font-size:12px}
+.decomposition summary{cursor:pointer;color:#555}
+.decomposition .tag{font-weight:700}
+@media print{.decomposition{display:none!important}
   body{display:block;background:#fff}
   .panel,.stagebar,.toasts,.library,.mobtabs,.dirty-notice{display:none!important}
   body.progress-view .paper{display:none}
@@ -355,7 +358,14 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
   <fieldset id="taskFieldset">
     <legend>Situation d'intégration — support</legend>
     <div class="f"><textarea id="taskSupport" rows="3" placeholder="Optional: the text, table, picture or document given to the learners for the task. Leave empty to list the resources of the lesson or unit."></textarea></div>
-    <p class="note">The support is one of the four constituents of an integration situation, with the context, the function and the instructions.</p>
+    <div class="f"><label for="consigneCount">Number of instructions</label>
+      <select id="consigneCount">
+        <option value="auto">Automatic (one per resource studied)</option>
+        <option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option>
+      </select>
+      <p class="note">The number of instructions cannot exceed the number of resources actually studied: the task must not assess what has not been taught.</p></div>
+    <p class="note">The support is one of the constituents of an integration situation, with the context, the function and the instructions. None of them is labelled on the plan: they are named inside the wording of the task, so that the learner has to select the useful resources himself.</p>
   </fieldset>
 
   <fieldset id="assessFieldset">
@@ -900,16 +910,56 @@ const CURRICULUM = {
 // 2. INTERMEDIATE COMPETENCIES (abrégé pour la lisibilité, complet dans le fichier final)
 // ========================================================================
 const INTERMEDIATE_COMPETENCIES = {
-    "6e": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage très élémentaire", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre des phrases simples en discriminant les sons", "Speaking": "L'apprenant doit pouvoir recueillir ou donner des informations dans un langage très élémentaire en lien avec son environnement immédiat", "Writing": "L'apprenant doit pouvoir écrire des phrases simples", "Translation": "L'apprenant doit pouvoir transférer le sens général d'un texte très court" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage très élémentaire", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre des phrases simples en discriminant les sons", "Speaking": "L'apprenant doit pouvoir recueillir ou donner des informations dans un langage très élémentaire en lien avec son environnement immédiat", "Writing": "L'apprenant doit pouvoir écrire des phrases simples", "Translation": "L'apprenant doit pouvoir transférer le sens général d'un texte très court" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage très élémentaire", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre des phrases simples en discriminant les sons", "Speaking": "L'apprenant doit pouvoir recueillir ou donner des informations dans un langage très élémentaire en lien avec son environnement immédiat", "Writing": "L'apprenant doit pouvoir écrire des phrases simples", "Translation": "L'apprenant doit pouvoir transférer le sens général d'un texte très court" } },
-    "5e": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage élémentaire", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre des phrases simples en discriminant les sons", "Speaking": "L'apprenant doit pouvoir recueillir ou donner des informations dans un langage élémentaire en lien avec son environnement immédiat", "Writing": "L'apprenant doit pouvoir écrire des phrases simples" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage élémentaire", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre des phrases simples en discriminant les sons", "Speaking": "L'apprenant doit pouvoir recueillir ou donner des informations dans un langage élémentaire en lien avec son environnement immédiat", "Writing": "L'apprenant doit pouvoir écrire des phrases simples" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage élémentaire", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre des phrases simples en discriminant les sons", "Speaking": "L'apprenant doit pouvoir recueillir ou donner des informations dans un langage élémentaire en lien avec son environnement immédiat", "Writing": "L'apprenant doit pouvoir écrire des phrases simples" } },
-    "4e": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage simple en lien avec les thèmes 'Familles, Health, Young people in danger'", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale dans un langage simple en lien avec les thèmes 'Familles, Health, Young people in danger'", "Speaking": "L'apprenant doit pouvoir communiquer de façon simple sur les thèmes 'Familles, Health, Young people in danger' lorsque l'interlocuteur parle lentement, distinctement et facilite l'interaction", "Writing": "L'apprenant doit pouvoir écrire un texte simple et cohérent sur les thèmes 'Familles, Health, Young people in danger' pour décrire une expérience ou exprimer une opinion" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage simple en lien avec les thèmes 'Teen times, Environmental education, Women'", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale dans un langage simple en lien avec les thèmes 'Teen times, Environmental education, Women'", "Speaking": "L'apprenant doit pouvoir communiquer de façon simple sur les thèmes 'Teen times, Environmental education, Women' lorsque l'interlocuteur parle lentement, distinctement et facilite l'interaction", "Writing": "L'apprenant doit pouvoir écrire un texte simple et cohérent sur les thèmes 'Teen times, Environmental education, Women' pour décrire une expérience ou exprimer une opinion" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage simple en lien avec les thèmes 'Advantages and drawbacks of ICTs, The Net Generation'", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale dans un langage simple en lien avec les thèmes 'Advantages and drawbacks of ICTs, The Net Generation'", "Speaking": "L'apprenant doit pouvoir communiquer de façon simple sur les thèmes 'Advantages and drawbacks of ICTs, The Net Generation' lorsque l'interlocuteur parle lentement, distinctement et facilite l'interaction", "Writing": "L'apprenant doit pouvoir écrire un texte simple et cohérent sur les thèmes 'Advantages and drawbacks of ICTs, The Net Generation' pour décrire une expérience ou exprimer une opinion" } },
-    "3e": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage simple en lien avec les thèmes 'Love and marriage celebrations, food and health, et migrations'", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale dans un langage simple en lien avec les thèmes 'Love and marriage celebrations, food and health, et migrations'", "Speaking": "L'apprenant doit pouvoir communiquer de façon simple sur les thèmes 'Love and marriage celebrations, food and health, et migrations' lorsque l'interlocuteur parle lentement, distinctement et facilite l'interaction", "Writing": "L'apprenant doit pouvoir écrire un texte simple et cohérent sur les thèmes 'Love and marriage celebrations, food and health, et migrations' pour décrire une expérience ou exprimer une opinion" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage simple en lien avec les thèmes 'Heroes, The environment, Training and jobs'", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale dans un langage simple en lien avec les thèmes 'Heroes, The environment, Training and jobs'", "Speaking": "L'apprenant doit pouvoir communiquer de façon simple sur les thèmes 'Heroes, The environment, Training and jobs' lorsque l'interlocuteur parle lentement, distinctement et facilite l'interaction", "Writing": "L'apprenant doit pouvoir écrire un texte simple et cohérent sur les thèmes 'Heroes, The environment, Training and jobs' pour décrire une expérience ou exprimer une opinion" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte écrit dans un langage simple en lien avec les thèmes 'Tolerance, Literature and Civilization'", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale dans un langage simple en lien avec les thèmes 'Tolerance, Literature and Civilization'", "Speaking": "L'apprenant doit pouvoir communiquer de façon simple sur les thèmes 'Tolerance, Literature and Civilization' lorsque l'interlocuteur parle lentement, distinctement et facilite l'interaction", "Writing": "L'apprenant doit pouvoir écrire un texte simple et cohérent sur les thèmes 'Tolerance, Literature and Civilization' pour décrire une expérience ou exprimer une opinion" } },
-    "2nde A": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte simple de 300 à 350 mots sur Youth unemployment, Religions in Burkina Faso et Youth and ICTs et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale simple de deux à trois (2 - 3) minutes sur Youth unemployment, Religions in Burkina Faso et Youth and ICTs et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement et portant sur Youth unemployment, Religions in Burkina Faso et Youth and ICTs.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) simple, cohérent et compréhensible d'environ cent (100) mots sous forme de paragraph sur Youth unemployment, Religions in Burkina Faso et Youth and ICTs.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte simple de 300 à 350 mots sur the world as a planetary village, Cultural values et popular hobbies among teenagers et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale simple de deux à trois (2 - 3) minutes sur the world as a planetary village, Cultural values et popular hobbies among teenagers et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement et portant sur the world as a planetary village, Cultural values et popular hobbies among teenagers.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) simple, cohérent et compréhensible d'environ cent (100) mots sous forme de paragraph sur the world as a planetary village, Cultural values et popular hobbies among teenagers.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte simple de 300 à 350 mots sur democratic principles et cultural events in Burkina Faso et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale simple de deux à trois (2 - 3) minutes sur democratic principles et cultural events in Burkina Faso et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement et portant sur democratic principles et cultural events in Burkina Faso.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) simple, cohérent et compréhensible d'environ cent (100) mots sous forme de paragraph sur democratic principles et cultural events in Burkina Faso.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" } },
-    "1ere A": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Gender equity, Public development aid, Religion as a factor of good social relationship et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 - 4) minutes sur Gender equity, Public development aid, Religion as a factor of good social relationship et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Gender equity, Public development aid, Religion as a factor of good social relationship.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Gender equity, Public development aid, Religion as a factor of good social relationship.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Pollution and climate change, Smoking, drug addiction and alcohol abuse, Internet and education et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 - 4) minutes sur Pollution and climate change, Smoking, drug addiction and alcohol abuse, Internet and education et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Pollution and climate change, Smoking, drug addiction and alcohol abuse, Internet and education.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Pollution and climate change, Smoking, drug addiction and alcohol abuse, Internet and education.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur democratic principles, and entrepreneurship P et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 - 4) minutes sur democratic principles, and entrepreneurship P et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur democratic principles, and entrepreneurship P.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur democratic principles, and entrepreneurship P.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" } },
-    "Terminale A": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 400 à 450 mots sur « Self-Employment», « International Trade», et « Religious Tolerance» et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à cinq (3-5) minutes « Self-Employment», « International Trade», et « Religious Tolerance» et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement portant sur «Self-Employment», «International Trade», et «Religious Tolerance».", "Writing": "L'apprenant doit pouvoir écrire une rédaction contenant une introduction, un développement et une conclusion d'environ cent cinquante (150) mots sur « Self-Employment», « International Trade», et « Religious Tolerance».", "Translation": "L'apprenant doit pouvoir traduire un passage d'environ 70 mots contenant des phrases complexes" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 400 à 450 mots sur « Geopolitics », « Africa, a Land of Wealth » et « The Place of African Culture in the World» et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur « Geopolitics », « Africa, a Land of Wealth » et « The Place of African Culture in the World » et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement portant sur «Geopolitics», «Africa, a Land of Wealth» et «The Place of African Culture in the World».", "Writing": "L'apprenant doit pouvoir écrire une rédaction contenant une introduction, un développement et une conclusion d'environ cent cinquante (150) mots sur « Geopolitics », « Africa, a Land of Wealth » et « The Place of African Culture in the World».", "Translation": "L'apprenant doit pouvoir traduire un passage d'environ 70 mots contenant des phrases complexes" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 400 à 450 mots sur « Good Governance and Development » et « Can we live without ICTs? » et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à cinq (3 - 5) minutes sur « Good Governance and Development » et « Can we live without ICTs? » et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement portant sur « Good Governance and Development » et « Can we live without ICTs? ».", "Writing": "L'apprenant doit pouvoir écrire une rédaction contenant une introduction, un développement et une conclusion d'environ cent cinquante (150) mots sur « Good Governance and Development » et « Can we live without ICTs? ».", "Translation": "L'apprenant doit pouvoir traduire un passage de 70 mots contenant des phrases complexes." } },
-    "2nde C": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Cellular Phones, Self-Medication, The Peril of Plastic Bags et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 – 4) minutes sur Cellular Phones, Self-Medication, The Peril of Plastic Bags et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Cellular Phones, Self-Medication, The Peril of Plastic Bags.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Cellular Phones, Self-Medication, The Peril of Plastic Bags.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Smuggling, Female Genital Mutilations (FGMs) et Food self-sufficiency et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3-4) minutes sur Smuggling, Female Genital Mutilations (FGMs) et Food self- sufficiency et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Smuggling, Female Genital Mutilations (FGMs) et Food self-sufficiency.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Smuggling, Female Genital Mutilations (FGMs) et Food self-sufficiency.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Smoking, Drug Addiction And Violence et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 – 4) minutes sur Smoking, Drug Addiction And Violence et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Smoking, Drug Addiction And Violence.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Smoking, Drug Addiction And Violence.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" } },
-    "1ere C-D": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Information and communication technologies (ICTs), Medicine, Climate change et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 – 4) minutes sur Information and communication technologies (ICTs), Medicine, Climate change et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Information and communication technologies (ICTs), Medicine, Climate change.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Information and communication technologies (ICTs), Medicine, Climate change.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Entrepreneurship, Integrity and development, Gender issues et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 - 4) minutes sur Entrepreneurship, Integrity and development, Gender issues et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Entrepreneurship, Integrity and development, Gender issues.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Entrepreneurship, Integrity and development, Gender issues.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Agriculture today in burkina faso. et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 - 4) minutes sur Agriculture today in burkina faso et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Agriculture today in burkina faso.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Agriculture today in burkina faso.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" } },
-    "Terminale C-D": { "Term 1": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur The internet, Diseases, Pollution et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3-4) minutes sur The internet, Diseases, Pollution et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur The internet, Diseases, Pollution.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur The internet, Diseases, Pollution.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 2": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Conflict resolution, Good governance and development, Food security et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3-4) minutes sur Conflict resolution, Good governance and development, Food security et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Conflict resolution, Good governance and development, Food security.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Conflict resolution, Good governance and development, Food security.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" }, "Term 3": { "Reading Comprehension": "L'apprenant doit pouvoir lire et comprendre un texte standard de 350 à 400 mots sur Entrepreneurship and agribusiness et répondre à des questions.", "Listening Comprehension": "L'apprenant doit pouvoir écouter et comprendre une production orale standard de trois à quatre (3 - 4) minutes sur Entrepreneurship and agribusiness et répondre à des questions.", "Speaking": "L'apprenant doit pouvoir tenir une conversation simple avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée avec aisance sur Entrepreneurship and agribusiness.", "Writing": "L'apprenant doit pouvoir produire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d'environ cent vingt (120) mots à travers un/des paragraphe.s sur Entrepreneurship and agribusiness.", "Translation": "L'apprenant doit pouvoir traduire des phrases contenant des points de grammaire spécifiques" } }
+    "6e": {
+        "Term 1": { "Reading Comprehension": "Comprendre un texte court écrit dans un langage très élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale brève exprimée dans un langage très élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Speaking": "Communiquer dans un langage très élémentaire sur des sujets en lien avec son environnement immédiat et les thèmes émergents lorsque l'interlocuteur parle très lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte dans un langage très élémentaire et compréhensible sur des sujets en lien avec son environnement immédiat et les thèmes émergents" },
+        "Term 2": { "Reading Comprehension": "Comprendre un texte court écrit dans un langage très élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale brève exprimée dans un langage très élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Speaking": "Communiquer dans un langage très élémentaire sur des sujets en lien avec son environnement immédiat et les thèmes émergents lorsque l'interlocuteur parle très lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte dans un langage très élémentaire et compréhensible sur des sujets en lien avec son environnement immédiat et les thèmes émergents" },
+        "Term 3": { "Reading Comprehension": "Comprendre un texte court écrit dans un langage très élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale brève exprimée dans un langage très élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Speaking": "Communiquer dans un langage très élémentaire sur des sujets en lien avec son environnement immédiat et les thèmes émergents lorsque l'interlocuteur parle très lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte dans un langage très élémentaire et compréhensible sur des sujets en lien avec son environnement immédiat et les thèmes émergents" }
+    },
+    "5e": {
+        "Term 1": { "Reading Comprehension": "Comprendre un texte court écrit dans un langage élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale brève exprimée dans un langage élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Speaking": "Communiquer dans un langage élémentaire sur des sujets en lien avec son environnement immédiat et les thèmes émergents lorsque l'interlocuteur parle très lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte dans un langage élémentaire et compréhensible sur des sujets en lien avec son environnement immédiat et les thèmes émergents" },
+        "Term 2": { "Reading Comprehension": "Comprendre un texte court écrit dans un langage élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale brève exprimée dans un langage élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Speaking": "Communiquer dans un langage élémentaire sur des sujets en lien avec son environnement immédiat et les thèmes émergents lorsque l'interlocuteur parle très lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte dans un langage élémentaire et compréhensible sur des sujets en lien avec son environnement immédiat et les thèmes émergents" },
+        "Term 3": { "Reading Comprehension": "Comprendre un texte court écrit dans un langage élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale brève exprimée dans un langage élémentaire en lien avec l’environnement immédiat et les thèmes émergents", "Speaking": "Communiquer dans un langage élémentaire sur des sujets en lien avec son environnement immédiat et les thèmes émergents lorsque l'interlocuteur parle très lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte dans un langage élémentaire et compréhensible sur des sujets en lien avec son environnement immédiat et les thèmes émergents" }
+    },
+    "4e": {
+        "Term 1": { "Reading Comprehension": "Comprendre un texte écrit dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale exprimée dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Speaking": "Communiquer de façon simple sur des sujets familiers et des thèmes émergents lorsque l'interlocuteur parle lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte simple et cohérent sur des sujets familiers ou d’intérêt personnel pour décrire une expérience ou exprimer une opinion" },
+        "Term 2": { "Reading Comprehension": "Comprendre un texte écrit dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale exprimée dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Speaking": "Communiquer de façon simple sur des sujets familiers et des thèmes émergents lorsque l'interlocuteur parle lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte simple et cohérent sur des sujets familiers ou d’intérêt personnel pour décrire une expérience ou exprimer une opinion" },
+        "Term 3": { "Reading Comprehension": "Comprendre un texte écrit dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale exprimée dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Speaking": "Communiquer de façon simple sur des sujets familiers et des thèmes émergents lorsque l'interlocuteur parle lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte simple et cohérent sur des sujets familiers ou d’intérêt personnel pour décrire une expérience ou exprimer une opinion" }
+    },
+    "3e": {
+        "Term 1": { "Reading Comprehension": "Comprendre un texte écrit dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Speaking": "Communiquer de façon simple sur des sujets familiers et des thèmes émergents lorsque l'interlocuteur parle lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte simple et cohérent sur des sujets familiers ou d’intérêt personnel pour décrire une expérience ou exprimer une opinion" },
+        "Term 2": { "Reading Comprehension": "Comprendre un texte écrit dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Speaking": "Communiquer de façon simple sur des sujets familiers et des thèmes émergents lorsque l'interlocuteur parle lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte simple et cohérent sur des sujets familiers ou d’intérêt personnel pour décrire une expérience ou exprimer une opinion" },
+        "Term 3": { "Reading Comprehension": "Comprendre un texte écrit dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Listening Comprehension": "Comprendre une production orale dans un langage simple en lien avec l’environnement familier et les thèmes émergents", "Speaking": "Communiquer de façon simple sur des sujets familiers et des thèmes émergents lorsque l'interlocuteur parle lentement, distinctement et facilite l’interaction", "Writing": "Ecrire un texte simple et cohérent sur des sujets familiers ou d’intérêt personnel pour décrire une expérience ou exprimer une opinion" }
+    },
+    "2nde A": {
+        "Term 1": { "Reading Comprehension": "Lire et comprendre un texte simple de 300 à 350 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de deux à trois (2 – 3) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations-problèmes liés à ces thèmes.", "Speaking": "Communiquer sur des sujets familiers et des thèmes émergents en utilisant les ressources linguistiques appropriées", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif et narratif) simple, cohérent et compréhensible d’environ cent (100) mots en relation avec son environnement et ses préoccupations, en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un paragraphe.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ." },
+        "Term 2": { "Reading Comprehension": "Lire et comprendre un texte simple de 300 à 350 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de deux à trois (2 – 3) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations-problèmes liés à ces thèmes.", "Speaking": "Communiquer sur des sujets familiers et des thèmes émergents en utilisant les ressources linguistiques appropriées", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif et narratif) simple, cohérent et compréhensible d’environ cent (100) mots en relation avec son environnement et ses préoccupations, en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un paragraphe.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ." },
+        "Term 3": { "Reading Comprehension": "Lire et comprendre un texte simple de 300 à 350 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de deux à trois (2 – 3) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations-problèmes liés à ces thèmes.", "Speaking": "Communiquer sur des sujets familiers et des thèmes émergents en utilisant les ressources linguistiques appropriées", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif et narratif) simple, cohérent et compréhensible d’environ cent (100) mots en relation avec son environnement et ses préoccupations, en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un paragraphe.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ." }
+    },
+    "1ere A": {
+        "Term 1": { "Reading Comprehension": "Lire et comprendre un texte standard de 350 à 400 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international, en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de trois à quatre (3 – 4) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes", "Speaking": "Tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Ecrire un texte cohérent et compréhensible (descriptif, explicatif, argumentatif, narratif) d’environ cent vingt (120) mots sur des sujets de la vie courante en mobilisant des techniques d’écriture et des ressources linguistiques appropriées à travers une rédaction contenant une introduction, un développement et une conclusion.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ et en utilisant une qualité de langue qui respecte les outils de la langue d’arrivée (Français)." },
+        "Term 2": { "Reading Comprehension": "Lire et comprendre un texte standard de 350 à 400 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international, en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de trois à quatre (3 – 4) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes", "Speaking": "Tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Ecrire un texte cohérent et compréhensible (descriptif, explicatif, argumentatif, narratif) d’environ cent vingt (120) mots sur des sujets de la vie courante en mobilisant des techniques d’écriture et des ressources linguistiques appropriées à travers une rédaction contenant une introduction, un développement et une conclusion.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ et en utilisant une qualité de langue qui respecte les outils de la langue d’arrivée (Français)." },
+        "Term 3": { "Reading Comprehension": "Lire et comprendre un texte standard de 350 à 400 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international, en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de trois à quatre (3 – 4) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes", "Speaking": "Tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Ecrire un texte cohérent et compréhensible (descriptif, explicatif, argumentatif, narratif) d’environ cent vingt (120) mots sur des sujets de la vie courante en mobilisant des techniques d’écriture et des ressources linguistiques appropriées à travers une rédaction contenant une introduction, un développement et une conclusion.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ et en utilisant une qualité de langue qui respecte les outils de la langue d’arrivée (Français)." }
+    },
+    "Terminale A": {
+        "Term 1": { "Reading Comprehension": "Lire et comprendre un texte standard de 400 à 450 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international, en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement dans laquelle il / elle explique et / ou justifie une idée en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Produire un texte cohérent (descriptif, explicatif, argumentatif, narratif) et compréhensible d’environ cent cinquante (150) mots en mobilisant les techniques d’écriture et les ressources linguistiques appropriées à travers une rédaction contenant une introduction, un développement et une conclusion.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ et en utilisant une qualité de langue qui respecte les outils de la langue d’arrivée (Français)." },
+        "Term 2": { "Reading Comprehension": "Lire et comprendre un texte standard de 400 à 450 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international, en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement dans laquelle il / elle explique et / ou justifie une idée en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Produire un texte cohérent (descriptif, explicatif, argumentatif, narratif) et compréhensible d’environ cent cinquante (150) mots en mobilisant les techniques d’écriture et les ressources linguistiques appropriées à travers une rédaction contenant une introduction, un développement et une conclusion.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ et en utilisant une qualité de langue qui respecte les outils de la langue d’arrivée (Français)." },
+        "Term 3": { "Reading Comprehension": "Lire et comprendre un texte standard de 400 à 450 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international, en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Tenir une conversation simple avec des locuteurs de la langue sur des sujets familiers et en rapport avec son environnement dans laquelle il / elle explique et / ou justifie une idée en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Produire un texte cohérent (descriptif, explicatif, argumentatif, narratif) et compréhensible d’environ cent cinquante (150) mots en mobilisant les techniques d’écriture et les ressources linguistiques appropriées à travers une rédaction contenant une introduction, un développement et une conclusion.", "Translation": "Transférer le message d’un texte de départ vers un texte d’arrivée en gardant le sens général du texte de départ et en utilisant une qualité de langue qui respecte les outils de la langue d’arrivée (Français)." }
+    },
+    "2nde C": {
+        "Term 1": { "Reading Comprehension": "Lire et comprendre un texte simple de 300 à 350 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de deux à trois (2 – 3) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Communiquer sur des sujets familiers et des thèmes émergents en utilisant les ressources linguistiques appropriées.", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d’environ cent (100) mots en relation avec son environnement et ses préoccupations, en mobilisant des techniques d’écriture et des ressources linguistiques appropriées et ce, à travers un paragraphe." },
+        "Term 2": { "Reading Comprehension": "Lire et comprendre un texte simple de 300 à 350 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de deux à trois (2 – 3) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Communiquer sur des sujets familiers et des thèmes émergents en utilisant les ressources linguistiques appropriées.", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d’environ cent (100) mots en relation avec son environnement et ses préoccupations, en mobilisant des techniques d’écriture et des ressources linguistiques appropriées et ce, à travers un paragraphe." },
+        "Term 3": { "Reading Comprehension": "Lire et comprendre un texte simple de 300 à 350 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de deux à trois (2 – 3) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Communiquer sur des sujets familiers et des thèmes émergents en utilisant les ressources linguistiques appropriées.", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d’environ cent (100) mots en relation avec son environnement et ses préoccupations, en mobilisant des techniques d’écriture et des ressources linguistiques appropriées et ce, à travers un paragraphe." }
+    },
+    "1ere C-D": {
+        "Term 1": { "Reading Comprehension": "Lire et comprendre un texte standard de 350 à 400 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur les textes authentiques, les aspects linguistiques et les résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de trois à quatre (3 – 4) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "S’entretenir avec des locuteurs de la langue sur des sujets de vie courante en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d’environ cent vingt (120) mots sur des sujets de la vie courante en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un/des paragraphe.s." },
+        "Term 2": { "Reading Comprehension": "Lire et comprendre un texte standard de 350 à 400 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur les textes authentiques, les aspects linguistiques et les résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de trois à quatre (3 – 4) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "S’entretenir avec des locuteurs de la langue sur des sujets de vie courante en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d’environ cent vingt (120) mots sur des sujets de la vie courante en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un/des paragraphe.s." },
+        "Term 3": { "Reading Comprehension": "Lire et comprendre un texte standard de 350 à 400 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur les textes authentiques, les aspects linguistiques et les résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale simple de trois à quatre (3 – 4) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des productions orales authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Speaking": "S’entretenir avec des locuteurs de la langue sur des sujets de vie courante en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Ecrire un texte (descriptif, explicatif, argumentatif, narratif) cohérent et compréhensible d’environ cent vingt (120) mots sur des sujets de la vie courante en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un/des paragraphe.s." }
+    },
+    "Terminale C-D": {
+        "Term 1": { "Reading Comprehension": "Lire et comprendre un texte standard de 400 à 450 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur les productions orales authentiques, les aspects linguistiques et les résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Tenir une conversation avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Produire un texte cohérent (descriptif, explicatif, argumentatif, narratif) d’environ cent cinquante (150) mots en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un/des paragraphe.s" },
+        "Term 2": { "Reading Comprehension": "Lire et comprendre un texte standard de 400 à 450 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur les productions orales authentiques, les aspects linguistiques et les résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Tenir une conversation avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Produire un texte cohérent (descriptif, explicatif, argumentatif, narratif) d’environ cent cinquante (150) mots en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un/des paragraphe.s" },
+        "Term 3": { "Reading Comprehension": "Lire et comprendre un texte standard de 400 à 450 mots, adapté au niveau de la classe, sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur des textes authentiques, des aspects linguistiques et des résolutions de situations problèmes liés à ces thèmes.", "Listening Comprehension": "Ecouter et comprendre une production orale standard de trois à cinq (3 – 5) minutes sur la problématique des thèmes émergents et d’autres en rapport avec l’environnement national et international en s’appuyant sur les productions orales authentiques, les aspects linguistiques et les résolutions de situations problèmes liés à ces thèmes.", "Speaking": "Tenir une conversation avec des locuteurs de la langue dans laquelle il / elle explique et / ou justifie une idée en utilisant les ressources linguistiques appropriées et des techniques de persuasion.", "Writing": "Produire un texte cohérent (descriptif, explicatif, argumentatif, narratif) d’environ cent cinquante (150) mots en mobilisant les techniques d’écriture et les ressources linguistiques appropriées et ce, à travers un/des paragraphe.s" }
+    }
 };
 
 // ========================================================================
@@ -5429,13 +5479,57 @@ function updateTermNote() {
    consolidation et de résolution de problème, parce que la compétence
    principale « Speaking + Writing » n'existe pas dans le référentiel.
    On retombe ici sur la première compétence disponible. */
+/* Libellé de la rubrique. Les curricula de septembre 2024 intitulent la
+   colonne « Compétences intermédiaires » pour toutes les classes, y compris
+   la 3e et la Terminale ; les compétences terminales y sont des références
+   de fin de cycle et non des compétences de classe. La fiche suit cette
+   terminologie. */
+const COMPETENCE_TITRE = 'Compétence intermédiaire';
+const SKILL_FR = {
+  'Reading Comprehension': 'Compréhension écrite (Reading comprehension)',
+  'Listening Comprehension': 'Compréhension orale (Listening comprehension)',
+  'Speaking': 'Expression orale (Speaking)',
+  'Writing': 'Expression écrite (Writing)',
+  'Translation': 'Traduction'
+};
+const TERM_FR = { '1': '1er trimestre', '2': '2e trimestre', '3': '3e trimestre' };
+/* Les curricula (septembre 2024) fixent une compétence par classe et par
+   skill, sans découpage trimestriel ni référence à un thème précis. Aucune
+   classe n'en dépend donc du trimestre ; l'ensemble est conservé au cas où
+   une future planification réintroduirait cette dépendance. */
+const TERM_DEPENDENT = new Set();
+
+/* Renvoie la compétence officielle à recopier sur la fiche.
+   - skill : la compétence effectivement citée (elle peut différer de la
+     compétence principale de la séance lorsque celle-ci n'existe pas dans
+     le curriculum, cas des séances de consolidation « Speaking + Writing ») ;
+   - absent : vrai lorsque le curriculum ne fixe aucun palier pour le skill
+     demandé. On ne lui substitue alors rien en silence. */
 function intermediateCompetency() {
-  const data = INTERMEDIATE_COMPETENCIES[$('classLevel').value]?.['Term ' + currentTerm()];
-  if (!data) return '';
-  const skill = $('mainSkill').value;
-  if (data[skill]) return data[skill];
-  for (const part of skill.split('+').map(s => s.trim())) if (data[part]) return data[part];
-  return data['Speaking'] || data['Writing'] || Object.values(data)[0] || '';
+  const classe = $('classLevel').value, term = currentTerm();
+  const data = INTERMEDIATE_COMPETENCIES[classe]?.['Term ' + term];
+  if (!data) return null;
+  const wanted = $('mainSkill').value;
+  const base = { classe, term };
+  if (data[wanted]) return { ...base, skill: wanted, text: data[wanted], absent: false };
+  for (const part of wanted.split('+').map(s => s.trim())) {
+    if (data[part]) return { ...base, skill: part, text: data[part], absent: false };
+  }
+  const fallback = data['Speaking'] || data['Writing'] || Object.values(data)[0] || '';
+  return { ...base, skill: wanted, text: fallback, absent: true };
+}
+
+function competencyBox(comp) {
+  if (!comp) return '';
+  const titre = COMPETENCE_TITRE;
+  if (comp.absent) {
+    return `<div class="box comp"><b>${esc(titre)}</b><br>
+      <span class="note">Le curriculum ne fixe pas de compétence
+      en ${esc((SKILL_FR[comp.skill] || comp.skill).toLowerCase())} pour cette classe.</span></div>`;
+  }
+  const periode = TERM_DEPENDENT.has(comp.classe) ? ', ' + (TERM_FR[comp.term] || '') : '';
+  return `<div class="box comp"><b>${esc(titre)} — ${esc(SKILL_FR[comp.skill] || comp.skill)}${esc(periode)}</b><br>
+    ${esc(comp.text)}</div>`;
 }
 
 /* ---------------- suggestions contextuelles ----------------
@@ -5473,6 +5567,8 @@ const THEMES = [
          "Tu rencontres un nouvel ami anglophone dans ton quartier. Tu veux l’accueillir et commencer une conversation. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Write a short dialogue using the expressions studied today and be ready to act it out.",
     sit: "some English-speaking visitors are coming to your school and you are chosen to welcome them",
+    why: "Knowing that a good welcome says a lot about a school and about a country",
+    move: "you decide to play your part",
     act: "greet them, introduce yourself and introduce other people",
     verb: "make them feel welcome" },
 
@@ -5482,6 +5578,8 @@ const THEMES = [
          "A cousin who lives abroad has asked you for news from home. You decide to write a personal letter to him. This is what we are going to learn today."],
     hw: "Write a short personal letter to a pen friend, giving news about your school and your family.",
     sit: "your school has started an exchange programme with a school in an English-speaking country",
+    why: "Knowing how much a first letter counts in a friendship that is beginning",
+    move: "you decide to answer without delay",
     act: "write to your new pen friend, introduce yourself and give news",
     verb: "build a lasting friendship across borders" },
 
@@ -5491,6 +5589,8 @@ const THEMES = [
          "Your parents think that mobile phones are harming young people’s studies. You are asked to give your opinion with clear arguments. This is what we are going to learn today."],
     hw: "Note the time you spend on your phone for three days, then write a paragraph on what you could change.",
     sit: "the excessive use of mobile phones and social media is affecting learners’ studies and relationships",
+    why: "Aware of what a telephone can bring and of what it can destroy when it is badly used",
+    move: "you decide to warn those around you",
     act: "inform your schoolmates and give them practical advice",
     verb: "promote a balanced and responsible use of mobile phones" },
 
@@ -5500,6 +5600,8 @@ const THEMES = [
          "The school health club is preparing an awareness day on public health. You are asked to explain the dangers of self-medication. This is what we are going to learn today."],
     hw: "Ask two adults where they usually buy their medicines and write a short report with your advice.",
     sit: "many people around you buy and take medicines without any medical advice",
+    why: "Knowing that a medicine taken without advice can do more harm than the illness itself",
+    move: "you decide to speak up",
     act: "raise awareness and advise people",
     verb: "protect public health" },
 
@@ -5509,6 +5611,8 @@ const THEMES = [
          "A local NGO is organising an awareness campaign against FGM and needs young volunteers. You are asked to explain the causes and consequences of this practice. This is what we are going to learn today."],
     hw: "Write a short awareness message against FGM that could be read on a local radio.",
     sit: "an awareness campaign against female genital mutilation is being prepared in your community",
+    why: "Knowing the suffering this practice causes and the rights it violates",
+    move: "you decide to take a stand",
     act: "inform people and argue against the practice",
     verb: "protect the health and rights of girls and women" },
 
@@ -5518,6 +5622,8 @@ const THEMES = [
          "A friend tells you that taking drugs helps him forget his problems. You want to explain the real effects and suggest better solutions. This is what we are going to learn today."],
     hw: "Write a short message to a friend who has started smoking, explaining the dangers and giving advice.",
     sit: "some young people in your community have started using drugs, alcohol or tobacco",
+    why: "Knowing what these products destroy in a family, in a school and in a whole generation",
+    move: "you decide to react",
     act: "raise awareness, explain the dangers and propose solutions",
     verb: "protect young people’s health and future" },
 
@@ -5527,6 +5633,8 @@ const THEMES = [
          "During a school activity, learners discuss the advantages and risks of a digital tool. You are asked to explain the relevant information and give your views. This is what we are going to learn today."],
     hw: "Write a paragraph on the advantages and drawbacks of the Internet for young people.",
     sit: "your school wants learners to use digital tools responsibly",
+    why: "Aware of what these tools make possible and of the risks they carry",
+    move: "you decide to inform those around you",
     act: "inform, advise and express your views",
     verb: "promote a responsible use of technology" },
 
@@ -5536,6 +5644,8 @@ const THEMES = [
          "Your school is preparing an interfaith day to celebrate living together. You are asked to present the religions practised in Burkina Faso and what they share. This is what we are going to learn today."],
     hw: "Describe a moment when people of different religions helped one another in your community.",
     sit: "people of different faiths in your community are preparing an event to celebrate living together",
+    why: "Knowing that peace between believers is a treasure that has to be protected",
+    move: "you decide to take part",
     act: "inform, explain and share your views",
     verb: "promote religious tolerance and social cohesion" },
 
@@ -5545,6 +5655,8 @@ const THEMES = [
          "A misunderstanding between two communities has been reported in your area. You want to explain why tolerance is important for peace. This is what we are going to learn today."],
     hw: "Write about a custom from another culture that you find interesting and explain what we can learn from it.",
     sit: "a misunderstanding linked to cultural differences has divided some learners in your school",
+    why: "Convinced that living together is built every day and by everyone",
+    move: "you decide to do your share",
     act: "sensitise your schoolmates and propose ways of living together",
     verb: "promote tolerance and peaceful coexistence" },
 
@@ -5554,6 +5666,8 @@ const THEMES = [
          "A young farmer in your village has turned his activity into a successful company. The class wants to understand how he did it. This is what we are going to learn today."],
     hw: "Identify a business opportunity in your community and explain how you would develop it.",
     sit: "a youth association in your town is looking for ideas to help young people create their own activities",
+    why: "Knowing that many young people have ideas but do not know where to begin",
+    move: "you decide to get involved",
     act: "inform, explain and propose a concrete project",
     verb: "promote self-employment among young people" },
 
@@ -5563,6 +5677,8 @@ const THEMES = [
          "Your class is preparing a debate on youth unemployment and its effects on society. You need to understand the issue and express your opinion. This is what we are going to learn today."],
     hw: "Interview a young person looking for a job and report the difficulties he or she faces.",
     sit: "many young people in your community are unemployed and discouraged",
+    why: "Knowing how many young people around you look for work without finding any",
+    move: "you decide to react",
     act: "explain the causes of the problem and propose realistic solutions",
     verb: "give young people hope and new opportunities" },
 
@@ -5572,6 +5688,8 @@ const THEMES = [
          "Your school garden cooperative wants to produce vegetables even in the dry season. You are asked to explain modern and sustainable farming practices. This is what we are going to learn today."],
     hw: "Ask a farmer in your area about the difficulties of his or her work and suggest two improvements.",
     sit: "farmers in your region are worried about poor harvests and food shortages",
+    why: "Knowing that what is grown here feeds the families of the whole region",
+    move: "you decide to take part",
     act: "inform them and propose practical solutions",
     verb: "contribute to food security in Burkina Faso" },
 
@@ -5581,6 +5699,8 @@ const THEMES = [
          "A debate has started in your class about whether men and women should have the same opportunities at work. You need clear ideas and arguments. This is what we are going to learn today."],
     hw: "Research a woman who has contributed to your community and present her story.",
     sit: "your school is preparing an activity on the place of women in the community",
+    why: "Convinced that a girl has the same right to study and to succeed as a boy",
+    move: "you decide to speak up",
     act: "inform and argue for equal opportunities",
     verb: "promote gender equity" },
 
@@ -5590,6 +5710,8 @@ const THEMES = [
          "Your class is preparing a report on the economic losses caused by smuggling in Burkina Faso. You need to explain the problem clearly. This is what we are going to learn today."],
     hw: "List three smuggled products sold in your area and explain the dangers they represent.",
     sit: "smuggled goods are openly sold in your community and many people buy them",
+    why: "Knowing what this traffic costs the country and the honest traders",
+    move: "you decide to react",
     act: "inform people and explain the consequences",
     verb: "encourage responsible behaviour as consumers and citizens" },
 
@@ -5599,6 +5721,8 @@ const THEMES = [
          "Your class is preparing a debate on corruption and its effects on development. You need clear ideas and examples. This is what we are going to learn today."],
     hw: "Describe an example of honest behaviour you have witnessed and explain why it matters for the country.",
     sit: "people in your community are questioning how public resources are managed",
+    why: "Convinced that a country is built on honesty and on accountability",
+    move: "you decide to speak up",
     act: "inform them and share your views",
     verb: "promote integrity, transparency and good governance" },
 
@@ -5608,6 +5732,8 @@ const THEMES = [
          "People in your community are concerned about an environmental change they have noticed. You are asked to explain the problem and suggest useful actions. This is what we are going to learn today."],
     hw: "Observe how waste is managed around your school and write a short paragraph on how it could be improved.",
     sit: "your school or neighbourhood is facing an environmental problem",
+    why: "Knowing the damage these practices will cause to your town and to the generations to come",
+    move: "you decide to react",
     act: "raise awareness and propose practical solutions",
     verb: "promote responsible behaviour" },
 
@@ -5617,6 +5743,8 @@ const THEMES = [
          "A friend asks you questions about a health problem and how to prevent it. You need to explain the situation clearly and give appropriate advice. This is what we are going to learn today."],
     hw: "Write five healthy habits you can adopt, explaining why each one matters.",
     sit: "a health problem is affecting people around your school",
+    why: "Knowing that most of these illnesses can be avoided by simple daily habits",
+    move: "you decide to inform those around you",
     act: "raise awareness and advise people",
     verb: "promote healthy practices" },
 
@@ -5629,6 +5757,8 @@ const THEMES = [
          "Ton équipe de football joue un match important. Tu veux décrire les actions du match à un ami anglophone. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Describe a sports activity you practise and explain its benefits for health.",
     sit: "your school is organising a sports and leisure week",
+    why: "Knowing how much these activities do for health and for friendship",
+    move: "you decide to take part",
     act: "present the activities, invite people and describe what they will do",
     verb: "encourage healthy and useful leisure activities" },
 
@@ -5638,6 +5768,8 @@ const THEMES = [
          "Some adults complain that teenagers do not respect rules. You want to talk about their rights and responsibilities. This is what we are going to learn today."],
     hw: "Write about three qualities and three difficulties of teenagers today.",
     sit: "adults and teenagers in your community do not always understand each other",
+    why: "Knowing how difficult these years are, and how much they need to be understood",
+    move: "you decide to speak up",
     act: "explain the realities of teenage life and suggest ways of improving communication",
     verb: "promote mutual understanding between generations" },
 
@@ -5647,6 +5779,8 @@ const THEMES = [
          "During a discussion at school, several learners ask questions about rights and duties. You need to explain the ideas clearly and give relevant examples. This is the focus of today’s lesson."],
     hw: "Write a short text about your rights and duties as a learner, with concrete examples.",
     sit: "people in your community need clearer information about their rights and duties",
+    why: "Convinced that a citizen who knows his rights and his duties makes his country stronger",
+    move: "you decide to take part",
     act: "inform and sensitise the community",
     verb: "promote responsible citizenship" },
 
@@ -5656,6 +5790,8 @@ const THEMES = [
          "The government has decided to limit some imports to protect local producers. People in your area disagree about this decision. This is what we are going to learn today."],
     hw: "Choose a product sold in your area and explain where it comes from and how it reached your market.",
     sit: "a local cooperative wants to sell its products abroad",
+    why: "Knowing that these rules affect the price of what every family buys",
+    move: "you decide to explain the matter",
     act: "inform and advise its members",
     verb: "promote local products on international markets" },
 
@@ -5665,6 +5801,8 @@ const THEMES = [
          "A misunderstanding between two classmates has turned into a serious quarrel. You are asked to help them settle their differences. This is what we are going to learn today."],
     hw: "Describe a conflict you have witnessed and explain how it was, or could have been, resolved peacefully.",
     sit: "a conflict has broken out between two groups in your community",
+    why: "Convinced that no lasting peace is built without dialogue",
+    move: "you decide to take part",
     act: "analyse the situation and propose peaceful solutions",
     verb: "promote dialogue, peace and reconciliation" },
 
@@ -5674,6 +5812,8 @@ const THEMES = [
          "During a debate, some learners say that Africa should rely on its own resources instead of foreign aid. You are asked to give your opinion. This is what we are going to learn today."],
     hw: "Name a natural resource of Burkina Faso and explain how it could better benefit the population.",
     sit: "people in your community are debating how Africa can use its resources and partnerships to develop",
+    why: "Knowing that a country rich in resources can stay poor if it does not master them",
+    move: "you decide to share your views",
     act: "inform them and share well-argued views",
     verb: "promote a sustainable and sovereign development" },
 
@@ -5683,6 +5823,8 @@ const THEMES = [
          "Your class is preparing a report on the causes and consequences of rural exodus. You need to explain the problem clearly. This is what we are going to learn today."],
     hw: "Interview someone who has moved from a village to a town or abroad and report on his or her experience.",
     sit: "many young people from your area are leaving for cities or other countries",
+    why: "Knowing how many young people leave without measuring what awaits them",
+    move: "you decide to speak up",
     act: "inform them about the realities of migration and give advice",
     verb: "help young people make informed decisions" },
 
@@ -5692,6 +5834,8 @@ const THEMES = [
          "Your class is preparing an exhibition on national heroes of Burkina Faso. You are asked to tell their story. This is what we are going to learn today."],
     hw: "Write a short biography of a person you admire, explaining what he or she achieved.",
     sit: "your school is preparing an exhibition on African and national heroes",
+    why: "Convinced that a people which forgets those who built it loses its way",
+    move: "you decide to take part",
     act: "tell their stories and explain their contribution",
     verb: "inspire young people with positive role models" },
 
@@ -5701,6 +5845,8 @@ const THEMES = [
          "The English club wants to perform a short play for the end-of-year celebration. You are asked to read it and share your opinion. This is what we are going to learn today."],
     hw: "Choose a short English song or poem you like and explain its message in a few sentences.",
     sit: "your school is preparing a cultural evening in English",
+    why: "Knowing how much a book or a song can change the way one sees the world",
+    move: "you decide to share your discovery",
     act: "present a piece of anglophone literature and share your views",
     verb: "promote reading and cultural exchange" },
 
@@ -5710,6 +5856,8 @@ const THEMES = [
          "Cultural events such as FESPACO and SIAO attract many visitors to Burkina Faso every year. Your class wants to understand what they bring to the country. This is what we are going to learn today."],
     hw: "Present a cultural event of your region and explain its importance for the community.",
     sit: "visitors are coming to your area and the school wants to promote a cultural event",
+    why: "Knowing what this heritage represents for your community and for its economy",
+    move: "you decide to take part",
     act: "inform visitors and promote the activity",
     verb: "promote local culture and tourism" },
 
@@ -5719,6 +5867,8 @@ const THEMES = [
          "Your school has started an online exchange with learners from other countries. You need to explain how globalization connects people. This is what we are going to learn today."],
     hw: "List five things you use every day that come from other countries and say what this shows about globalization.",
     sit: "your school is taking part in an international exchange with learners from other countries",
+    why: "Aware of what the opening of the world brings and of what it threatens",
+    move: "you decide to share your views",
     act: "present your country and discuss the effects of globalization",
     verb: "promote exchange while preserving local values" },
 
@@ -5728,6 +5878,8 @@ const THEMES = [
          "Your cousin is getting married soon and the family is discussing whether to have a traditional or a modern wedding. You are asked to share your views. This is what we are going to learn today."],
     hw: "Interview an older relative about family traditions and report your findings to the class.",
     sit: "a disagreement has arisen between young people and adults in your community",
+    why: "Knowing how much these misunderstandings weigh on family life",
+    move: "you decide to help them understand each other",
     act: "facilitate communication and propose constructive solutions",
     verb: "promote understanding and respectful communication" },
 
@@ -5737,6 +5889,8 @@ const THEMES = [
          "The school is preparing a road safety campaign and asks your class to give advice to other learners. This is what we are going to learn today."],
     hw: "Describe a dangerous situation you have seen on the road and propose three measures to improve safety.",
     sit: "a recent road incident has made people concerned about road safety",
+    why: "Knowing how many lives are lost every year on these roads",
+    move: "you decide to react",
     act: "raise awareness and recommend safer practices",
     verb: "promote safer behaviour" },
 
@@ -5746,6 +5900,8 @@ const THEMES = [
          "You are thinking about the job you would like to do in the future. You need to talk about the training and skills it requires. This is what we are going to learn today."],
     hw: "Research a job that interests you and present it, explaining the skills it requires.",
     sit: "an activity is being organised to help young people discover professional life",
+    why: "Knowing how many young people choose a trade without knowing what it really demands",
+    move: "you decide to inform them",
     act: "inform, describe and advise",
     verb: "present useful information about working life" },
 
@@ -5758,6 +5914,8 @@ const THEMES = [
          "Pendant le cours, tu veux demander poliment à ton professeur la permission de sortir ou une information. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Write a short dialogue using the expressions studied today and be ready to act it out.",
     sit: "new learners have just arrived in your school and need help finding their way",
+    why: "Knowing how lost one feels in a school one does not know yet",
+    move: "you decide to help them",
     act: "welcome them, give them useful information and help them",
     verb: "help them feel at home in the school" },
 
@@ -5770,6 +5928,8 @@ const THEMES = [
          "Un visiteur te demande l’heure et le jour d’une activité. Tu veux lui répondre correctement. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Write your timetable for a school day, giving the time of each activity.",
     sit: "your English-speaking pen friend wants to know how your days and weeks are organised",
+    why: "Knowing that a well-organised day makes school work much easier",
+    move: "you decide to help",
     act: "describe your timetable and give precise times and dates",
     verb: "share your daily life clearly" },
 
@@ -5782,6 +5942,8 @@ const THEMES = [
          "Ta classe organise une journée de cuisine. Tu dois expliquer comment on prépare un plat de chez toi. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Note what you ate yesterday, say whether it was balanced and suggest improvements.",
     sit: "you are helping to organise an activity about food",
+    why: "Knowing how much a shared meal says about a country and about its hospitality",
+    move: "you decide to take part",
     act: "inform and advise the participants",
     verb: "promote healthy and appropriate choices" },
 
@@ -5794,6 +5956,8 @@ const THEMES = [
          "Tes camarades et toi comparez vos affaires et vos habits. Tu veux dire lequel est le plus grand ou le plus beau. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Describe a member of your family: his or her appearance, clothes and mood.",
     sit: "a child is lost at the market and his parents need help to find him",
+    why: "Knowing that describing precisely avoids many misunderstandings",
+    move: "you decide to help",
     act: "describe people and things precisely",
     verb: "help others identify them quickly" },
 
@@ -5806,6 +5970,8 @@ const THEMES = [
          "Ton petit frère prend tes affaires sans demander. Tu veux lui expliquer ce qui appartient à chacun. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "List five objects at home and say who each one belongs to.",
     sit: "some learners in your school do not respect public and private property",
+    why: "Knowing that clear rules protect what belongs to everyone",
+    move: "you decide to help",
     act: "inform them and remind them of the rules",
     verb: "promote respect for property and regulations" },
 
@@ -5818,6 +5984,8 @@ const THEMES = [
          "Ta famille prépare un voyage vers une autre ville. Tu dois parler des moyens de transport et des documents de voyage. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Draw a simple map of your neighbourhood and write directions from your house to your school.",
     sit: "English-speaking visitors are in your town and need help to find places and activities",
+    why: "Knowing how hard it is to find one's way in a town one does not know",
+    move: "you decide to help them",
     act: "give them directions and invite them to local entertainment",
     verb: "make their stay pleasant" },
 
@@ -5830,6 +5998,8 @@ const THEMES = [
          "Un enfant anglophone te pose des questions sur les animaux sauvages du Burkina Faso. Tu veux les lui décrire. C’est ce que nous allons apprendre aujourd’hui."],
     hw: "Choose an animal or a vegetable you know well and write a short description of it.",
     sit: "your class is preparing a visit to a farm and a zoo with English-speaking visitors",
+    why: "Knowing how much there is to learn from the animals and the plants around you",
+    move: "you decide to take part",
     act: "present the animals and plants and describe them",
     verb: "share your knowledge of nature in Burkina Faso" }
 ];
@@ -6356,8 +6526,8 @@ const LESSON_SITUATIONS = {
     conso: 'the computer room of your school is slowing down and nobody maintains it, and you are asked to retrace the history of the machine, explain how it is kept in working order and say where it is heading'
   },
   '1ere C-D|U1|The Internet': {
-    app: 'A classmate has been swindled online and nobody knows how the fraud was possible. You are asked to explain how the Internet works, how to protect oneself, and what it changes in society.',
-    conso: 'a classmate has been swindled online and nobody knows how the fraud was possible, and you are asked to explain how the Internet works, how to protect oneself and what it changes in society'
+    app: 'A classmate has been swindled online and nobody knows how the fraud was possible. You are asked to explain how the Internet works, how to protect yourself, and what it changes in society.',
+    conso: 'a classmate has been swindled online and nobody knows how the fraud was possible, and you are asked to explain how the Internet works, how to protect yourself and what it changes in society'
   },
   '1ere C-D|U2|Traditional and modern medicine': {
     app: 'In the same family, the grandmother treats with plants and the father goes to the hospital. You are asked to compare the two medicines, weigh them and show how they can be combined.',
@@ -6450,6 +6620,8 @@ function lessonSituation(classe, uid, lecon) {
 
 const SITUATIONS = themeMap('sit');
 const ACTIONS = themeMap('act');
+const MOTIFS = themeMap('why');
+const ENGAGEMENTS = themeMap('move');
 const VERBS = themeMap('verb');
 
 /* Devoir : suggestion thématique si le thème est reconnu, sinon la
@@ -7983,6 +8155,101 @@ function socialFunction(fns) {
   return usable.find(f => !GENERIC_FN.test(f)) || usable[0] || list[0] || 'Talking';
 }
 
+/* ------------------------------------------------------------------
+   Situation d'intégration et tâche de consolidation : un bloc unique.
+   Les quatre constituants — contexte, fonction, support, consignes —
+   restent ceux de la conception, mais ils ne sont plus étiquetés sur la
+   fiche. L'élève lit un énoncé continu, comme dans les exemples
+   officiels ; la décomposition reste consultable par l'enseignant dans un
+   volet repliable, qui ne s'imprime pas.
+   Les tournures varient d'une leçon à l'autre, mais restent stables pour
+   une leçon donnée : une fiche rouverte ou réimprimée redonne exactement
+   le même texte, condition pour qu'un professeur puisse la photocopier.
+   ------------------------------------------------------------------ */
+function seedOf(s) {
+  let h = 2166136261;
+  s = String(s || '');
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+const variante = (seed, list, offset = 0) => list[(seed + offset) % list.length];
+
+/* La situation ne se situe pas « après la leçon » : elle se passe dans la
+   vie de l'élève. Ce qui a été appris en classe n'est pas le cadre du
+   problème, c'est la ressource qui permet de le résoudre.
+   L'engagement de l'élève n'est pas posé brutalement : il est motivé. Le
+   fait constaté est suivi du mobile — ce que l'élève sait, ce dont il est
+   convaincu — puis de la décision, dont le verbe change selon le thème :
+   réagir, prendre position, alerter, prêter main-forte. */
+const ENGAGEMENT_DEFAUT = { why: 'Knowing that the matter concerns everyone around you', move: 'you decide to take part' };
+/* Quand la situation dit déjà ce que l'élève entreprend — « you are asked
+   to… », « your teacher asks you to… » —, mobile et décision feraient
+   doublon. En revanche « your school is preparing an exhibition » ne dit
+   rien du rôle de l'élève : le mobile et la décision y ont leur place. */
+const DEJA_ENGAGE = /\b(you\s+(are|have been|were)\s+(asked|chosen|invited|requested|selected|charged|put in charge)|you\s+(decide|want|must|have to|need to|are going to|agree)\b|(asks?|invites?|wants?|expects?|requests?)\s+you\s+to\b|you\s+are\s+the\b|it\s+is\s+up\s+to\s+you\b)/i;
+
+const AMORCES_SUPPORT = [
+  'Basing yourself on what you have learnt in class about %s and on your own knowledge',
+  'Drawing on what was studied in class about %s and on your own experience',
+  'Using what you have learnt in class about %s and what you already know',
+  'With the help of what was studied in class about %s and of your own knowledge',
+  'From what you have learnt in class about %s and from your own ideas'
+];
+const PRODUCTIONS_ORAL = [
+  'prepare a spoken production of %s',
+  'produce a dialogue of %s',
+  'prepare a presentation of %s',
+  'prepare a talk of %s'
+];
+const PRODUCTIONS_ECRIT = [
+  'write a text of %s',
+  'write a coherent text of %s',
+  'produce a written production of %s',
+  'write a message of %s'
+];
+/* Toutes les amorces introduisent des consignes à l'impératif : le cadre
+   « produce two sentences to… » doit rester grammatical après elles. */
+const AMORCES_CONSIGNES = [
+  'In your production:', 'In what you produce:', 'In your work:'
+];
+const CADRES_CONSIGNE = [
+  'use %s sentences to %s',
+  'include %s sentences to %s',
+  'produce %s sentences to %s',
+  'find %s different ways to %s'
+];
+const CLOTURES_ORAL = [
+  'Use appropriate vocabulary and grammar, speak clearly and audibly, and get ready to present your work in front of the class, using appropriate gestures.',
+  'Mind your pronunciation and your grammar. Get ready to act out your production in front of the class, using appropriate gestures.',
+  'Speak clearly, use the vocabulary and the structures you have studied, and be ready to present your work to the class with appropriate gestures.'
+];
+const CLOTURES_ECRIT = [
+  'Write legibly and neatly, using appropriate vocabulary and grammar. Get ready to present your work in front of the class, using appropriate gestures.',
+  'Write clearly, without crossing out, and use the vocabulary and the grammar you have studied. Be ready to read your production to the class.',
+  'Mind your spelling and the order of your ideas, and use appropriate vocabulary and grammar. Get ready to present your work to the class, using appropriate gestures.'
+];
+/* La situation arrive sous forme de proposition ; elle devient la phrase
+   d'ouverture de l'énoncé. */
+function phraseSituation(s) {
+  let t = String(s || '').trim().replace(/^[,;\s]+/, '');
+  if (!t) return '';
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  if (!/[.!?…]$/.test(t)) t += '.';
+  return t;
+}
+const gabarit = (tpl, ...xs) => xs.reduce((s, x) => s.replace('%s', x), tpl);
+
+/* La consigne s'adresse à l'élève : « introduce oneself » devient
+   « introduce yourself ». */
+const noyauAction = s => String(s || '').replace(/\s*\([^)]*\)\s*$/, '').trim().toLowerCase();
+
+function adresseApprenant(s) {
+  return String(s || '')
+    .replace(/\boneself\b/gi, 'yourself')
+    .replace(/\bone's\b/gi, 'your')
+    .replace(/\bthemselves\b/gi, 'yourselves');
+}
+
 function integrationParts(d, u, l) {
   const theme = cleanTheme(u?.label), info = levelInfo(d.c);
   const early = ['6e', '5e'].includes(d.c);
@@ -8009,35 +8276,94 @@ function integrationParts(d, u, l) {
   const support = (d.taskSupport || '').trim()
     || `What you studied in ${scope}: your notebook, the support texts and the documents studied in class, the words and structures written on the board, and your own experience. Select only what is useful for the task.`;
 
-  // (4) consignes
-  const items = d.isConso ? (l?.sessions || []).slice(0, 4) : (u?.lessons || []).map(x => x.name).slice(0, 4);
+  // (4) consignes — leur nombre suit les ressources étudiées, sauf si
+  // l'enseignant en fixe un autre ; leur formulation tourne d'un cadre à
+  // l'autre pour qu'aucune fiche ne ressemble à la précédente.
+  const seed = seedOf([d.c, u?.id, l?.name, d.type].join('|'));
+  const voulu = parseInt(d.consigneCount) || 0;
+  const brut = d.isConso ? (l?.sessions || []) : (u?.lessons || []).map(x => x.name);
+  const dispo = brut.filter(Boolean);
+  const n = voulu ? Math.min(voulu, Math.max(dispo.length, 1)) : Math.min(4, Math.max(dispo.length, 1));
+  const items = dispo.slice(0, n);
   const fns = d.isConso ? (l?.functions || []) : (u?.lessons || []).map(x => socialFunction(x.functions));
+  const mot = NUM_WORDS[perItem] || perItem;
+  const vus = new Set();
   const consignes = items.map((it, i) => {
     const f = fns[i] && !/^extracting/i.test(fns[i]) ? fns[i] : socialFunction(fns);
-    return `Use ${numWord(perItem)} sentences to ${actionPhrase(it, f)}.`;
+    let action = actionPhrase(it, f);
+    /* Deux consignes qui demandent la même chose seraient comptées deux
+       fois dans le barème. On compare le noyau verbal, sans la parenthèse
+       de rappel, et on cherche une autre fonction de la leçon avant de se
+       rabattre sur le titre de la séance. */
+    if (vus.has(noyauAction(action))) {
+      const autres = (fns || []).filter(Boolean).filter(x => !/^extracting/i.test(x));
+      for (const alt of autres) {
+        const cand = actionPhrase(it, alt);
+        if (!vus.has(noyauAction(cand))) { action = cand; break; }
+      }
+    }
+    if (vus.has(noyauAction(action))) action = `talk about ${String(it).toLowerCase()}`;
+    vus.add(noyauAction(action));
+    const cadre = variante(seed, CADRES_CONSIGNE, i);
+    return gabarit(cadre, mot, adresseApprenant(action));
   });
-  if (!consignes.length) consignes.push(`Use ${numWord(perItem)} sentences to respond to the situation above.`);
+  if (!consignes.length) consignes.push(gabarit(CADRES_CONSIGNE[0], mot, 'respond to the situation above'));
 
   const volume = d.isConso ? info.writing
     : (early ? (d.c === '6e' ? '8 to 10 sentences' : '10 to 12 sentences') : `about ${info.words} words`);
-  const lead = `Based on ${d.isConso ? 'what you studied in the whole lesson' : 'what you studied in the whole unit'}, produce a coherent response of ${volume}. In your production:`;
-  // La séance se termine toujours par une présentation devant la classe :
-  // la consigne le dit explicitement.
-  const closing = oral || early
-    ? 'Get ready to present your work orally in front of the class.'
-    : 'Write legibly, and get ready to present your work in front of the class.';
 
-  return { context, fonction, support, consignes, lead, closing, oral: oral || early, perItem };
+  /* L'énoncé : le fait constaté, la décision d'agir, puis les ressources
+     et la production. Aucune mention du moment scolaire ; la classe
+     n'apparaît que comme appui, et le thème étudié est nommé pour que
+     l'élève sache où chercher. */
+  /* Le thème est nommé pour que l'élève sache où chercher, mais il ne peut
+     pas être fondu dans la phrase : « about AT SCHOOL » serait criard,
+     « about religions in burkina faso » perdrait les noms propres. On le
+     cite entre guillemets, en remettant les intitulés tout en capitales en
+     casse de titre. */
+  const PETITS_MOTS = new Set(['a','an','and','as','at','by','for','from','in','of','on','or','the','to','vs','with']);
+  const casseTitre = s => s.toLowerCase().split(/\s+/)
+    .map((w, k) => (k > 0 && PETITS_MOTS.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  const brutSujet = String(d.isConso ? (l?.name || theme) : theme).trim();
+  const sujet = '“' + (/[a-z]/.test(brutSujet) ? brutSujet : casseTitre(brutSujet)) + '”';
+  const fait = phraseSituation(sitTexte);
+  const engage = DEJA_ENGAGE.test(sitTexte);
+  const mobile = pick(MOTIFS, ctxKey, ENGAGEMENT_DEFAUT.why);
+  const pas = pick(ENGAGEMENTS, ctxKey, ENGAGEMENT_DEFAUT.move);
+  const decision = engage ? '' : ` ${mobile}, ${pas}.`;
+  const appui = gabarit(variante(seed, AMORCES_SUPPORT, 1), sujet)
+    + ((d.taskSupport || '').trim() ? ', together with the document given to you' : '');
+  const production = gabarit(variante(seed, (oral || early) ? PRODUCTIONS_ORAL : PRODUCTIONS_ECRIT, 2), volume);
+  /* Le but n'est énoncé que lorsque la situation ne dit pas déjà ce que
+     l'élève doit faire. Quand elle le dit — « you are asked to say what
+     really counts… » —, ajouter « in order to… » ferait doublon et, comme
+     ce but est tiré du thème et non de la leçon, il pouvait tomber à côté.
+     Là où la situation reste muette, le but est indispensable : c'est lui
+     qui donne son sens à la production. */
+  const but = adresseApprenant(pick(ACTIONS, ctxKey, 'inform, interact and respond appropriately'));
+  const enonce = `${fait}${decision} ${appui}, ${production}${engage ? '' : ` in order to ${but}`}.`;
+  const amorce = variante(seed, AMORCES_CONSIGNES, 3);
+  const closing = variante(seed, (oral || early) ? CLOTURES_ORAL : CLOTURES_ECRIT, 4);
+
+  return { context, fonction, support, consignes, enonce, amorce, closing,
+           oral: oral || early, perItem, volume };
 }
 
 function situationBox(p, title) {
   return `<div class="box task"><b>${esc(title)}</b>
-    <p><span class="tag">Context</span> ${esc(p.context)}</p>
-    <p><span class="tag">Function</span> ${esc(p.fonction)}</p>
-    <p><span class="tag">Support</span> ${esc(p.support)}</p>
-    <p><span class="tag">Instructions</span> ${esc(p.lead)}</p>
-    <ol class="consignes">${p.consignes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
-    <p class="closing">${esc(p.closing)}</p></div>`;
+    <p>${esc(p.enonce)}</p>
+    <p>${esc(p.amorce)}</p>
+    <ol class="consignes">${p.consignes.map((x, i) =>
+      `<li>${esc(x)}${i === p.consignes.length - 1 ? '.' : ';'}</li>`).join('')}</ol>
+    <p class="closing">${esc(p.closing)}</p>
+    <details class="decomposition"><summary>Constituents of this situation &mdash; for the teacher</summary>
+      <p><span class="tag">Context</span> ${esc(p.context)}</p>
+      <p><span class="tag">Function</span> ${esc(p.fonction)}</p>
+      <p><span class="tag">Support</span> ${esc(p.support)}</p>
+      <p><span class="tag">Instructions</span> ${p.consignes.length} numbered instruction${p.consignes.length > 1 ? 's' : ''}, ${esc(p.perItem)} sentences each, one per resource studied.</p>
+      <p class="note">These four constituents are not printed on the plan: the learner must identify the useful resources himself. They are shown here so that the teacher can check the construction of the task.</p>
+    </details></div>`;
 }
 
 /* ---------------- grille de correction critériée ----------------
@@ -8200,6 +8526,7 @@ function collect() {
     methods: $('methods')?.value.trim() || '', teachingAids: $('teachingAids')?.value.trim() || '',
     situation: $('situationText')?.value.trim() || '', dynamicActivities: selectedActivities(),
     taskSupport: $('taskSupport')?.value.trim() || '',
+    consigneCount: $('consigneCount')?.value === 'auto' ? 0 : parseInt($('consigneCount')?.value) || 0,
     exAuto: !!$('exAuto')?.checked, exKey: !!$('exKey')?.checked,
     exCount: Math.min(8, Math.max(2, parseInt($('exCount')?.value) || 4)),
     w: weights()
@@ -8313,7 +8640,7 @@ function generate() {
       ${phaseTitle(1, t[0][0], t[0][1])}
       <p>Greeting, date, attendance and a brief oral warm-up.</p>
       ${phaseTitle(2, t[1][0], t[1][1])}
-      <p>Recall what was studied ${d.isConso ? 'in the learning sessions of the lesson' : 'across the lessons of the unit'}. Present the four parts of the situation (context, function, support, instructions), the marking criteria and the time limit. Organise individual, pair or group work.</p>
+      <p>Recall what was studied ${d.isConso ? 'in the learning sessions of the lesson' : 'across the lessons of the unit'}. Read the situation aloud and make sure the wording is understood, without listing its constituents for the learners. State the marking criteria and the time limit. Organise individual, pair or group work.</p>
       ${situationBox(parts, d.isProblem ? "Situation d'intégration — whole unit" : 'Task — situation for the whole lesson')}
       ${phaseTitle(3, t[2][0], t[2][1])}
       <p>Learners carry out the task. The teacher monitors, observes and helps only when necessary.</p>
@@ -8354,7 +8681,7 @@ function generate() {
       <b>Methods / Techniques:</b> ${esc(d.methods || '……………………………………………………………..')}<br>
       <b>Teaching aids / Materials:</b> ${esc(d.teachingAids || '……………………………………………………………..')}
     </p>
-    ${comp ? `<div class="box comp"><b>Intermediate competency (Term ${esc(d.term)}, ${esc(d.skill)}):</b> ${esc(comp)}</div>` : ''}
+    ${competencyBox(comp)}
     ${body}
     ${lastAnswerKey}
     ${d.notes ? `<h3>Teacher's notes</h3><p>${esc(d.notes).replace(/\n/g, '<br>')}</p>` : ''}`;
@@ -8369,7 +8696,7 @@ function generate() {
 /* ---------------- préférences ---------------- */
 const PREF_FIELDS = ['teacher', 'school', 'province', 'duration', 'sessionType', 'classLevel',
   'unitSelect', 'lessonSelect', 'sessionSelect', 'mainSkill', 'integratedSkill', 'termSelect',
-  'wRel', 'wLang', 'wCoh', 'wRef', 'classSize', 'boys', 'girls', 'attendance', 'specialNeeds', 'methods', 'teachingAids', 'exCount', 'textVersion'];
+  'wRel', 'wLang', 'wCoh', 'wRef', 'classSize', 'boys', 'girls', 'attendance', 'specialNeeds', 'methods', 'teachingAids', 'exCount', 'textVersion', 'consigneCount'];
 const CHECK_FIELDS = ['exAuto', 'exKey'];
 
 function savePrefs() {
