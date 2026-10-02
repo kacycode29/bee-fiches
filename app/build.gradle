@@ -10,8 +10,8 @@ android {
         applicationId "com.burkinaenglishexpress.lessonplan"
         minSdk 21
         targetSdk 34
-        versionCode 19
-        versionName "13.16"
+        versionCode 20
+        versionName "13.22"
     }
 
     // Clé de signature permanente. Elle est fournie par GitHub au moment de la
