@@ -104,6 +104,34 @@ select:disabled,input:disabled{background:#f4f6f7;color:#94a3ab}
 .ex-list{margin:4px 0 6px 22px}
 .ex-list li{margin-bottom:4px}
 .ex-opts{color:var(--ink-soft)}
+.ex-bank{margin:4px 0 8px;padding:7px 10px;background:var(--amber-bg);border:1px solid #ecd9b4;border-radius:6px;text-align:center;font-weight:600;letter-spacing:.01em}
+/* ---- Composition (sujet d'évaluation) ---- */
+.compo-avis{background:#fdf6e9;border:1px solid #ecd9b4;border-radius:7px;padding:9px 13px;margin:0 0 16px;font-size:12.5px;color:#7a5410}
+.compo-avis p{margin:3px 0}
+.compo-tete{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;border-bottom:1px solid var(--rule);padding-bottom:8px}
+.compo-droite{text-align:right}
+.compo-etab{margin:0;font-weight:700;text-transform:uppercase;font-size:12.5px;letter-spacing:.02em}
+.compo-mini{margin:2px 0;font-size:12px;color:var(--ink-soft)}
+.compo-titre{text-align:center;letter-spacing:.06em;margin:16px 0 10px;font-size:17px}
+table.compo-bandeau{width:auto;margin:0 auto 12px;border-collapse:collapse;font-size:12.5px}
+table.compo-bandeau td{border:1px solid var(--rule);padding:3px 11px}
+table.compo-bandeau td:first-child{font-weight:600;color:var(--ink-soft)}
+.compo-h-texte{text-align:center;letter-spacing:.14em;margin:14px 0 6px;font-size:13px}
+.compo-source{font-size:11.5px;color:var(--ink-soft);margin:6px 0 18px}
+.compo-partie{margin:16px 0 0;page-break-inside:auto}
+.compo-partie>h3{border-bottom:1.5px solid var(--rule);padding-bottom:3px;letter-spacing:.03em}
+.compo-ex{margin:9px 0 13px;padding-left:10px;border-left:2px solid var(--rule)}
+.compo-ex-t{margin:0 0 3px;font-weight:600;font-size:13px}
+.compo-bar{float:right;font-weight:400;font-size:11.5px;color:var(--ink-soft)}
+.compo-cons{margin:4px 0 6px 22px}
+.compo-cons li{margin-bottom:3px}
+.compo-vol{font-style:italic;font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
+.compo-corrige{margin-top:26px;padding-top:16px;border-top:2.5px double var(--rule);page-break-before:always}
+.compo-cle{margin:10px 0;padding:8px 12px;background:#fbfcfd;border:1px solid var(--rule);border-radius:6px;font-size:12.5px}
+.compo-cle b{display:block;margin-bottom:4px}
+#compoSheet.sans-corrige .compo-corrige{display:none}
+#compoBareme .f label{font-size:10.5px;text-transform:uppercase;letter-spacing:.03em}
+
 .corr{font-size:12.5px;color:var(--amber);font-weight:600;margin:4px 0 0}
 .warn-note{font-size:12px;color:var(--alert);margin:4px 0}
 .keybox{border:1.5px dashed var(--ink-soft);border-radius:6px;padding:10px 14px;margin:14px 0;background:#fbfcfd;font-size:13.5px}
@@ -302,7 +330,7 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
 
 <!-- ============ RÉGLAGES ============ -->
 <aside class="panel" id="panel">
-  <div class="brand"><b>📘 BEE</b><span>Burkina English Express · Lesson Plan Generator v2</span></div>
+  <div class="brand"><b>📘 BEE</b><span>Burkina English Express · Lesson Plan Generator<br><small style="opacity:.7">version 13.26</small></span></div>
 
   <fieldset>
     <legend>Teacher and school</legend>
@@ -415,6 +443,43 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
     <p class="note">The exercises are taken from the support text. Read them before the lesson and adapt them if needed.</p>
   </fieldset>
 
+
+  <fieldset id="compoFieldset">
+    <legend>Composition &mdash; sujet d'&eacute;valuation</legend>
+    <p class="note">BEE b&acirc;tit le sujet autour de <b>votre</b> texte. Ce champ est ind&eacute;pendant du texte de la le&ccedil;on&nbsp;:
+      changer de classe ou de le&ccedil;on ne l'effacera pas. Les instructions officielles exigent un texte in&eacute;dit &mdash;
+      jamais &eacute;tudi&eacute; en classe, jamais pass&eacute; &agrave; un examen, ni tir&eacute; d'annales, d'ouvrages au programme,
+      de Wikip&eacute;dia ou d'une intelligence artificielle. Les textes de la base sont des textes d'&eacute;tude&nbsp;: ils ne conviennent pas ici.</p>
+    <div class="f"><label for="compoText">Texte support du sujet &mdash; le v&ocirc;tre</label>
+      <textarea id="compoText" rows="7" placeholder="Collez ici le texte in&eacute;dit que vous avez choisi pour l'&eacute;preuve."></textarea></div>
+    <p class="note" id="compoWordCount"></p>
+    <div class="f"><label for="compoFormat">Format de l'&eacute;preuve</label>
+      <select id="compoFormat">
+        <option value="auto">Automatique, selon la classe</option>
+        <option value="BEPC">BEPC &mdash; post-primaire</option>
+        <option value="BAC-A">Baccalaur&eacute;at &mdash; s&eacute;rie A</option>
+        <option value="BAC-CD">Baccalaur&eacute;at &mdash; s&eacute;ries C et D</option>
+      </select></div>
+    <div class="admin-grid" style="margin-top:8px">
+      <div class="f"><label for="compoTitre">Titre de l'&eacute;preuve</label><input id="compoTitre" type="text" placeholder="&Eacute;PREUVE D'ANGLAIS"></div>
+      <div class="f"><label for="compoSession">Session</label><input id="compoSession" type="text" placeholder="Session de mars 2026"></div>
+      <div class="f"><label for="compoDuree">Dur&eacute;e</label><input id="compoDuree" type="text" placeholder="selon le format"></div>
+      <div class="f"><label for="compoCoef">Coefficient</label><input id="compoCoef" type="text" placeholder="selon le format"></div>
+    </div>
+    <p class="note" style="margin-top:10px"><b>Bar&egrave;me par partie</b> &mdash; modifiable&nbsp;: la r&eacute;partition se d&eacute;cide en concertation avant la correction.</p>
+    <div id="compoBareme" class="four"></div>
+    <p class="note" id="compoTotalNote"></p>
+    <button class="btn slim" type="button" id="btnCompoReset" style="margin-top:4px">Remettre le bar&egrave;me officiel</button>
+    <p class="note" style="margin-top:12px"><b>Production &eacute;crite</b> &mdash; r&eacute;partition des points entre les quatre crit&egrave;res.</p>
+    <div class="four">
+      <div class="f"><label for="cePert">Pertinence</label><input id="cePert" type="number" min="0" max="20" step="0.5" value="1"></div>
+      <div class="f"><label for="ceLang">Langue</label><input id="ceLang" type="number" min="0" max="20" step="0.5" value="2"></div>
+      <div class="f"><label for="ceCoh">Coh&eacute;rence</label><input id="ceCoh" type="number" min="0" max="20" step="0.5" value="2"></div>
+      <div class="f"><label for="cePerf">Perfectionnement</label><input id="cePerf" type="number" min="0" max="20" step="0.5" value="1"></div>
+    </div>
+    <p class="note" id="compoEcritNote"></p>
+    <label class="choice" style="margin-top:8px"><input type="checkbox" id="compoCorrige" checked> <span>Imprimer aussi le corrig&eacute; et le bar&egrave;me (exemplaire du correcteur)</span></label>
+  </fieldset>
   <fieldset>
     <legend>Teacher's notes</legend>
     <div class="f"><textarea id="teacherNotes" rows="3" placeholder="Optional — printed at the end of the plan"></textarea></div>
@@ -448,6 +513,7 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
       <button class="btn slim" type="button" id="btnProgress">Progression</button>
       <button class="btn slim" type="button" id="btnEdit">Edit the plan</button>
       <button class="btn slim" type="button" id="btnSheet">Teacher's sheet</button>
+      <button class="btn slim" type="button" id="btnCompo">Composition</button>
       <button class="btn slim" type="button" id="btnPrint">Print / PDF</button>
       <button class="btn slim" type="button" id="btnWord">Download for Word</button>
       <button class="btn slim" type="button" id="btnCopy">Copy</button>
@@ -459,6 +525,7 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
   </div>
   <div class="paper" id="output" role="document" aria-label="Generated lesson plan"></div>
   <div class="paper" id="supportSheet" role="document" aria-label="Teacher's accompanying sheet" hidden></div>
+  <div class="paper" id="compoSheet" role="document" aria-label="Sujet de composition" hidden></div>
   <div class="progression" id="progression" hidden></div>
   <div class="library" id="library"></div>
   <input type="file" id="importFile" accept=".json,application/json" hidden>
@@ -7730,7 +7797,7 @@ const GRAMMAR = [
   [/sport|activity|holiday|plan/, 'the simple present and present continuous for actions'],
   [/food|meal|dish|cutlery|cooking|preference/, 'countable and uncountable nouns, articles and expressions of preference'],
   [/describ|appearance|mood|colour|clothing|compar/, 'adjectives and comparative structures'],
-  [/possession|property|whose/, 'possessive adjectives, possessive pronouns and the possessive case'],
+  [/possessi|propert|whose|belong/, 'possessive adjectives, possessive pronouns and the possessive case'],
   [/invit|accept|declin/, 'would like to, can, and polite expressions for invitations'],
   [/direction|locat|place|travel/, 'prepositions of place and imperative forms for directions'],
   [/health|disease|hygiene|medicine|nutrition/, 'the simple present, cause-and-effect expressions and should'],
@@ -7740,7 +7807,14 @@ const GRAMMAR = [
   [/condition|problem|solution/, 'conditional structures and expressions of cause and consequence'],
   [/opinion|debate|argument|view|advis|sensitis|persuad/, 'expressions for giving opinions, reasons, agreement and disagreement'],
   [/gender|women|equality/, 'comparative structures and expressions of equality'],
-  [/entrepreneur|self-employment/, 'modals of obligation and necessity, and expressions of advice']
+  [/entrepreneur|self-employment/, 'modals of obligation and necessity, and expressions of advice'],
+  /* Motifs de recours. Ils viennent en dernier : ils ne captent que ce
+     qu'aucun fait de langue précis n'a reconnu. Sans eux, un tiers des
+     leçons n'avait pas de point de grammaire nommé. */
+  [/letter|e-?mail|correspondence|postcard/, 'the layout of a personal letter and the formulas of opening and closing'],
+  [/reason|why|cause|consequence/, 'conditional structures and expressions of cause and consequence'],
+  [/talking about|types of|name|vocabulary|list|understanding|characteristic|role/,
+   'there is / there are, the plural of nouns and the vocabulary of the topic']
 ];
 function inferGrammar(...parts) {
   const t = parts.join(' ').toLowerCase();
@@ -7916,7 +7990,7 @@ function refreshDynamicEditor(force=false) {
   const mine = ownSituation();
   const situation = typed || mine || sugg[0];
   const custom = !!(typed || mine);
-  const controlled=['Gap filling','Matching','True / False','Multiple choice','Sentence completion','Word or phrase ordering','Grammar transformation / substitution'];
+  const controlled=['Gap filling','Matching','True / False','Multiple choice','Sentence completion','Word or phrase ordering','Grammar transformation / substitution','Word formation','Word family','Word definition','Vocabulary matching','Opposites','Synonyms','Expressions'];
   const semi=['WH-questions','Sentence writing from prompts','Information transfer into a table or form','Guided dialogue / exchange','Guided paragraph writing'];
   /* Tant que l'enseignant n'a pas choisi lui-même, les activités proposées
      sont celles qui conviennent à la compétence principale. */
@@ -8040,6 +8114,1239 @@ function shuffledBy(arr, rnd) {
   return a;
 }
 /* Prend n éléments répartis sur tout le texte, pas seulement au début. */
+/* ======================================================================
+   ÉTAGE 2 — FAMILLES DE MOTS
+
+   Relevées sur les 369 textes du logiciel, et non sur une liste extérieure :
+   chaque famille se rencontre vraiment dans BEE, donc dans le vocabulaire
+   du programme burkinabè. Format compact : base|n:noms|v:verbes|a:adjectifs
+   |d:adverbes. Les rattachements purement mécaniques mais faux de sens
+   (« career » n'est pas dérivé de « care », ni « station » de « state »)
+   ont été écartés un à un.
+
+   Deux usages : fabriquer de vrais exercices de formation de mots — où la
+   réponse ne se copie pas dans le texte mais se dérive d'un mot donné — et
+   fournir aux QCM des distracteurs de la même famille, donc défendables.
+   ====================================================================== */
+const FAMILLES_BRUT = (
+  "public|n:publication;economic|a:economical|d:economically;work|n:worker;" +
+  "person|a:personal|d:personally;access|a:accessible;support|a:supportive;help|a:helpful;trade|n:trader;" +
+  "real|n:reality|v:realise;practice|a:practical|d:practically;modern|v:modernise;" +
+  "respect|a:respectful,respectable|d:respectfully;simple|v:simplify;medicine|a:medicinal;" +
+  "understand|a:understandable;class|v:classify;season|a:seasonal;value|a:valuable;formal|n:formality;" +
+  "play|n:player;agriculture|a:agricultural;product|n:production|a:productive|d:productively;" +
+  "infrastructure|a:infrastructural;form|n:formation|a:formal|d:formally;" +
+  "create|n:creation,creator|a:creative;youth|a:youthful;protect|n:protection|a:protective;" +
+  "environmental|n:environmentalist;continue|n:continuation,continuity|a:continuous|d:continuously;" +
+  "produce|n:producer;improve|n:improvement;care|a:careful,careless|d:carefully,carelessly;" +
+  "organise|n:organisation;right|a:rightful;rule|n:ruler;power|a:powerful|d:powerfully;region|a:regional;" +
+  "present|n:presentation;effect|a:effective|d:effectively;citizen|n:citizenship;" +
+  "culture|a:cultural|d:culturally;contribute|n:contribution,contributor;urban|v:urbanise;sell|n:seller;" +
+  "open|n:openness;music|a:musical;develop|n:development;progress|a:progressive|d:progressively;" +
+  "direct|n:direction;entrepreneur|n:entrepreneurship;reason|a:reasonable;behaviour|a:behavioural;" +
+  "climate|a:climatic;depend|n:dependence|a:dependent;speak|n:speaker;teach|n:teacher;" +
+  "require|n:requirement;exist|n:existence;centre|a:central;mother|n:motherhood;" +
+  "short|n:shortage|v:shorten;prevent|n:prevention|a:preventive;read|n:reader;" +
+  "invest|n:investment,investor;complete|n:completion;combine|n:combination;recognise|a:recognisable;" +
+  "peace|a:peaceful|d:peacefully;appear|n:appearance;major|n:majority;regular|n:regularity;" +
+  "period|a:periodic;avoid|n:avoidance;manage|n:management,manager;lead|n:leader;adult|n:adulthood;" +
+  "kind|n:kindness;equal|n:equality;success|a:successful,successive|d:successfully;export|n:exporter;" +
+  "encourage|n:encouragement;harm|a:harmful,harmless|d:harmfully;believe|n:believer;adopt|n:adoption;" +
+  "treat|n:treatment;fair|n:fairness;continent|a:continental;consider|n:consideration|a:considerable;" +
+  "ethnic|n:ethnicity;listen|n:listener;send|n:sender;separate|n:separation;industrial|v:industrialise;" +
+  "lose|n:loser;judge|n:judgement;measure|n:measurement|a:measurable;friend|n:friendship;" +
+  "accept|n:acceptance|a:acceptable;visit|n:visitor;account|a:accountable;abuse|a:abusive;" +
+  "faith|a:faithful|d:faithfully;serve|n:server;member|n:membership;limit|n:limitation;child|n:childhood;" +
+  "deliberate|n:deliberation;achieve|n:achievement|a:achievable;prepare|n:preparation;" +
+  "correct|n:correction|a:corrective;participate|n:participation;rich|n:richness;seek|n:seeker;" +
+  "complex|n:complexity;observe|n:observation;diverse|n:diversity|v:diversify;" +
+  "danger|a:dangerous|d:dangerously;consume|n:consumer;weak|n:weakness|v:weaken;structure|a:structural;" +
+  "normal|v:normalise;partner|n:partnership;preserve|n:preservation;" +
+  "inform|n:information|a:informal|d:informally;express|n:expression;hygiene|a:hygienic;" +
+  "origin|a:original|d:originally;popular|n:popularity;represent|n:representation;connect|n:connection;" +
+  "move|n:movement;hard|n:hardship;christian|n:christianity;" +
+  "collect|n:collection|a:collective|d:collectively;neighbour|n:neighbourhood;" +
+  "distinct|n:distinction|a:distinctive;store|n:storage;nature|a:natural|d:naturally;" +
+  "disappear|n:disappearance;communicate|n:communication;precise|n:precision;earn|n:earner;" +
+  "determine|n:determination;cooperate|n:cooperation|a:cooperative;consult|n:consultation;" +
+  "operate|n:operation,operator;woman|n:womanhood;generate|n:generation,generator;discuss|n:discussion;" +
+  "agree|n:agreement;compare|a:comparable;attract|n:attraction|a:attractive;involve|n:involvement;" +
+  "scarce|n:scarcity;circulate|n:circulation;perform|n:performance;dose|n:dosage;settle|n:settlement;" +
+  "wait|n:waiter;farm|n:farmer;special|n:specialist|v:specialise;promote|n:promotion;" +
+  "recommend|n:recommendation;demonstrate|n:demonstration;favour|a:favourable;base|a:basic;" +
+  "evaluate|n:evaluation;celebrate|n:celebration;ready|n:readiness;prefer|n:preference|a:preferable;" +
+  "adapt|n:adaptation|a:adaptable;appreciate|n:appreciation;internal|v:internalise;" +
+  "translate|n:translation;sustain|a:sustainable;negotiate|n:negotiation;" +
+  "criminal|n:criminality|v:criminalise;wear|a:wearable;guide|n:guidance;attend|n:attendance;" +
+  "fruit|a:fruitful;accident|a:accidental;cover|n:coverage;reflect|n:reflection;deep|v:deepen;" +
+  "examine|n:examination;expense|a:expensive;resist|n:resistance|a:resistant;afford|a:affordable;" +
+  "import|n:importance,importer|a:important|d:importantly;restore|n:restoration;pain|a:painful;" +
+  "discourage|n:discouragement;opposite|n:opposition;adjust|n:adjustment;possess|a:possessive;" +
+  "differ|n:difference|a:different|d:differently;engage|n:engagement;govern|n:government,governance;" +
+  "cultivate|n:cultivation;persist|n:persistence|a:persistent|d:persistently;accumulate|n:accumulation;" +
+  "secure|n:security;neutral|n:neutrality;investigate|n:investigation|a:investigative;" +
+  "distribute|n:distribution,distributor;correspond|n:correspondence;calculate|n:calculation,calculator;" +
+  "employ|n:employment,employer|a:employable;irregular|n:irregularity;aware|n:awareness;" +
+  "character|v:characterise;strength|v:strengthen;interact|n:interaction|a:interactive;" +
+  "mentor|n:mentorship;establish|n:establishment;declare|n:declaration;expect|n:expectation;" +
+  "author|n:authority;logic|a:logical;constitute|n:constitution;comfort|a:comfortable;" +
+  "invite|n:invitation;pollute|n:pollution;beauty|a:beautiful;garden|n:gardener;" +
+  "concentrate|n:concentration;disagree|n:disagreement;hope|a:hopeful;enrich|n:enrichment;" +
+  "navigate|n:navigation;exploit|n:exploitation;collaborate|n:collaboration|a:collaborative;" +
+  "arrange|n:arrangement;predict|a:predictable;coast|a:coastal;object|a:objective;owner|n:ownership;" +
+  "install|n:installation;inspire|n:inspiration;mature|n:maturity;dominate|n:domination;" +
+  "coordinate|n:coordination;authentic|n:authentication,authenticity;accelerate|n:acceleration;" +
+  "impartial|n:impartiality;fertile|n:fertility;profit|a:profitable;thought|a:thoughtful|d:thoughtfully;" +
+  "punish|n:punishment;commit|n:commitment;familiar|n:familiarity;intense|n:intensity|v:intensify;" +
+  "detect|n:detection;ignore|n:ignorance;revise|n:revision;certificate|n:certification;lend|n:lender;" +
+  "irrigate|n:irrigation;educate|n:education;reject|n:rejection;eco-citizen|n:eco-citizenship;" +
+  "facilitate|n:facilitation;parent|a:parental;coexist|n:coexistence;imitate|n:imitation;" +
+  "escalate|n:escalation;craftsman|n:craftsmanship;supervise|n:supervision,supervisor;" +
+  "interrupt|n:interruption;reuse|a:reusable;orient|n:orientation;artist|a:artistic;locate|n:location;" +
+  "excess|a:excessive|d:excessively;prestige|a:prestigious;drain|n:drainage;tour|n:tourist;" +
+  "compensate|n:compensation;mitigate|n:mitigation;pure|n:purity;integrate|n:integration;" +
+  "displace|n:displacement;corrupt|n:corruption;categorise|n:categorisation;" +
+  "interpret|n:interpretation,interpreter;assess|n:assessment;disrupt|n:disruption;degrade|n:degradation;" +
+  "prosecute|n:prosecution;assist|n:assistance|a:assistant;motivate|n:motivation;suit|a:suitable;" +
+  "oblige|n:obligation;equip|n:equipment;diffuse|n:diffusion;select|n:selection;").split(';').filter(Boolean);
+
+const CAT_NOM = { n: 'noun', v: 'verb', a: 'adjective', d: 'adverb' };
+let _FAM = null;
+function familles() {
+  if (_FAM) return _FAM;
+  const parBase = new Map(), parForme = new Map();
+  for (const entree of FAMILLES_BRUT) {
+    const [base, ...reste] = entree.split('|');
+    const f = { base, n: [], v: [], a: [], d: [] };
+    for (const r of reste) {
+      const c = r[0];
+      if (f[c]) f[c] = r.slice(2).split(',').filter(Boolean);
+    }
+    parBase.set(base, f);
+    for (const c of ['n', 'v', 'a', 'd'])
+      for (const w of f[c]) if (!parForme.has(w)) parForme.set(w, { base, cat: c });
+  }
+  _FAM = { parBase, parForme };
+  return _FAM;
+}
+/* Le mot est-il une forme dérivée ? Si oui, de quelle base et de quelle
+   catégorie ? C'est ce qui permet de poser « DEVELOP » entre parenthèses
+   et d'attendre « development ». */
+const deriveDe = w => familles().parForme.get(String(w || '').toLowerCase()) || null;
+/* Toutes les formes d'une famille, la base comprise : de quoi fabriquer
+   des distracteurs qui se ressemblent vraiment. */
+function formesDe(base) {
+  const f = familles().parBase.get(base);
+  if (!f) return [];
+  return [base, ...f.n, ...f.v, ...f.a, ...f.d];
+}
+
+/* ======================================================================
+   ÉTAGE 2 — SYNONYMES ET ANTONYMES
+
+   Les deux membres de chaque couple se rencontrent dans les 369 textes du
+   logiciel : la consigne « trouvez dans le texte un mot qui signifie le
+   contraire de… » a donc toujours sa réponse sous les yeux de l'élève.
+   C'est l'exercice de vocabulaire que nomment les instructions officielles,
+   et il demande de chercher, non de recopier une phrase entière.
+
+   Les couples approximatifs ont été écartés : un synonyme douteux produit
+   un corrigé contestable, et c'est l'enseignant qui en porte la charge
+   devant sa classe.
+   ====================================================================== */
+const ANTONYMES_BRUT = (
+  "good:bad big:small large:small long:short high:low old:young old:modern new:old rich:poor " +
+  "easy:difficult easy:hard strong:weak clean:dirty safe:dangerous cheap:expensive legal:illegal " +
+  "formal:informal possible:impossible regular:irregular healthy:unhealthy employed:unemployed " +
+  "official:unofficial safe:unsafe near:far early:late first:last begin:end start:finish open:close " +
+  "increase:decrease reduce:increase lose:win remember:forget accept:refuse accept:reject " +
+  "agree:disagree appear:disappear encourage:discourage improve:worsen allow:forbid buy:sell " +
+  "include:exclude arrive:leave ask:answer give:receive give:take build:destroy teach:learn " +
+  "send:receive import:export rural:urban male:female boy:girl man:woman men:women boys:girls " +
+  "question:answer problem:solution success:failure cause:effect advantage:drawback " +
+  "advantage:disadvantage benefit:loss profit:loss war:peace conflict:peace poverty:wealth " +
+  "illness:health disease:health majority:minority always:never often:rarely everybody:nobody " +
+  "everyone:nobody everything:nothing something:nothing more:less most:few many:few much:little " +
+  "before:after above:below inside:outside together:alone with:without present:absent true:false " +
+  "right:wrong correct:wrong possible:impossible natural:artificial traditional:modern " +
+  "public:private local:national local:international simple:complex cheap:costly quick:slow " +
+  "fast:slow useful:useless careful:careless harmful:harmless harmful:useful friend:enemy day:night " +
+  "morning:evening dry:wet hot:cold heavy:light full:empty wide:narrow loud:quiet happy:sad " +
+  "honest:dishonest ").trim().split(' ');
+const SYNONYMES_BRUT = (
+  "big:large small:little quick:fast begin:start finish:complete help:assist help:support " +
+  "buy:purchase keep:preserve make:produce make:create choose:select show:demonstrate tell:explain " +
+  "say:explain answer:reply need:require get:obtain give:provide give:offer use:employ reduce:lower " +
+  "raise:increase learn:study know:understand think:believe want:wish stop:prevent join:connect " +
+  "change:modify important:essential important:significant difficult:hard easy:simple rich:wealthy " +
+  "clean:healthy correct:right whole:entire famous:known usual:common common:ordinary main:principal " +
+  "main:major quick:rapid careful:cautious dangerous:risky useful:helpful job:work job:employment " +
+  "aim:goal aim:purpose idea:thought problem:difficulty answer:solution help:assistance money:income " +
+  "shop:store teacher:instructor country:nation town:city region:area area:zone road:street " +
+  "illness:disease rubbish:waste price:cost chance:opportunity effect:result effect:consequence " +
+  "trust:confidence rule:law custom:tradition group:team firm:company ").trim().split(' ');
+
+function tableCouples(brut) {
+  const m = new Map();
+  for (const p of brut) {
+    const [a, b] = p.split(':');
+    if (!a || !b) continue;
+    if (!m.has(a)) m.set(a, new Set());
+    if (!m.has(b)) m.set(b, new Set());
+    m.get(a).add(b); m.get(b).add(a);
+  }
+  return m;
+}
+let _ANT = null, _SYN = null;
+const tableAntonymes = () => (_ANT = _ANT || tableCouples(ANTONYMES_BRUT));
+const tableSynonymes = () => (_SYN = _SYN || tableCouples(SYNONYMES_BRUT));
+
+/* ======================================================================
+   ÉTAGE 3 — BANQUE DE DÉFINITIONS
+
+   449 mots, choisis non pas au hasard mais par leur rendement : ce sont
+   ceux qu'un relevé des 369 textes désigne comme caractéristiques de leurs
+   leçons. Une banque de cette taille suffit — chaque texte y trouve une
+   trentaine de ses mots, et 99 % en trouvent au moins huit.
+
+   Une définition est écrite une fois et sert dans toutes les leçons où le
+   mot revient : c'est ce qui rend l'entreprise tenable. Aucune ne contient
+   le mot qu'elle définit, sans quoi l'exercice se résoudrait à vue.
+
+   L'anglais en est volontairement simple : c'est celui d'un dictionnaire
+   pour apprenants, non celui d'un dictionnaire de langue.
+   ====================================================================== */
+const DEFINITIONS_BRUT =
+  "abroad|in or to another country|2" +
+  "\n" +
+  "access|the right or chance to use or reach something|1" +
+  "\n" +
+  "accident|something bad that happens without being planned|2" +
+  "\n" +
+  "account|a record of money received and spent|2" +
+  "\n" +
+  "accountability|the duty to explain one's actions and answer for them|2" +
+  "\n" +
+  "action|the doing of something|2" +
+  "\n" +
+  "activity|something that is done, often for pleasure or learning|1" +
+  "\n" +
+  "addiction|the condition of being unable to stop using something harmful|2" +
+  "\n" +
+  "adopt|to take up and begin to use a practice or an idea|2" +
+  "\n" +
+  "adult|a person who has grown up|2" +
+  "\n" +
+  "advantage|something that puts one in a better position|2" +
+  "\n" +
+  "advice|an opinion given to somebody about what they should do|2" +
+  "\n" +
+  "affect|to produce a change in something|1" +
+  "\n" +
+  "affordable|cheap enough for people to pay for|2" +
+  "\n" +
+  "agricultural|connected with growing crops and keeping animals|2" +
+  "\n" +
+  "alcohol|the liquid in beer and wine that makes people drunk|2" +
+  "\n" +
+  "animal|a living creature that is not a plant and not a human being|2" +
+  "\n" +
+  "answer|what one says or writes in reply|1" +
+  "\n" +
+  "area|a part of a place or a surface|1" +
+  "\n" +
+  "arrive|to reach a place|2" +
+  "\n" +
+  "assistance|the help given to somebody|2" +
+  "\n" +
+  "attitude|the way one thinks and feels about something|2" +
+  "\n" +
+  "aunt|the sister of one's father or mother|3" +
+  "\n" +
+  "aware|knowing that something exists or is happening|3" +
+  "\n" +
+  "awareness|knowledge that something exists and matters|2" +
+  "\n" +
+  "bank|a place that keeps money safe and lends it|2" +
+  "\n" +
+  "belief|something one holds to be true|2" +
+  "\n" +
+  "believe|to hold something to be true|1" +
+  "\n" +
+  "benefit|an advantage gained from something|1" +
+  "\n" +
+  "blue|of the colour of a clear sky|3" +
+  "\n" +
+  "body|the whole physical form of a person or an animal|2" +
+  "\n" +
+  "book|sheets of paper bound together with writing on them|2" +
+  "\n" +
+  "border|the line that separates two countries|2" +
+  "\n" +
+  "brain|the organ in the head with which one thinks|2" +
+  "\n" +
+  "branch|a part of a tree growing from the trunk, or a local office|3" +
+  "\n" +
+  "breakfast|the first meal of the day|3" +
+  "\n" +
+  "brother|a boy or man who has the same parents as another person|2" +
+  "\n" +
+  "budget|a plan of how much money will be received and spent|2" +
+  "\n" +
+  "burning|destroying something with fire|2" +
+  "\n" +
+  "business|an activity of buying and selling, or the firm that does it|1" +
+  "\n" +
+  "capacity|the ability to do something, or the amount a thing can hold|2" +
+  "\n" +
+  "capital|the money needed to start a business, or the chief city of a country|2" +
+  "\n" +
+  "care|to look after somebody, or the attention given|2" +
+  "\n" +
+  "career|the work a person does through their life|2" +
+  "\n" +
+  "carefully|with attention, so as to avoid mistakes|2" +
+  "\n" +
+  "carry|to hold something and take it from one place to another|2" +
+  "\n" +
+  "case|a particular situation or example|2" +
+  "\n" +
+  "cause|to make something happen, or the reason it happens|2" +
+  "\n" +
+  "centre|the middle of something, or a place for a given activity|1" +
+  "\n" +
+  "ceremony|a formal act performed on an important occasion|2" +
+  "\n" +
+  "chair|a seat for one person, with a back|3" +
+  "\n" +
+  "change|to become different, or to make something different|1" +
+  "\n" +
+  "check|to look at something to see that it is right|2" +
+  "\n" +
+  "children|young human beings who are not yet adults|1" +
+  "\n" +
+  "choose|to decide which one to take|2" +
+  "\n" +
+  "cinema|a building where films are shown|3" +
+  "\n" +
+  "citizen|a person who belongs to a country and has rights in it|1" +
+  "\n" +
+  "civic|connected with the duties of a citizen|2" +
+  "\n" +
+  "civil|connected with the citizens of a country|2" +
+  "\n" +
+  "class|a group of pupils taught together|1" +
+  "\n" +
+  "classroom|the room in which a class is taught|2" +
+  "\n" +
+  "clean|free from dirt and marks|2" +
+  "\n" +
+  "climate|the usual weather of a place over many years|2" +
+  "\n" +
+  "club|a group of people who meet for a shared activity|2" +
+  "\n" +
+  "coexistence|living together peacefully in spite of differences|3" +
+  "\n" +
+  "cohesion|the state of a group whose members hold together|3" +
+  "\n" +
+  "collect|to bring things together from several places|2" +
+  "\n" +
+  "collective|shared by all the members of a group|2" +
+  "\n" +
+  "communicate|to pass on information to somebody|3" +
+  "\n" +
+  "communication|the giving and receiving of messages|2" +
+  "\n" +
+  "community|all the people who live in one place|1" +
+  "\n" +
+  "competition|an event in which people try to do better than others|2" +
+  "\n" +
+  "compound|a yard with the houses of one family inside a wall|3" +
+  "\n" +
+  "computer|a machine that stores and works on data|2" +
+  "\n" +
+  "concern|a matter that worries somebody|1" +
+  "\n" +
+  "conflict|a serious disagreement or fight|2" +
+  "\n" +
+  "consequence|what follows from an action|2" +
+  "\n" +
+  "consumption|the using or eating of something|2" +
+  "\n" +
+  "continent|one of the large land masses of the earth|2" +
+  "\n" +
+  "cook|to prepare food by heating it|3" +
+  "\n" +
+  "cooking|preparing food by heating it|3" +
+  "\n" +
+  "cooperation|working together towards the same end|2" +
+  "\n" +
+  "corruption|dishonest behaviour by people in power, often for money|2" +
+  "\n" +
+  "cost|the amount of money needed to buy or do something|1" +
+  "\n" +
+  "cotton|a plant whose soft white fibres are made into cloth|3" +
+  "\n" +
+  "country|a land with its own government|1" +
+  "\n" +
+  "court|the place where a judge hears cases|2" +
+  "\n" +
+  "cousin|the child of one's uncle or aunt|3" +
+  "\n" +
+  "craft|work done with the hands and with skill|3" +
+  "\n" +
+  "crop|a plant grown in large quantity for food|2" +
+  "\n" +
+  "cultural|connected with the customs and beliefs of a people|2" +
+  "\n" +
+  "culture|the customs, beliefs and arts of a people|2" +
+  "\n" +
+  "custom|a way of behaving that a people has followed for a long time|2" +
+  "\n" +
+  "customer|a person who buys something from a shop or firm|2" +
+  "\n" +
+  "dangerous|able to cause harm|2" +
+  "\n" +
+  "data|facts collected together for study|2" +
+  "\n" +
+  "decision|a choice made after thinking|1" +
+  "\n" +
+  "demand|the wish of buyers for a good, or a firm request|2" +
+  "\n" +
+  "dependence|the state of needing something or somebody in order to manage|2" +
+  "\n" +
+  "describe|to say what somebody or something is like|3" +
+  "\n" +
+  "desk|a table at which one writes or works|3" +
+  "\n" +
+  "development|the process of growing or becoming better|1" +
+  "\n" +
+  "dialogue|a talk between two sides who wish to understand each other|2" +
+  "\n" +
+  "diet|the food a person usually eats|3" +
+  "\n" +
+  "different|not the same as another|1" +
+  "\n" +
+  "difficulty|something hard to do or to deal with|2" +
+  "\n" +
+  "digital|using numbers stored electronically, as computers do|2" +
+  "\n" +
+  "disease|an illness of the body or mind|2" +
+  "\n" +
+  "dispute|a disagreement, often a long one|2" +
+  "\n" +
+  "diversity|the fact of including people or things of many kinds|3" +
+  "\n" +
+  "document|a paper that gives information or proof|2" +
+  "\n" +
+  "door|the part of a building that is opened to go in and out|3" +
+  "\n" +
+  "drink|to take liquid into the body|2" +
+  "\n" +
+  "drug|a substance that changes the body, taken as medicine or illegally|2" +
+  "\n" +
+  "dust|dry earth in the form of a fine powder|3" +
+  "\n" +
+  "duty|what one must do because it is right or required|2" +
+  "\n" +
+  "earn|to get money by working|2" +
+  "\n" +
+  "easy|needing little effort or skill|2" +
+  "\n" +
+  "eating|taking food into the body|3" +
+  "\n" +
+  "economic|connected with trade, industry and money|1" +
+  "\n" +
+  "education|the teaching and training a person receives|1" +
+  "\n" +
+  "educational|connected with teaching and learning|2" +
+  "\n" +
+  "effect|the change produced by an action or a cause|1" +
+  "\n" +
+  "effort|the use of strength or will to do something|1" +
+  "\n" +
+  "elder|an older person whose age gives authority|2" +
+  "\n" +
+  "election|the choosing of people for a position by a vote|3" +
+  "\n" +
+  "electricity|the power carried by wires that lights lamps and drives machines|2" +
+  "\n" +
+  "employee|a person who is paid to work for somebody|2" +
+  "\n" +
+  "empowerment|giving people the means and the confidence to act for themselves|3" +
+  "\n" +
+  "encourage|to give somebody the wish and the confidence to act|2" +
+  "\n" +
+  "energy|the power that makes machines work and people act|2" +
+  "\n" +
+  "enforcement|making sure that a law or a rule is obeyed|2" +
+  "\n" +
+  "enjoy|to take pleasure in something|2" +
+  "\n" +
+  "entrepreneur|a person who starts and runs a business|2" +
+  "\n" +
+  "entrepreneurial|showing the spirit of a person who starts a business|2" +
+  "\n" +
+  "entrepreneurship|the activity of setting up and running one's own business|2" +
+  "\n" +
+  "environment|the air, water and land around us|2" +
+  "\n" +
+  "environmental|connected with the natural world around us|2" +
+  "\n" +
+  "equal|the same in size, value or rights|3" +
+  "\n" +
+  "equality|the state of having the same rights and worth|3" +
+  "\n" +
+  "equipment|the tools and machines needed for a task|2" +
+  "\n" +
+  "equity|fairness in the way people are treated|3" +
+  "\n" +
+  "evening|the part of the day between afternoon and night|2" +
+  "\n" +
+  "event|something that happens, often something important|2" +
+  "\n" +
+  "exchange|to give one thing and receive another|2" +
+  "\n" +
+  "excited|feeling eager and happy about something|3" +
+  "\n" +
+  "export|to send goods to another country to be sold|2" +
+  "\n" +
+  "face|the front of the head|2" +
+  "\n" +
+  "failure|not succeeding in what was attempted|2" +
+  "\n" +
+  "fairly|in a just way, treating all alike|2" +
+  "\n" +
+  "family|parents and their children|1" +
+  "\n" +
+  "farm|land used for growing crops or keeping animals|3" +
+  "\n" +
+  "farmer|a person who grows crops or keeps animals|2" +
+  "\n" +
+  "farming|the work of growing crops and keeping animals|2" +
+  "\n" +
+  "father|a man who has a child|3" +
+  "\n" +
+  "field|a piece of land used for crops or for a game|2" +
+  "\n" +
+  "film|a story told in moving pictures|2" +
+  "\n" +
+  "financial|connected with money and how it is managed|2" +
+  "\n" +
+  "fish|an animal that lives in water and is often eaten|3" +
+  "\n" +
+  "follow|to go or come after|1" +
+  "\n" +
+  "food|what people and animals eat to stay alive|1" +
+  "\n" +
+  "football|a game played by two teams who kick a ball|2" +
+  "\n" +
+  "foreign|belonging to another country|2" +
+  "\n" +
+  "formal|following the accepted rules and forms|2" +
+  "\n" +
+  "friend|a person one likes and knows well|2" +
+  "\n" +
+  "friendly|behaving in a kind and pleasant way|3" +
+  "\n" +
+  "front|the part that faces forward|3" +
+  "\n" +
+  "fuel|a material burnt to give heat or power|2" +
+  "\n" +
+  "gender|the fact of being male or female, and what society expects of each|2" +
+  "\n" +
+  "generation|all the people born at about the same time|1" +
+  "\n" +
+  "genuine|real, and not pretended|1" +
+  "\n" +
+  "girl|a young female person|2" +
+  "\n" +
+  "global|affecting the whole world|2" +
+  "\n" +
+  "globalization|the growing of links in trade and ideas between all countries|3" +
+  "\n" +
+  "gold|a precious yellow metal|2" +
+  "\n" +
+  "governance|the way a country or an institution is directed and controlled|2" +
+  "\n" +
+  "government|the group of people who direct a country|1" +
+  "\n" +
+  "grandmother|the mother of one's father or mother|3" +
+  "\n" +
+  "great|very large, or very good|3" +
+  "\n" +
+  "growth|the process of becoming larger or more developed|2" +
+  "\n" +
+  "gutter|a channel at the side of a road that carries away water|3" +
+  "\n" +
+  "habit|something one does often and almost without thinking|2" +
+  "\n" +
+  "hand|the part of the body at the end of the arm|2" +
+  "\n" +
+  "happy|feeling or showing pleasure|3" +
+  "\n" +
+  "hard|difficult, or firm to the touch|3" +
+  "\n" +
+  "harmful|likely to cause damage or injury|2" +
+  "\n" +
+  "harvest|the gathering in of the crops|2" +
+  "\n" +
+  "healer|a person who treats the sick, often by traditional means|3" +
+  "\n" +
+  "health|the condition of a person's body and mind|1" +
+  "\n" +
+  "healthcare|the services that keep people well and treat the ill|2" +
+  "\n" +
+  "healthy|in good condition of body, or good for the body|2" +
+  "\n" +
+  "heavy|of great weight, and hard to lift|3" +
+  "\n" +
+  "helmet|a hard hat worn to protect the head|3" +
+  "\n" +
+  "heritage|what is handed down from the past and worth keeping|2" +
+  "\n" +
+  "history|the study of what happened in the past|2" +
+  "\n" +
+  "holiday|a time when one does not work or go to school|3" +
+  "\n" +
+  "home|the place where somebody lives|2" +
+  "\n" +
+  "homework|school work that a pupil does at home|3" +
+  "\n" +
+  "honest|telling the truth and not stealing|2" +
+  "\n" +
+  "hope|to wish for something and think it may happen|3" +
+  "\n" +
+  "house|a building made for people to live in|3" +
+  "\n" +
+  "human|connected with men, women and children|2" +
+  "\n" +
+  "idea|a thought or a plan formed in the mind|2" +
+  "\n" +
+  "identify|to say who or what somebody or something is|2" +
+  "\n" +
+  "identity|who or what a person is|2" +
+  "\n" +
+  "illness|the state of being unwell|2" +
+  "\n" +
+  "image|a picture of somebody or something|2" +
+  "\n" +
+  "independence|freedom from the control of another|2" +
+  "\n" +
+  "independent|not controlled or governed by another|2" +
+  "\n" +
+  "individual|a single person, considered apart from the group|1" +
+  "\n" +
+  "industry|the making of goods in factories|3" +
+  "\n" +
+  "influence|the power to change what others think or do|2" +
+  "\n" +
+  "informal|not following strict rules or official forms|2" +
+  "\n" +
+  "information|facts told or learnt about somebody or something|1" +
+  "\n" +
+  "infrastructure|the roads, schools and other works a country needs to function|2" +
+  "\n" +
+  "ingredient|one of the foods put together to make a dish|3" +
+  "\n" +
+  "institution|an organisation set up for a public purpose|1" +
+  "\n" +
+  "integrity|the quality of being honest and keeping to one's principles|3" +
+  "\n" +
+  "interest|the wish to know more about something|2" +
+  "\n" +
+  "interfaith|between people of different religions|3" +
+  "\n" +
+  "international|between two or more countries|1" +
+  "\n" +
+  "internet|the worldwide network that links computers together|2" +
+  "\n" +
+  "invite|to ask somebody to come|3" +
+  "\n" +
+  "irrigation|bringing water to dry land so that crops can grow|3" +
+  "\n" +
+  "journalist|a person who writes news for a paper or a broadcast|3" +
+  "\n" +
+  "judge|the official who decides cases in a court|2" +
+  "\n" +
+  "justice|fair treatment according to the law|2" +
+  "\n" +
+  "knowledge|what a person knows|2" +
+  "\n" +
+  "labour|hard work, especially with the hands|2" +
+  "\n" +
+  "land|the solid part of the earth's surface|2" +
+  "\n" +
+  "language|the system of words a people uses to speak and write|2" +
+  "\n" +
+  "leader|a person who guides others|2" +
+  "\n" +
+  "legal|allowed by the law, or connected with the law|2" +
+  "\n" +
+  "lesson|a period of teaching, or something learnt from experience|2" +
+  "\n" +
+  "level|a position on a scale of height, quality or amount|2" +
+  "\n" +
+  "listen|to pay attention to a sound|2" +
+  "\n" +
+  "literacy|the ability to read and write|2" +
+  "\n" +
+  "local|belonging to the place where one lives|1" +
+  "\n" +
+  "love|a strong warm feeling for somebody|3" +
+  "\n" +
+  "lunch|the meal eaten in the middle of the day|3" +
+  "\n" +
+  "machine|a device with moving parts that does work|3" +
+  "\n" +
+  "malaria|a disease carried by mosquitoes that gives fever|3" +
+  "\n" +
+  "market|a place where people meet to buy and sell|1" +
+  "\n" +
+  "match|a game between two players or teams|3" +
+  "\n" +
+  "mathematics|the study of numbers, quantities and shapes|3" +
+  "\n" +
+  "meal|the food eaten at one time|2" +
+  "\n" +
+  "mechanism|the way a system is arranged to work|2" +
+  "\n" +
+  "media|the newspapers, radio and television that carry news|2" +
+  "\n" +
+  "mediation|the work of helping two sides to settle a quarrel|3" +
+  "\n" +
+  "medical|connected with the treatment of illness|2" +
+  "\n" +
+  "medicine|a substance taken to cure an illness|2" +
+  "\n" +
+  "mental|connected with the mind|3" +
+  "\n" +
+  "message|a piece of information sent to somebody|2" +
+  "\n" +
+  "method|a planned way of doing something|2" +
+  "\n" +
+  "milk|the white liquid that cows give and people drink|3" +
+  "\n" +
+  "mindset|the fixed way a person thinks about things|3" +
+  "\n" +
+  "mining|digging minerals out of the ground|3" +
+  "\n" +
+  "mobile|able to be moved or carried|2" +
+  "\n" +
+  "modern|belonging to the present time|2" +
+  "\n" +
+  "money|coins and notes used to buy things|1" +
+  "\n" +
+  "month|one of the twelve parts of the year|2" +
+  "\n" +
+  "morning|the part of the day before noon|2" +
+  "\n" +
+  "mother|a woman who has given birth to a child|2" +
+  "\n" +
+  "motorbike|a two-wheeled vehicle driven by an engine|3" +
+  "\n" +
+  "music|sounds arranged in a pleasant way, sung or played|2" +
+  "\n" +
+  "mutual|felt or done by each towards the other|2" +
+  "\n" +
+  "name|the word by which a person or thing is known|2" +
+  "\n" +
+  "national|belonging to a whole country|1" +
+  "\n" +
+  "neighbourhood|the area around where one lives, and the people in it|2" +
+  "\n" +
+  "notebook|a book of blank pages for writing notes|3" +
+  "\n" +
+  "number|a word or sign that says how many|1" +
+  "\n" +
+  "nutrition|the food a body needs and the way it uses it|3" +
+  "\n" +
+  "object|a thing that can be seen and touched|3" +
+  "\n" +
+  "obstacle|something that stands in the way|2" +
+  "\n" +
+  "office|a room where written work is done|3" +
+  "\n" +
+  "online|connected to the internet|2" +
+  "\n" +
+  "opportunity|a time or a situation that makes something possible|1" +
+  "\n" +
+  "organisation|a group of people working together for a purpose|1" +
+  "\n" +
+  "organise|to arrange and make ready|2" +
+  "\n" +
+  "outcome|the result of an action or a process|2" +
+  "\n" +
+  "parent|a mother or a father|2" +
+  "\n" +
+  "parliament|the assembly that makes the laws of a country|3" +
+  "\n" +
+  "participate|to take part in something|2" +
+  "\n" +
+  "partner|a person who shares in an activity or a life with another|2" +
+  "\n" +
+  "party|a group of people with the same political aims, or a social gathering|3" +
+  "\n" +
+  "patient|a person who is receiving medical care|2" +
+  "\n" +
+  "peace|a state in which there is no war or fighting|2" +
+  "\n" +
+  "peer|a person of the same age or position as oneself|2" +
+  "\n" +
+  "pencil|an instrument for writing, with a thin stick of graphite|3" +
+  "\n" +
+  "people|human beings in general, or the members of a nation|1" +
+  "\n" +
+  "person|a single human being|1" +
+  "\n" +
+  "personal|belonging to one person and nobody else|1" +
+  "\n" +
+  "phone|an instrument used to speak to somebody far away|2" +
+  "\n" +
+  "physical|connected with the body rather than the mind|2" +
+  "\n" +
+  "piece|a part taken from something larger|3" +
+  "\n" +
+  "place|a particular area or position|1" +
+  "\n" +
+  "plan|an arrangement made in advance|2" +
+  "\n" +
+  "plant|a living thing that grows in the ground|2" +
+  "\n" +
+  "plastic|a light artificial material used to make bags and bottles|2" +
+  "\n" +
+  "platform|a service on the internet where people meet and share|2" +
+  "\n" +
+  "policy|a plan of action adopted by a government or a firm|2" +
+  "\n" +
+  "politely|in a way that shows good manners|3" +
+  "\n" +
+  "political|connected with the government of a country|2" +
+  "\n" +
+  "pollution|dirty or harmful substances put into the air, water or soil|2" +
+  "\n" +
+  "population|all the people who live in a place|1" +
+  "\n" +
+  "poverty|the state of being very poor|2" +
+  "\n" +
+  "power|the ability to act or to control others|2" +
+  "\n" +
+  "practice|doing something regularly in order to do it well|1" +
+  "\n" +
+  "prepare|to get something ready before it is needed|2" +
+  "\n" +
+  "pressure|a force pushing on something, or a strong urging|2" +
+  "\n" +
+  "prevent|to stop something from happening|2" +
+  "\n" +
+  "prevention|action taken so that something bad does not happen|2" +
+  "\n" +
+  "price|the amount of money for which something is sold|2" +
+  "\n" +
+  "principle|a rule of conduct that guides what one does|2" +
+  "\n" +
+  "priority|something treated as more important than the rest|2" +
+  "\n" +
+  "privacy|the right to keep one's life and affairs to oneself|3" +
+  "\n" +
+  "problem|a thing that is difficult to deal with|1" +
+  "\n" +
+  "processing|treating raw material so that it can be used or sold|2" +
+  "\n" +
+  "product|something that is made or grown to be sold|1" +
+  "\n" +
+  "production|the making or growing of goods in quantity|2" +
+  "\n" +
+  "programme|a planned series of actions or events|1" +
+  "\n" +
+  "project|a planned piece of work with a particular aim|2" +
+  "\n" +
+  "protect|to keep safe from harm|1" +
+  "\n" +
+  "protection|keeping somebody or something safe from harm|2" +
+  "\n" +
+  "proud|pleased with what one or one's people has done|3" +
+  "\n" +
+  "public|belonging to or open to all the people|1" +
+  "\n" +
+  "pupil|a child who attends a school|1" +
+  "\n" +
+  "rainfall|the amount of rain that falls in a place|2" +
+  "\n" +
+  "rainy|describing a season or a day with much water falling from the sky|2" +
+  "\n" +
+  "ready|prepared, and able to begin|3" +
+  "\n" +
+  "receive|to get something that is given or sent|2" +
+  "\n" +
+  "recycling|treating used material so that it can serve again|3" +
+  "\n" +
+  "reduce|to make smaller or less|1" +
+  "\n" +
+  "regional|connected with one part of a country or of the world|2" +
+  "\n" +
+  "regular|happening at even intervals, or usual|2" +
+  "\n" +
+  "relation|the way things or people are connected|2" +
+  "\n" +
+  "relationship|the way two people or groups behave towards each other|2" +
+  "\n" +
+  "religion|belief in God or gods, and the practices that go with it|2" +
+  "\n" +
+  "religious|connected with belief in God or gods|2" +
+  "\n" +
+  "remedy|something that cures an illness or puts a wrong right|3" +
+  "\n" +
+  "renewable|able to be replaced naturally, as sunlight and wind are|3" +
+  "\n" +
+  "replace|to put something new in the place of|2" +
+  "\n" +
+  "research|careful study made in order to discover new facts|2" +
+  "\n" +
+  "resource|something a country or a person can use, such as land or money|1" +
+  "\n" +
+  "respect|to treat somebody or something as deserving care and honour|1" +
+  "\n" +
+  "responsible|having the duty to deal with something, and answering for it|2" +
+  "\n" +
+  "restaurant|a place where meals are bought and eaten|3" +
+  "\n" +
+  "revenue|the money a government or a firm receives|2" +
+  "\n" +
+  "rice|white or brown grains boiled and eaten as food|3" +
+  "\n" +
+  "risk|the chance that something bad will happen|1" +
+  "\n" +
+  "road|a hard way made for vehicles to travel on|1" +
+  "\n" +
+  "room|a part of a building with its own walls and door|2" +
+  "\n" +
+  "rule|a statement of what one must or must not do|1" +
+  "\n" +
+  "rural|connected with the countryside|2" +
+  "\n" +
+  "safe|not in danger, and not likely to cause harm|2" +
+  "\n" +
+  "safety|the state of being free from danger|2" +
+  "\n" +
+  "save|to keep for later use, or to take out of danger|2" +
+  "\n" +
+  "school|a place where children are taught|1" +
+  "\n" +
+  "science|knowledge about the natural world got by observing and testing|2" +
+  "\n" +
+  "season|one of the parts of the year, marked by its weather|2" +
+  "\n" +
+  "security|the state of being safe from danger or attack|2" +
+  "\n" +
+  "seed|the small part of a plant from which a new plant grows|2" +
+  "\n" +
+  "self-medication|taking drugs without the advice of a doctor|3" +
+  "\n" +
+  "service|work done for others rather than goods produced|1" +
+  "\n" +
+  "shea|a tree of the savannah whose nuts give a butter used in cooking and soap|2" +
+  "\n" +
+  "shoe|a covering for the foot|3" +
+  "\n" +
+  "short|not long, or not tall|2" +
+  "\n" +
+  "side|one of the two surfaces or parts of something|2" +
+  "\n" +
+  "sign|a mark or notice that gives information|2" +
+  "\n" +
+  "similar|alike, but not exactly the same|2" +
+  "\n" +
+  "skill|the ability to do something well, learnt by practice|2" +
+  "\n" +
+  "sleep|to rest with the eyes closed and the mind at rest|2" +
+  "\n" +
+  "smoke|the grey cloud that rises from a fire|3" +
+  "\n" +
+  "smuggling|taking goods secretly across a border to avoid paying tax|3" +
+  "\n" +
+  "social|connected with life in a group or society|1" +
+  "\n" +
+  "society|all the people living together under the same rules|2" +
+  "\n" +
+  "soil|the earth in which plants grow|2" +
+  "\n" +
+  "solar|connected with the sun|3" +
+  "\n" +
+  "solidarity|the support members of a group give one another|3" +
+  "\n" +
+  "solution|a way of solving a problem|2" +
+  "\n" +
+  "speed|how fast something moves|3" +
+  "\n" +
+  "sport|a game or activity in which the body is exercised|2" +
+  "\n" +
+  "stage|one step in a process, or a raised floor for performing|2" +
+  "\n" +
+  "state|a country, or the government of a country|2" +
+  "\n" +
+  "strategy|a plan made to reach an aim over a long time|2" +
+  "\n" +
+  "street|a road in a town, with houses on each side|2" +
+  "\n" +
+  "strengthen|to make firmer or more powerful|2" +
+  "\n" +
+  "student|a person who studies, usually at a higher school|1" +
+  "\n" +
+  "study|to learn about something by reading and thinking|1" +
+  "\n" +
+  "subject|what is being studied or talked about|2" +
+  "\n" +
+  "substance|a material of a particular kind|2" +
+  "\n" +
+  "successful|having achieved what was wanted|2" +
+  "\n" +
+  "support|to help somebody or to hold something up|1" +
+  "\n" +
+  "sure|certain, with no doubt|3" +
+  "\n" +
+  "sustainable|able to continue without using up or damaging what it needs|2" +
+  "\n" +
+  "system|a set of parts working together as a whole|1" +
+  "\n" +
+  "table|a piece of furniture with a flat top on legs|3" +
+  "\n" +
+  "talk|to speak to somebody|3" +
+  "\n" +
+  "tall|of more than average height|3" +
+  "\n" +
+  "task|a piece of work that must be done|2" +
+  "\n" +
+  "teacher|a person whose work is to teach|1" +
+  "\n" +
+  "team|a group who play or work together on the same side|3" +
+  "\n" +
+  "technique|a particular way of doing something that needs skill|2" +
+  "\n" +
+  "technology|the use of science to make tools and machines|2" +
+  "\n" +
+  "teenager|a person between thirteen and nineteen years old|3" +
+  "\n" +
+  "telephone|an instrument used to speak to somebody far away|2" +
+  "\n" +
+  "time|what is measured in hours, days and years|1" +
+  "\n" +
+  "tobacco|the dried leaves smoked in cigarettes|3" +
+  "\n" +
+  "tolerance|the willingness to accept beliefs and ways one does not share|2" +
+  "\n" +
+  "tool|an instrument held in the hand to do work|2" +
+  "\n" +
+  "tourism|the business of people travelling for pleasure|3" +
+  "\n" +
+  "town|a place with houses, shops and streets, larger than a village|2" +
+  "\n" +
+  "trade|the buying and selling of goods|2" +
+  "\n" +
+  "tradition|a belief or custom passed on from one generation to the next|2" +
+  "\n" +
+  "traditional|following the customs handed down from earlier times|1" +
+  "\n" +
+  "traffic|the vehicles moving on a road|3" +
+  "\n" +
+  "transparency|the practice of acting openly, so that others can see what is done|2" +
+  "\n" +
+  "travel|to go from one place to another|2" +
+  "\n" +
+  "treated|given medical care, or dealt with in a given way|2" +
+  "\n" +
+  "treatment|the care given to cure an illness|2" +
+  "\n" +
+  "tree|a tall plant with a trunk and branches|2" +
+  "\n" +
+  "trust|the belief that somebody is honest and will not harm you|2" +
+  "\n" +
+  "type|a kind or a sort|2" +
+  "\n" +
+  "uncle|the brother of one's father or mother|3" +
+  "\n" +
+  "understand|to know the meaning of something|1" +
+  "\n" +
+  "urban|connected with towns and cities|2" +
+  "\n" +
+  "user|a person who uses something|2" +
+  "\n" +
+  "value|the worth of something, or a belief about what is right|1" +
+  "\n" +
+  "vegetable|a plant grown to be eaten, such as an onion or a carrot|2" +
+  "\n" +
+  "village|a small group of houses in the countryside|1" +
+  "\n" +
+  "violence|behaviour meant to hurt or kill|2" +
+  "\n" +
+  "violent|using force meant to hurt|3" +
+  "\n" +
+  "visit|to go to see a person or a place|2" +
+  "\n" +
+  "visitor|a person who comes to see a place or a person|3" +
+  "\n" +
+  "voice|the sound a person makes in speaking|2" +
+  "\n" +
+  "volleyball|a game in which two teams hit a ball over a high net|3" +
+  "\n" +
+  "walk|to move on foot|2" +
+  "\n" +
+  "wall|an upright structure of brick or earth that encloses or divides|3" +
+  "\n" +
+  "wash|to clean with water|3" +
+  "\n" +
+  "waste|things that are thrown away because they are no longer wanted|2" +
+  "\n" +
+  "watch|to look at something for a time|2" +
+  "\n" +
+  "water|the clear liquid that people and plants need to live|1" +
+  "\n" +
+  "wear|to have clothes on the body|3" +
+  "\n" +
+  "week|a period of seven days|2" +
+  "\n" +
+  "worker|a person who works, usually for wages|2" +
+  "\n" +
+  "writing|words put down on paper|2" +
+  "\n" +
+  "year|a period of twelve months|1" +
+  "\n" +
+  "young|having lived only a short time|1" +
+  "\n" +
+  "youth|the time of being young, or young people as a group|2";
+
+let _DEF = null;
+function definitions() {
+  if (_DEF) return _DEF;
+  const m = new Map();
+  for (const l of DEFINITIONS_BRUT.split('\n')) {
+    const i = l.indexOf('|'), j = l.lastIndexOf('|');
+    if (i > 0) m.set(l.slice(0, i), { def: l.slice(i + 1, j), rarete: +l.slice(j + 1) || 1 });
+  }
+  _DEF = m;
+  return m;
+}
+/* Le texte emploie « farmers », la banque connaît « farmer » : on ramène
+   le mot à sa forme de base avant de chercher. */
+function baseDefinissable(w) {
+  const b = String(w || '').toLowerCase();
+  const d = definitions();
+  if (d.has(b)) return b;
+  const essais = /ies$/.test(b) ? [b.slice(0, -3) + 'y']
+    : /(ches|shes|sses|xes|oes)$/.test(b) ? [b.slice(0, -2)]
+    : /s$/.test(b) && !/ss$/.test(b) ? [b.slice(0, -1)]
+    : /ing$/.test(b) ? [b.slice(0, -3), b.slice(0, -3) + 'e']
+    : /ed$/.test(b) ? [b.slice(0, -2), b.slice(0, -1)] : [];
+  for (const e of essais) if (d.has(e)) return e;
+  return null;
+}
+const definitionDe = w => { const b = baseDefinissable(w); return b ? definitions().get(b).def : null; };
+/* 3 : mot propre à peu de leçons, celui qu'un professeur écrit au tableau.
+   1 : mot que tous les textes emploient, sans intérêt pour un glossaire. */
+const rareteDe = w => { const b = baseDefinissable(w); return b ? definitions().get(b).rarete : 0; };
+
+/* ======================================================================
+   ÉTAGE 3 — COLLOCATIONS
+
+   350 expressions relevées dans les 369 textes eux-mêmes, non pas à la main
+   mais par l'information mutuelle : deux mots qui se rencontrent beaucoup
+   plus souvent que le hasard ne le voudrait forment une expression. « rainy
+   season », « renewable energy », « shea butter », « good governance » : ce
+   sont les blocs que l'élève doit savoir d'un seul tenant, et qu'il écrit
+   fautivement quand il les reconstruit mot à mot depuis le français.
+
+   Les noms propres, les adverbes, les repères de temps et les coupures de
+   phrase ont été écartés : « burkina faso » n'est pas une collocation à
+   faire apprendre, « every year » non plus.
+   ====================================================================== */
+const COLLOCATIONS_BRUT = (
+  "young people;rainy season;renewable energy;civil society;dry season;rural areas;" +
+  "artificial intelligence;plastic bags;shea butter;social media;modern medicine;gender equity;" +
+  "substance abuse;awareness campaigns;good governance;non-governmental organisations;" +
+  "climate change;remote areas;post-harvest losses;health workers;balanced diet;" +
+  "conflict resolution;health centre;health centres;research institutes;different faiths;" +
+  "neighbouring countries;labour market;large quantities;fossil fuels;ordinary citizens;" +
+  "global warming;drug use;national languages;sustained investment;carbon dioxide;" +
+  "youth unemployment;vocational training;greenhouse gases;social cohesion;business owners;" +
+  "public health;pregnant women;drug addiction;religious leaders;mosquito nets;monetary union;" +
+  "radio programmes;improved seeds;road safety;digital literacy;genital mutilation;" +
+  "gender-based violence;resource wealth;religious tolerance;smallholder farmers;young person;" +
+  "youth entrepreneurship;infectious diseases;fine particles;false information;wild animals;" +
+  "head teacher;natural resources;microfinance institutions;sugary drinks;mental health;" +
+  "successful entrepreneurs;digital citizenship;drinking water;mobile phones;development aid;" +
+  "water points;international trade;cultural events;political interference;financial management;" +
+  "rural exodus;weather forecasts;colonial period;development partners;joking relationships;" +
+  "market gardening;solar energy;secondary schools;civic education;traditional healers;" +
+  "plastic waste;civil servants;government agencies;mobile money;law enforcement;" +
+  "traditional medicine;peer pressure;blood pressure;interfaith dialogue;economic growth;" +
+  "customs duties;enriched flours;security challenges;urban centres;drip irrigation;" +
+  "business plan;important role;national development;future generations;mining sites;" +
+  "success stories;young entrepreneurs;agricultural extension;resource curse;local authorities;" +
+  "agribusiness entrepreneurship;air pollution;career path;academic performance;raw materials;" +
+  "urban areas;employee mindset;create jobs;storage facilities;youth associations;" +
+  "security crisis;food processing;resource extraction;vaccination campaigns;road accidents;" +
+  "armed groups;entrepreneurial mindset;shea nuts;human capital;public services;substance use;" +
+  "formal employment;poultry farm;phone calls;digital platforms;physical activity;" +
+  "food self-sufficiency;market research;clean water;food security;cashew nuts;" +
+  "international partners;economic empowerment;chronic diseases;public spending;" +
+  "rainfall patterns;insurance schemes;classroom instruction;adaptation strategies;" +
+  "settle disputes;border regions;wild plants;poverty reduction;technical assistance;" +
+  "environmental degradation;international partnerships;national pride;informal sector;" +
+  "mobile applications;local foods;democratic governance;absorb carbon;school bag;public funds;" +
+  "extension services;technical expertise;tax revenue;practical skills;serious illness;" +
+  "trade routes;potential customers;literacy classes;privacy settings;legal aid;" +
+  "capacity building;resolve disputes;health worker;pay taxes;scientific research;" +
+  "employment opportunities;health specialists;young children;woven bags;processed foods;" +
+  "waste collection;secondary school;traditional remedies;justice system;budget portals;" +
+  "empirical evidence;creative hobbies;role models;former practitioners;career guidance;" +
+  "mutual respect;existing inequalities;human rights;gender equality;exporting raw;" +
+  "schools hospitals;national heroes;arrives late;international organisations;revealed religions;" +
+  "aspiring entrepreneurs;ethnic groups;personal information;root causes;crop yields;" +
+  "results fall;without accompanying;value chain;traditional practices;fish disappear;" +
+  "salaried post;developing countries;deserves particular;neighbouring states;body needs;" +
+  "accountability mechanisms;school fees;solar panels;takes several;waste management;" +
+  "soil fertility;underlying causes;calculated risks;cultural exchange;mobile telephones;" +
+  "digital divide;stagnant water;transparent accountable;skills needed;cannot compete;" +
+  "writing letters;artisanal sites;chemical products;means accepting;comprehensive approach;" +
+  "environmental sustainability;external assistance;independent audits;non-infectious diseases;" +
+  "smuggling networks;combating smuggling;crop varieties;practices founded;public procurement;" +
+  "solutions exist;whole population;arable land;medical care;generation gap;regional cooperation;" +
+  "phone use;administrative processes;raises questions;radio stations;speed limits;danger signs;" +
+  "digital tools;plant trees;internet access;rural communities;mobile phone;risks associated;" +
+  "others believe;traditional religions;mobile telephone;production zones;researchers studying;" +
+  "comparative studies;prices rise;paying taxes;real-world experience;raw cotton;" +
+  "traditional practitioners;strategic alliances;essential role;legal prohibition;" +
+  "conservation techniques;fresh vegetables;prevention efforts;public resources;now understands;" +
+  "several centuries;pollution reduction;economic integration;music dance;younger generations;" +
+  "decisions budgets;traditional beliefs;people think;regional bodies;imported products;" +
+  "community members;football match;training programmes;large share;water conservation;" +
+  "solar power;conflicts concern;public officials;help students;health authorities;" +
+  "customs procedures;gold mining;imported goods;political connections;shared responsibility;" +
+  "external powers;land ownership;costs nothing;younger pupils;education programmes;" +
+  "ethnic diversity;different roles;expanding access;natural resource;employment prospects;" +
+  "degraded land;governance indices;traditional healer;confidence needed;energy sources;" +
+  "basic computer;traditional leaders;religious celebrations;national identity;large amounts;" +
+  "farming techniques;government policy;ask questions;shelf life;economic opportunity;" +
+  "media platforms;creating employment;burning plastic;direct economic;government officials;" +
+  "higher prices;combine several;central role;gender inequality;remains limited;religious lines;" +
+  "studies conducted;crucial role;").split(';').filter(Boolean);
+
+let _COL = null;
+function collocations() {
+  if (_COL) return _COL;
+  const parPremier = new Map(), seconds = new Set();
+  for (const p of COLLOCATIONS_BRUT) {
+    const i = p.indexOf(' ');
+    if (i < 0) continue;
+    const a = p.slice(0, i), b = p.slice(i + 1);
+    if (!parPremier.has(a)) parPremier.set(a, []);
+    parPremier.get(a).push(b);
+    seconds.add(b);
+  }
+  _COL = { parPremier, seconds, liste: COLLOCATIONS_BRUT };
+  return _COL;
+}
+
 function spreadPick(arr, n) {
   if (arr.length <= n) return [...arr];
   const out = [], step = arr.length / n;
@@ -8066,6 +9373,15 @@ function tidySentence(s) {
   }
   return t;
 }
+const ABREVIATIONS = /\b(mr|mrs|ms|dr|prof|st|jr|sr|vs|etc|fig|no|approx|e\.g|i\.e)\.$/i;
+/* Dans une fiche de leçon, deux exercices peuvent reprendre la même
+   phrase : l'élève la travaille deux fois, et c'est voulu. Dans un sujet
+   d'examen, non : la copie répondrait trois fois à la même question. Le
+   sujet partage donc les phrases du texte entre ses exercices, et chaque
+   générateur ne voit que sa part. Hors composition, la réserve est nulle
+   et rien ne change. */
+let PHRASES_RESERVEES = null;
+
 function sentencesOf(text) {
   const t = String(text || '').replace(/\s+/g, ' ').trim();
   const out = []; let cur = '';
@@ -8076,13 +9392,18 @@ function sentencesOf(text) {
     // On emporte les guillemets fermants qui suivent immédiatement.
     let j = i + 1;
     while (j < t.length && QUOTES.indexOf(t[j]) >= 0) { cur += t[j]; j++; }
+    /* v13.23 — Une abreviation n'est pas une fin de phrase : sans cela,
+       « Mr. Traoré arrive… » etait coupe en deux et l'item perdait son sujet. */
+    const dejaLa = cur.trim();
+    if (ch === '.' && (ABREVIATIONS.test(dejaLa) || /(^|\s)[A-Z]\.$/.test(dejaLa))) { i = j - 1; continue; }
     // On ne coupe que devant une vraie nouvelle phrase.
     const rest = t.slice(j);
     if (rest === '' || /^\s+["'\u2018\u2019\u201c]?[A-Z0-9]/.test(rest)) { out.push(cur.trim()); cur = ''; i = j - 1; }
     else i = j - 1;
   }
   if (cur.trim()) out.push(cur.trim());
-  return out.map(tidySentence).filter(s => wordsOf(s).length >= 6);
+  const net = out.map(tidySentence).filter(s => wordsOf(s).length >= 6);
+  return PHRASES_RESERVEES ? net.filter(s => PHRASES_RESERVEES.has(s)) : net;
 }
 const WORD_RE = /[A-Za-z][A-Za-z'’-]*/g;
 const wordsOf = s => String(s || '').match(WORD_RE) || [];
@@ -8207,33 +9528,79 @@ const ol = items => `<ol class="ex-list">${items.map(i => `<li>${i}</li>`).join(
 const keyLine = items => items.map((x, i) => `${i + 1}. ${x}`).join(' · ');
 
 /* ---- activités contrôlées (une seule bonne réponse) ---- */
+/* v13.23 — L'exercice est fermé par une banque de mots. Sans elle, l'élève
+   qui propose un synonyme acceptable est sanctionné pour une réponse juste :
+   c'était le défaut le plus injuste du logiciel. Deux intrus empêchent de
+   trouver le dernier mot par simple élimination. */
+function motsIntrus(ctx, reponses, combien) {
+  const pris = new Set(reponses);
+  const pool = [...new Set(itemPool(ctx.text).flatMap(contentWords).map(w => w.toLowerCase()))]
+    .filter(w => !pris.has(w) && !VERB_FORMS.has(w) && w.length >= 4);
+  const formes = new Set(reponses.map(formeDe));
+  const proches = pool.filter(w => formes.has(formeDe(w)));
+  return shuffledBy(proches.length >= combien ? proches : pool, ctx.rnd).slice(0, combien);
+}
 function exGapFill(ctx) {
-  const sents = spreadPick(itemPool(ctx.text), ctx.n), items = [], key = [], used = new Set();
+  const sents = spreadPick(itemPool(ctx.text), ctx.n);
+  const items = [], key = [], reponses = [], used = new Set();
   for (const s of sents) {
     const cand = gapCandidates(s).filter(w => !used.has(w.toLowerCase())).sort((a, b) => b.length - a.length)[0];
     if (!cand) continue;
     used.add(cand.toLowerCase());
     items.push(esc(blankOut(s, cand)));
-    key.push(cand.toLowerCase());
+    reponses.push(cand.toLowerCase());
+    key.push(cand.toLowerCase() + repereDe(s, ctx.text, ctx.lineNums));
   }
   if (!items.length) return null;
-  return { instruction: 'Complete the sentences with the missing words from the text.', body: ol(items), key: keyLine(key) };
+  const intrus = motsIntrus(ctx, reponses, 2);
+  const banque = shuffledBy([...reponses, ...intrus], ctx.rnd);
+  const boite = '<p class="ex-bank">' + banque.map(esc).join(' &middot; ') + '</p>';
+  const reste = intrus.length === 2 ? 'Two words will not be used.'
+              : intrus.length === 1 ? 'One word will not be used.' : '';
+  return { instruction: ('Complete each sentence with one word from the box. ' + reste).trim(),
+           body: boite + ol(items), key: keyLine(key) };
+}
+/* v13.23 — Les distracteurs étaient tirés au hasard parmi les mots de
+   longueur voisine : tantôt la bonne réponse sautait aux yeux, tantôt une
+   seconde option se défendait. Désormais un distracteur doit être de la même
+   famille de forme que la réponse, et ne jamais former avec les mots qui
+   entourent le trou une paire attestée dans le texte — sans quoi il serait
+   défendable. Un item qui ne trouve pas deux distracteurs sûrs est écarté :
+   mieux vaut quatre bons items que cinq dont un est contestable. */
+/* « grandmother » en face de « grandmother's » n'est pas un distracteur :
+   c'est le même mot, et l'item n'évalue plus le sens mais l'apostrophe. */
+function varianteDe(a, b) {
+  const x = String(a).replace(/[\u2019'-]/g, ''), y = String(b).replace(/[\u2019'-]/g, '');
+  if (x === y) return true;
+  const court = x.length <= y.length ? x : y, long = x.length <= y.length ? y : x;
+  return long.indexOf(court) === 0 && long.length - court.length <= 3;
 }
 function exMCQ(ctx) {
   const all = itemPool(ctx.text);
   const pool = [...new Set(all.flatMap(contentWords).map(w => w.toLowerCase()))];
+  const bigrammes = bigrammesDu(ctx.text);
   const sents = spreadPick(all, ctx.n), items = [], key = [], used = new Set();
   for (const s of sents) {
     const cand = gapCandidates(s).filter(w => !used.has(w.toLowerCase())).sort((a, b) => b.length - a.length)[0];
     if (!cand) continue;
-    used.add(cand.toLowerCase());
     const answer = cand.toLowerCase();
-    const others = shuffledBy(pool.filter(w => w !== answer && Math.abs(w.length - answer.length) <= 3), ctx.rnd).slice(0, 2);
-    if (others.length < 2) continue;
+    const avant = motAvant(s, cand), apres = motApres(s, cand);
+    const dansLaPhrase = new Set(wordsOf(s).map(w => w.toLowerCase()));
+    const sur = w => w !== answer
+      && !varianteDe(w, answer)
+      && !dansLaPhrase.has(w)
+      && !(avant && bigrammes.has(avant + ' ' + w))
+      && !(apres && bigrammes.has(w + ' ' + apres));
+    const strict = pool.filter(w => sur(w) && formeDe(w) === formeDe(answer) && Math.abs(w.length - answer.length) <= 3);
+    const large  = pool.filter(w => sur(w) && Math.abs(w.length - answer.length) <= 3);
+    const source = strict.length >= 2 ? strict : large;
+    const others = [...new Set(shuffledBy(source, ctx.rnd))].filter(w => w !== answer).slice(0, 2);
+    if (others.length < 2 || new Set([answer, ...others]).size !== 3) continue;
+    used.add(answer);
     const opts = shuffledBy([answer, ...others], ctx.rnd);
     const letters = ['a', 'b', 'c'];
     items.push(`${esc(blankOut(s, cand))}<br><span class="ex-opts">${opts.map((o, i) => `${letters[i]}) ${esc(o)}`).join(' &nbsp; ')}</span>`);
-    key.push(letters[opts.indexOf(answer)] + ') ' + answer);
+    key.push(letters[opts.indexOf(answer)] + ') ' + answer + repereDe(s, ctx.text, ctx.lineNums));
   }
   if (!items.length) return null;
   return { instruction: 'Choose the correct word to complete each sentence.', body: ol(items), key: keyLine(key) };
@@ -8252,6 +9619,15 @@ const ANTONYMS = (() => {
     ['everybody', 'nobody'], ['everyone', 'nobody'], ['always', 'rarely'], ['most', 'few']];
   const m = {};
   for (const [a, b] of pairs) { if (!m[a]) m[a] = b; if (!m[b]) m[b] = a; }
+  /* Étage 2 — la table des contraires sert aussi à fabriquer les
+     affirmations fausses du vrai-faux : plus elle est fournie, plus la
+     falsification porte sur un mot qui compte. */
+  for (const p of ANTONYMES_BRUT) {
+    const [a, b] = p.split(':');
+    if (!a || !b) continue;
+    if (!m[a]) m[a] = b;
+    if (!m[b]) m[b] = a;
+  }
   return m;
 })();
 /* Nombres écrits en lettres : « three forms » → « seven forms ». */
@@ -8411,6 +9787,138 @@ function ligneDe(phrase, texte) {
   return 0;
 }
 
+/* ======================================================================
+   v13.23 — REPÈRES DU CORRIGÉ
+   Une réponse sans repère ne se corrige pas : l'enseignant doit retrouver
+   d'un coup d'œil où elle se justifie, et l'élève doit pouvoir la défendre.
+   Lignes numérotées : « (§2, l. 7) ». Sinon : les premiers mots de la
+   phrase, qui restent une justification valable dans tous les cas.
+   ====================================================================== */
+function paragrapheDe(phrase, texte) {
+  const cible = String(phrase || '').replace(/\s+/g, ' ').trim().slice(0, 28).toLowerCase();
+  if (!cible) return 0;
+  const paras = String(texte || '').split(/\n{2,}/).filter(p => p.trim());
+  for (let i = 0; i < paras.length; i++) {
+    if (paras[i].replace(/\s+/g, ' ').toLowerCase().includes(cible)) return i + 1;
+  }
+  return 0;
+}
+function repereDe(phrase, texte, lineNums) {
+  if (!phrase) return '';
+  const p = paragrapheDe(phrase, texte);
+  if (lineNums) {
+    const l = ligneDe(phrase, texte);
+    if (p && l) return ' (\u00a7' + p + ', l. ' + l + ')';
+    if (l) return ' (l. ' + l + ')';
+  }
+  const mots = wordsOf(phrase).slice(0, 5).join(' ');
+  if (mots) return ' (\u201c' + mots + '\u2026\u201d' + (p ? ', \u00a7' + p : '') + ')';
+  return p ? ' (\u00a7' + p + ')' : '';
+}
+
+/* Famille de forme d'un mot : sert à choisir des distracteurs et des
+   intrus qui ne se repèrent pas à l'œil nu. */
+function formeDe(w) {
+  const m = String(w || '').toLowerCase();
+  for (const suf of ['tion', 'sion', 'ment', 'ness', 'ity', 'ance', 'ence', 'ing', 'ers', 'ed', 'ly', 'es', 'er', 's']) {
+    if (m.length > suf.length + 2 && m.endsWith(suf)) return suf;
+  }
+  return '';
+}
+/* Toutes les paires de mots voisins du texte. Un distracteur qui forme
+   une paire attestée au contact du trou serait défendable : on l'écarte. */
+function bigrammesDu(texte) {
+  const m = wordsOf(texte).map(w => w.toLowerCase());
+  const out = new Set();
+  for (let i = 0; i + 1 < m.length; i++) out.add(m[i] + ' ' + m[i + 1]);
+  return out;
+}
+const echappe = w => String(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function motAvant(s, w) {
+  const m = String(s).match(new RegExp("([A-Za-z\u2019'-]+)\\W+" + echappe(w) + '(?![A-Za-z])', 'i'));
+  return m ? m[1].toLowerCase() : '';
+}
+function motApres(s, w) {
+  const m = String(s).match(new RegExp(echappe(w) + "\\W+([A-Za-z\u2019'-]+)", 'i'));
+  return m ? m[1].toLowerCase() : '';
+}
+/* Mots que le texte emploie au moins une fois en minuscule : eux seuls
+   peuvent perdre leur majuscule quand on rapporte une phrase. Clarisse
+   reste Clarisse. */
+/* Pour savoir si un mot peut perdre sa majuscule, un seul texte ne suffit
+   pas : « several » peut n'y figurer qu'en tête de phrase. Le logiciel
+   dispose de ses 369 textes : il y lit, une fois pour toutes, quels mots
+   l'anglais écrit en minuscule. Ce qui n'y figure jamais est un nom propre,
+   et garde sa majuscule. */
+let LEXIQUE_MINUSCULE = null;
+function lexiqueMinuscule() {
+  if (LEXIQUE_MINUSCULE) return LEXIQUE_MINUSCULE;
+  const out = new Set();
+  const ajoute = t => { const re = /[a-z][a-z\u2019'-]*/g; let m; while ((m = re.exec(t)) !== null) out.add(m[0]); };
+  try {
+    for (const src of [typeof SUPPORT_TEXTS !== 'undefined' ? SUPPORT_TEXTS : null,
+                       typeof SUPPORT_TEXTS_LONG !== 'undefined' ? SUPPORT_TEXTS_LONG : null]) {
+      if (!src) continue;
+      for (const c of Object.keys(src)) for (const k of Object.keys(src[c])) ajoute(src[c][k].join(' '));
+    }
+  } catch (e) { /* on se rabat sur le seul texte de la seance */ }
+  LEXIQUE_MINUSCULE = out;
+  return out;
+}
+function motsEnMinuscule(texte) {
+  const out = new Set();
+  const re = /[a-z][a-z\u2019'-]*/g; let m;
+  while ((m = re.exec(String(texte || ''))) !== null) out.add(m[0]);
+  return out;
+}
+
+/* Rapporte une phrase sans en changer le sens. La majuscule initiale ne
+   tombe que si le texte emploie deja ce mot en minuscule ailleurs : ainsi
+   « Self-medication » devient « self-medication », mais « Clarisse » reste
+   « Clarisse ». Les phrases interrogatives et imperatives sont laissees
+   intactes : les encadrer produirait une faute. */
+/* Un mot est courant s'il figure en minuscule dans les textes du logiciel,
+   ou si sa forme de base y figure : « Surgeons » ne s'y lit qu'en tête de
+   phrase, mais « surgeon » s'y lit. Ce qui reste introuvable est tenu pour
+   un nom propre et garde sa majuscule. */
+/* Des mots courants peuvent ne figurer nulle part en minuscule dans un texte
+   donne : ils n'y
+   apparaissent qu'en tête de phrase. Sans cette liste, ils garderaient une
+   majuscule au milieu d'une affirmation. Elle est courte et close : si un
+   enseignant colle son propre texte, le cas peut se représenter, et le
+   défaut se borne alors à une majuscule superflue. */
+const MOTS_COURANTS_SUPPL = new Set(('absences according administrative adults afterwards agriculture although anyone besides bilingual boys building buyers children citizens clinics commerce communities compared compensating constant contrary conversely countless cultural deleting depending despite doctors drinking drivers eating economic educated education employers energy environmental everybody everyone families farmers farming finally finding firstly formal frequent furthermore girls giving global growing health healthy hospitals households however illegal industry informal keeping knowing lastly leaders learning legal listening local making markets meanwhile men modern moreover national nevertheless nobody nothing nowadays numerous nurses occasional official older overseas parents passing pharmacies philosopher philosophers planning political practical private public pupils qualified reading recently regional regular rural safe saving schools secondly sellers several sharing sickle skilled social somebody someone something speaking stocks students surgeon surgeons taking teachers teaching technical technology therefore thirdly today tomorrow towns traders traditional trained training transport ultrasound unemployed unhealthy unlike unofficial unsafe urban using various vendors veterinarian veterinarians villages virtual whereas women workers working writing yesterday young').split(' '));
+function motCourant(bas) {
+  const lex = lexiqueMinuscule();
+  if (lex.has(bas) || MOTS_COURANTS_SUPPL.has(bas)) return true;
+  const bases = [];
+  if (/ies$/.test(bas)) bases.push(bas.slice(0, -3) + 'y');
+  if (/es$/.test(bas)) bases.push(bas.slice(0, -2), bas.slice(0, -1));
+  if (/s$/.test(bas)) bases.push(bas.slice(0, -1));
+  if (/ing$/.test(bas)) bases.push(bas.slice(0, -3), bas.slice(0, -3) + 'e');
+  if (/ed$/.test(bas)) bases.push(bas.slice(0, -2), bas.slice(0, -1));
+  if (/ly$/.test(bas)) bases.push(bas.slice(0, -2));
+  if (/al$/.test(bas)) bases.push(bas.slice(0, -2));
+  return bases.some(x => x.length >= 3 && lex.has(x));
+}
+function rapporter(phrase, minusc, cadre) {
+  const s = String(phrase || '').trim();
+  if (!s || s.indexOf('?') >= 0) return s;
+  if (/^(according to the text|the text|the author)\b/i.test(s)) return s;
+  const prem = (s.match(/^[A-Za-z\u2019'-]+/) || [''])[0];
+  if (!prem || VERB_FORMS.has(prem.toLowerCase())) return s;
+  /* On ne rapporte que si la minuscule initiale est sûre : le mot existe
+     déjà en minuscule ailleurs dans le texte, ou c'est un mot-outil. Sinon on
+     laisse la phrase telle quelle : mieux vaut une affirmation nue qu'un
+     « According to the text, Clarisse… » ou une majuscule en plein milieu. */
+  const bas = prem.toLowerCase();
+  /* On encadre toujours : c'est ce qui empêche l'affirmation d'être la
+     phrase du texte recopiée, et c'est aussi ce qui garantit que le cadre
+     ne signale jamais la réponse. Seule la minuscule est conditionnelle :
+     un nom propre garde sa majuscule, et la phrase reste correcte. */
+  const courant = minusc.has(bas) || STOPWORDS.has(bas) || motCourant(bas);
+  return cadre + (courant ? bas : prem) + s.slice(prem.length);
+}
 function exTrueFalse(ctx) {
   const all = itemPool(ctx.text);
   const pools = { persons: actorNames(ctx.text), places: [...placeNames(ctx.text)] };
@@ -8430,13 +9938,27 @@ function exTrueFalse(ctx) {
   // Les affirmations fausses sont tirées au sort : elles ne tombent pas
   // toujours aux mêmes rangs.
   const falseSet = new Set(shuffledBy(chosen.filter(x => x.alt), ctx.rnd).slice(0, wantFalse));
+  /* v13.23 — Une affirmation recopiee mot pour mot du texte se reconnait
+     sans l'avoir comprise. On la rapporte. Le cadre est le meme pour les
+     vraies et pour les fausses : il ne trahit jamais la reponse. */
+  const minusc = motsEnMinuscule(ctx.text);
+  /* En 6e et en 5e, un seul cadre, le plus simple : trois formules
+     differentes ajouteraient une difficulte de lecture inutile. */
+  const CADRES = ctx.early ? ['The text says that ']
+    : ['According to the text, ', 'The text says that ', 'The author explains that '];
+  /* Tout ou rien : si une seule affirmation ne peut pas etre rapportee
+     proprement, aucune ne l'est. Sans cette regle, la presence du cadre
+     finirait par signaler la reponse. */
   const items = [], key = [];
-  for (const x of chosen) {
-    const ln = ctx.lineNums ? ligneDe(x.s, ctx.text) : 0;
-    const ou = ln ? ` (line ${ln})` : '';
-    if (falseSet.has(x)) { items.push(esc(x.alt[0])); key.push('False \u2014 ' + x.alt[1] + ou); }
-    else { items.push(esc(x.s)); key.push('True' + ou); }
-  }
+  chosen.forEach((x, i) => {
+    const repere = repereDe(x.s, ctx.text, ctx.lineNums);
+    const brut = falseSet.has(x) ? x.alt[0] : x.s;
+    /* La decision se prend sur la phrase d'origine, identique pour la
+       version vraie et pour la version fausse : le cadre ne peut donc
+       pas indiquer laquelle on lit. */
+    items.push(esc(rapporter(brut, minusc, CADRES[i % CADRES.length])));
+    key.push(falseSet.has(x) ? 'False \u2014 ' + x.alt[1] + repere : 'True' + repere);
+  });
   if (!items.length) return null;
   /* Une réponse vraie ou fausse sans justification n'apprend rien et ne se
      corrige pas : l'élève doit montrer où il a trouvé sa réponse. Quand les
@@ -8450,18 +9972,31 @@ function exTrueFalse(ctx) {
            warn: 'The false statements are built by changing one element of the text. Check them before the lesson.' };
 }
 
+/* v13.23 — La coupure tombait au milieu des mots comptes, souvent au
+   milieu d'un groupe : l'eleve recollait la syntaxe sans comprendre. On
+   coupe maintenant devant une charniere logique, de sorte que les deux
+   moities gardent chacune un sens et que l'appariement demande de saisir
+   le lien entre elles. */
+const CHARNIERE_APP = /^(because|which|that|when|if|while|although|though|so|but|and|since|before|after|unless|whereas|where|whose)$/i;
 function exMatching(ctx) {
   const sents = spreadPick(sentencesOf(ctx.text).filter(s => wordsOf(s).length >= 7), ctx.n);
   if (sents.length < 2) return null;
   const halves = sents.map(s => {
-    const w = s.split(' '), cut = Math.floor(w.length / 2);
+    const w = s.split(' ');
+    let cut = Math.floor(w.length / 2);
+    const bas = Math.max(3, Math.floor(w.length * 0.3));
+    const haut = Math.min(w.length - 3, Math.ceil(w.length * 0.7));
+    for (let i = bas; i <= haut; i++) {
+      if (CHARNIERE_APP.test(String(w[i] || '').replace(/[^A-Za-z]/g, ''))) { cut = i; break; }
+    }
     return [w.slice(0, cut).join(' '), w.slice(cut).join(' ')];
   });
   const letters = 'abcdefgh'.split('');
   const right = shuffledBy(halves.map((h, i) => ({ i, t: h[1] })), ctx.rnd);
   const rows = halves.map((h, i) =>
     `<tr><td>${i + 1}. ${esc(h[0])} …</td><td>${letters[i]}) … ${esc(right[i].t)}</td></tr>`).join('');
-  const key = halves.map((h, i) => `${i + 1}-${letters[right.findIndex(r => r.i === i)]}`).join(' · ');
+  const key = halves.map((h, i) =>
+    `${i + 1}-${letters[right.findIndex(r => r.i === i)]}${repereDe(sents[i], ctx.text, ctx.lineNums)}`).join(' · ');
   return { instruction: 'Match each beginning of sentence with its correct ending.',
            body: `<table class="grid ex-match"><tbody>${rows}</tbody></table>`, key };
 }
@@ -8486,12 +10021,6 @@ function exOrdering(ctx) {
   }
   return { instruction: 'Put the words in the right order to make correct sentences.',
            body: ol(items), key: key.map((x, i) => `${i + 1}. ${x}`).join(' · ') };
-}
-function exTransform(ctx) {
-  const sents = spreadPick(sentencesOf(ctx.text), ctx.n);
-  if (!sents.length) return null;
-  return { instruction: `Rewrite the following sentences using ${ctx.grammar}.`,
-           body: ol(sents.map(esc)), key: '', note: 'The expected answers depend on the transformation the teacher asks for.' };
 }
 /* ---- activités semi-contrôlées (plusieurs bonnes réponses) ---- */
 function exCompletion(ctx) {
@@ -8948,6 +10477,503 @@ function exParagraph(ctx) {
            note: 'Answers vary; assess relevance, language and organisation.' };
 }
 
+
+/* ------------------------------------------------------------------
+   Formation de mots.
+
+   C'est l'exercice que réclamaient les instructions officielles au titre
+   du vocabulaire, et c'est surtout le seul de la série dont la réponse ne
+   se copie pas dans le texte : l'élève reçoit un mot et doit en dériver
+   un autre. On ôte du texte une forme dérivée et l'on donne sa base entre
+   parenthèses.
+
+   Deux précautions : on n'ôte jamais une forme dont la base figure déjà
+   dans la même phrase — la réponse s'y lirait — et l'on ne pose pas deux
+   items de la même famille.
+   ------------------------------------------------------------------ */
+function exWordForm(ctx) {
+  const sents = sentencesOf(ctx.text);
+  if (!sents.length) return null;
+  const vus = new Set(), cand = [];
+  for (const s of sents) {
+    const mots = wordsOf(s);
+    const bas = new Set(mots.map(w => w.toLowerCase()));
+    for (const w of mots) {
+      const bw = w.toLowerCase();
+      const d = deriveDe(bw);
+      if (!d || vus.has(d.base)) continue;
+      if (bas.has(d.base)) continue;            // la base est sous les yeux
+      if (bw === d.base) continue;
+      cand.push({ s, forme: w, base: d.base, cat: d.cat });
+      vus.add(d.base);
+      break;                                    // un item par phrase
+    }
+  }
+  if (cand.length < 2) return null;
+  const choisis = spreadPick(cand, ctx.n);
+  const items = [], key = [];
+  choisis.forEach((c, i) => {
+    const re = new RegExp('(^|[^A-Za-z])(' + c.forme.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![A-Za-z])');
+    const trou = c.s.replace(re, '$1' + BLANK);
+    if (trou === c.s) return;
+    items.push(esc(trou) + ' <b>(' + esc(c.base.toUpperCase()) + ')</b>');
+    key.push(c.forme.toLowerCase() + ' — ' + CAT_NOM[c.cat] + repereDe(c.s, ctx.text, ctx.lineNums));
+  });
+  if (items.length < 2) return null;
+  return {
+    instruction: 'Complete each sentence with the correct form of the word in brackets.',
+    body: ol(items), key: keyLine(key),
+    note: 'The answer is not written in the text as it stands: the learner has to derive it from the word given.'
+  };
+}
+
+/* ------------------------------------------------------------------
+   Mot de la même famille.
+
+   Variante plus exigeante, pour les classes du second cycle : au lieu de
+   compléter une phrase, l'élève donne la forme demandée d'un mot pris
+   dans le texte. Rien à recopier non plus.
+   ------------------------------------------------------------------ */
+function exWordFamily(ctx) {
+  const sents = sentencesOf(ctx.text);
+  const vus = new Set(), cand = [];
+  for (const s of sents)
+    for (const w of wordsOf(s)) {
+      const bw = w.toLowerCase();
+      const f = familles().parBase.get(bw) || (deriveDe(bw) ? familles().parBase.get(deriveDe(bw).base) : null);
+      if (!f || vus.has(f.base)) continue;
+      /* on ne demande qu'une catégorie que la famille possède vraiment, et
+         qui ne soit pas le mot déjà sous les yeux */
+      const cibles = ['n', 'v', 'a', 'd'].filter(c => f[c].length && f[c][0] !== bw);
+      if (!cibles.length) continue;
+      const cat = cibles[0];
+      cand.push({ s, mot: bw, cat, rep: f[cat][0] });
+      vus.add(f.base);
+      break;
+    }
+  if (cand.length < 2) return null;
+  const choisis = spreadPick(cand, ctx.n);
+  const items = [], key = [];
+  choisis.forEach((c, i) => {
+    items.push('Give the <b>' + CAT_NOM[c.cat] + '</b> formed from “' + esc(c.mot) + '”'
+      + repereDe(c.s, ctx.text, ctx.lineNums) + '.');
+    key.push(c.rep);
+  });
+  return {
+    instruction: 'Find in the text the word given, then write the word of the same family that is asked for.',
+    body: ol(items), key: keyLine(key),
+    note: 'More than one answer may be acceptable: accept any correct word of the same family.'
+  };
+}
+
+
+/* ------------------------------------------------------------------
+   Contraires et synonymes à chercher dans le texte.
+
+   La réponse est un mot du texte, mais l'élève ne peut pas la recopier :
+   on lui donne un mot qui ne s'y trouve pas, et il doit repérer celui qui
+   s'y oppose ou s'y équivaut. C'est l'exercice de vocabulaire nommé par
+   les instructions officielles.
+   ------------------------------------------------------------------ */
+function construireCouples(ctx, table, libelle, consigne) {
+  const sents = sentencesOf(ctx.text);
+  if (!sents.length) return null;
+  /* Les mots du texte entier servent à écarter une amorce qui s'y
+     trouverait déjà : la question se résoudrait alors à vue. */
+  const dansLeTexte = new Set(wordsOf(ctx.text).map(w => w.toLowerCase()));
+  const vus = new Set(), cand = [];
+  for (const s of sents) {
+    for (const w of wordsOf(s)) {
+      const bw = w.toLowerCase();
+      if (vus.has(bw) || !table.has(bw)) continue;
+      const libres = [...table.get(bw)].filter(x => !dansLeTexte.has(x));
+      if (!libres.length) continue;
+      /* « possible / impossible » se devine sans lire le texte : on préfère
+         une amorce qui ne contient pas le mot cherché, ni l'inverse. */
+      const propre = libres.find(x => !x.includes(bw) && !bw.includes(x));
+      cand.push({ s, mot: bw, amorce: propre || libres[0], facile: !propre });
+      vus.add(bw);
+      break;
+    }
+  }
+  if (cand.length < 2) return null;
+  /* On n'emploie les couples devinables que s'il n'y en a pas assez d'autres. */
+  const bons = cand.filter(c => !c.facile);
+  const choisis = spreadPick(bons.length >= Math.min(ctx.n, 3) ? bons : cand, ctx.n);
+  const items = [], key = [];
+  choisis.forEach(c => {
+    items.push(libelle + ' “<b>' + esc(c.amorce) + '</b>”'
+      + (ctx.lineNums ? repereDe(c.s, ctx.text, true) : '') + '.');
+    key.push(c.mot + repereDe(c.s, ctx.text, ctx.lineNums));
+  });
+  return { instruction: consigne, body: ol(items), key: keyLine(key) };
+}
+
+function exOpposite(ctx) {
+  return construireCouples(ctx, tableAntonymes(),
+    'a word that means the opposite of',
+    'Find in the text a word that means the opposite of each word given.');
+}
+
+function exSynonym(ctx) {
+  return construireCouples(ctx, tableSynonymes(),
+    'a word that means the same as',
+    'Find in the text a word that means the same as each word given.');
+}
+
+/* ======================================================================
+   ÉTAGE 2 — TRANSFORMATION GRAMMATICALE
+
+   Jusqu'ici l'exercice de transformation s'imprimait sans corrigé : « les
+   réponses dépendent de la transformation demandée ». Le correcteur se
+   retrouvait devant un blanc, et dans un sujet d'examen c'est un défaut.
+
+   Le logiciel ne transforme donc que ce qu'il sait transformer sans se
+   tromper : la forme négative et la forme interrogative d'une phrase
+   déclarative simple. Il écarte tout le reste — phrases à virgule avant le
+   verbe, phrases déjà négatives ou interrogatives, sujets qu'il ne sait pas
+   délimiter. Mieux vaut un exercice sur trois phrases avec un corrigé juste
+   que sur six avec un corrigé approximatif.
+   ====================================================================== */
+const VERBES_IRREGULIERS = (
+  'be:was:been have:had:had do:did:done go:went:gone say:said:said make:made:made ' +
+  'take:took:taken come:came:come see:saw:seen get:got:got give:gave:given know:knew:known ' +
+  'think:thought:thought find:found:found tell:told:told become:became:become leave:left:left ' +
+  'feel:felt:felt put:put:put bring:brought:brought begin:began:begun keep:kept:kept ' +
+  'hold:held:held write:wrote:written stand:stood:stood hear:heard:heard let:let:let ' +
+  'mean:meant:meant set:set:set meet:met:met run:ran:run pay:paid:paid sit:sat:sat ' +
+  'speak:spoke:spoken lead:led:led read:read:read grow:grew:grown lose:lost:lost ' +
+  'fall:fell:fallen send:sent:sent build:built:built understand:understood:understood ' +
+  'draw:drew:drawn break:broke:broken spend:spent:spent cut:cut:cut rise:rose:risen ' +
+  'drive:drove:driven buy:bought:bought wear:wore:worn choose:chose:chosen seek:sought:sought ' +
+  'throw:threw:thrown catch:caught:caught deal:dealt:dealt win:won:won forget:forgot:forgotten ' +
+  'eat:ate:eaten teach:taught:taught sell:sold:sold drink:drank:drunk hide:hid:hidden ' +
+  'steal:stole:stolen sleep:slept:slept feed:fed:fed fight:fought:fought hang:hung:hung ' +
+  'lend:lent:lent light:lit:lit spread:spread:spread strike:struck:struck').split(' ');
+
+let _IRR = null;
+function irreguliers() {
+  if (_IRR) return _IRR;
+  const parPasse = new Map(), parBase = new Map();
+  for (const l of VERBES_IRREGULIERS) {
+    const [b, p, pp] = l.split(':');
+    parBase.set(b, { passe: p, participe: pp });
+    if (!parPasse.has(p)) parPasse.set(p, b);
+  }
+  _IRR = { parBase, parPasse };
+  return _IRR;
+}
+
+const MODAUX = new Set('can could will would shall should may might must'.split(' '));
+const ETRE = new Set('am is are was were'.split(' '));
+const AVOIR_AUX = new Set('have has had'.split(' '));
+/* Les verbes que le logiciel sait conjuguer au présent 3e personne. */
+/* « class », « stress », « business » : un mot en -ss n'est jamais une
+   troisième personne du singulier. Sans cette exception, le logiciel tirait
+   de « class » un verbe « clas ». */
+const PRESENT_3E = /^[a-z]+(?:[^s]s|es)$/;
+const SUFFIXES_NOMINAUX = /(ss|ness|ity|tion|sion|ment|ance|ence|ship|hood|ism|ist)$/;
+
+/* Le sujet s'arrête au premier verbe conjugué. On ne cherche ce verbe que
+   dans les premiers mots, et l'on renonce dès qu'une virgule, un pronom
+   relatif ou une conjonction s'interpose : au-delà, le découpage n'est plus
+   sûr. */
+const BARRIERE = /^(that|which|who|whom|whose|because|although|though|while|when|if|since|after|before|unless|and|or|but|so)$/i;
+
+function analyser(phrase) {
+  const s = String(phrase || '').trim().replace(/\s+/g, ' ');
+  if (!s || /[?!]$/.test(s)) return null;
+  /* « did not have no money » : une phrase qui porte déjà une négation,
+     même lexicale, ne se nie pas une seconde fois. */
+  if (/\b(not|no|never|nothing|nobody|none|neither|nor|without|hardly|rarely|seldom)\b|n['’]t\b/i.test(s)) return null;
+  const mots = s.replace(/[.]$/, '').split(' ');
+  if (mots.length < 4 || mots.length > 26) return null;
+  const irr = irreguliers();
+  for (let i = 1; i < Math.min(mots.length - 1, 8); i++) {
+    const brut = mots[i], w = brut.toLowerCase().replace(/[^a-z'’]/g, '');
+    if (!w) return null;
+    if (/,$/.test(mots[i - 1]) || BARRIERE.test(w)) return null;
+    const sujet = mots.slice(0, i).join(' ');
+    const suite = mots.slice(i + 1).join(' ').replace(/[.]$/, '');
+    if (MODAUX.has(w)) return { type: 'modal', sujet, aux: brut, suite, s };
+    if (ETRE.has(w)) return { type: 'etre', sujet, aux: brut, suite, s };
+    if (AVOIR_AUX.has(w)) {
+      /* « has built » : auxiliaire. « has a plan » : verbe plein. */
+      const apres = (mots[i + 1] || '').toLowerCase().replace(/[^a-z]/g, '');
+      const participe = /ed$/.test(apres) || [...irr.parBase.values()].some(v => v.participe === apres);
+      if (participe) return { type: 'avoir', sujet, aux: brut, suite, s };
+      return { type: 'plein', sujet, verbe: brut, temps: w === 'had' ? 'passe' : 'present',
+               base: 'have', suite, s };
+    }
+    if (irr.parPasse.has(w)) return { type: 'plein', sujet, verbe: brut, temps: 'passe', base: irr.parPasse.get(w), suite, s };
+    /* Base nue : c'est un présent simple si le sujet est au pluriel, un
+       impératif ou un infinitif sinon. On ne tranche que dans le premier cas. */
+    if (!/s$/.test(w) && (irr.parBase.has(w) || VERB_FORMS.has(w))) {
+      return sujetPluriel(mots.slice(0, i))
+        ? { type: 'plein', sujet, verbe: brut, temps: 'present', base: w, suite, s }
+        : null;
+    }
+    if (/^[a-z]+ed$/.test(w) && w.length > 4)
+      return { type: 'plein', sujet, verbe: brut, temps: 'passe', base: baseDuRegulier(w), suite, s };
+    if (PRESENT_3E.test(w) && w.length > 3 && !NOMS_EN_S.has(w)) {
+      const racine = baseDuPresent(w);
+      /* « classes », « losses », « conditions » sont des pluriels de noms,
+         non des verbes : leur base porte une terminaison nominale. Sans ce
+         filtre, le logiciel tirait un verbe « clas » de « classes ». */
+      if (SUFFIXES_NOMINAUX.test(racine)) return null;
+      return { type: 'plein', sujet, verbe: brut, temps: 'present', base: racine, suite, s };
+    }
+  }
+  return null;
+}
+/* Des noms pluriels très courants ressemblent à un verbe en -s : sans cette
+   liste, « the schools of the province » passerait pour une phrase verbale. */
+const NOMS_EN_S = new Set(('years months weeks days times schools pupils students teachers parents '
+  + 'children families women men boys girls people farmers workers traders doctors nurses villages '
+  + 'towns cities countries regions markets shops goods services products prices costs rules laws '
+  + 'rights needs ideas words things activities resources programmes projects results effects '
+  + 'causes problems solutions questions answers skills values customs habits diseases medicines '
+  + 'crops animals tools machines phones roads seasons months conditions changes risks benefits '
+  + 'associations groups leaders citizens authorities decisions opportunities challenges').split(' '));
+
+/* Un sujet est tenu pour pluriel s'il se termine par un nom pluriel connu,
+   ou s'il est l'un des pronoms qui commandent la base nue. */
+const PRONOMS_PLURIEL = new Set('they we you i people children women men'.split(' '));
+function sujetPluriel(motsSujet) {
+  if (!motsSujet.length) return false;
+  const dernier = motsSujet[motsSujet.length - 1].toLowerCase().replace(/[^a-z'’]/g, '');
+  if (PRONOMS_PLURIEL.has(dernier)) return true;
+  if (NOMS_EN_S.has(dernier)) return true;
+  return false;
+}
+
+const baseDuRegulier = w =>
+  /ied$/.test(w) ? w.slice(0, -3) + 'y'
+  : /([^aeiou])\1ed$/.test(w) ? w.slice(0, -3)
+  : /eed$/.test(w) ? w.slice(0, -1)
+  : /ed$/.test(w) ? (w.slice(0, -1).match(/(ate|ise|ize|ide|ure|ine|ace|ive|ove|ake|ame|ope|use)$/) ? w.slice(0, -1) : w.slice(0, -2))
+  : w;
+const baseDuPresent = w =>
+  /ies$/.test(w) ? w.slice(0, -3) + 'y'
+  : /(ches|shes|sses|xes|zes|oes)$/.test(w) ? w.slice(0, -2)
+  : /s$/.test(w) ? w.slice(0, -1) : w;
+
+const majuscule = s => s.charAt(0).toUpperCase() + s.slice(1);
+const minusculeSujet = s => s;
+/* « some » devient « any » dans une phrase négative ou interrogative. */
+const someEnAny = s => s.replace(/\bsome\b/g, 'any').replace(/\bSome\b/g, 'Any');
+
+function formeNegative(a) {
+  if (!a) return null;
+  if (a.type === 'etre')  return `${a.sujet} ${a.aux} not ${someEnAny(a.suite)}.`;
+  if (a.type === 'modal') {
+    const bas = a.aux.toLowerCase();
+    const nie = bas === 'can' ? a.aux.replace(/can/i, m => m === 'Can' ? 'Cannot' : 'cannot')
+                              : a.aux + ' not';
+    return `${a.sujet} ${nie} ${someEnAny(a.suite)}.`;
+  }
+  if (a.type === 'avoir') return `${a.sujet} ${a.aux} not ${someEnAny(a.suite)}.`;
+  if (a.type === 'plein') {
+    const aux = a.temps === 'passe' ? 'did not'
+      : (/s$/.test(a.verbe.toLowerCase()) ? 'does not' : 'do not');
+    return `${a.sujet} ${aux} ${a.base} ${someEnAny(a.suite)}.`.replace(/\s+\./, '.');
+  }
+  return null;
+}
+
+function formeInterrogative(a) {
+  if (!a) return null;
+  const sujet = a.sujet.charAt(0).toLowerCase() === a.sujet.charAt(0)
+    ? a.sujet : (/^(I|Burkina|Africa|[A-Z][a-z]+)$/.test(a.sujet.split(' ')[0]) ? a.sujet : a.sujet);
+  if (a.type === 'etre' || a.type === 'modal' || a.type === 'avoir')
+    return `${majuscule(a.aux.toLowerCase())} ${abaisser(sujet)} ${someEnAny(a.suite)}?`;
+  if (a.type === 'plein') {
+    const aux = a.temps === 'passe' ? 'Did' : (/s$/.test(a.verbe.toLowerCase()) ? 'Does' : 'Do');
+    return `${aux} ${abaisser(sujet)} ${a.base} ${someEnAny(a.suite)}?`.replace(/\s+\?/, '?');
+  }
+  return null;
+}
+/* Le sujet perd sa majuscule en tête de question, sauf s'il s'agit d'un nom
+   propre ou du pronom « I ». */
+function abaisser(sujet) {
+  const prem = sujet.split(' ')[0];
+  if (prem === 'I' || !/^[A-Z]/.test(prem)) return sujet;
+  const bas = prem.toLowerCase();
+  return motCourant(bas) ? bas + sujet.slice(prem.length) : sujet;
+}
+
+
+/* ------------------------------------------------------------------
+   Transformation grammaticale, avec corrigé.
+
+   L'exercice ne retient que les phrases que le moteur sait transformer
+   sans se tromper. S'il n'en trouve pas assez, il revient à l'ancienne
+   consigne ouverte, dont la réponse appartient à l'enseignant.
+   ------------------------------------------------------------------ */
+function exTransform(ctx) {
+  const sents = spreadPick(sentencesOf(ctx.text), Math.max(6, ctx.n * 2));
+  if (!sents.length) return null;
+  const neg = [], inter = [];
+  for (const s of sents) {
+    const a = analyser(s);
+    if (!a) continue;
+    const n = formeNegative(a), q = formeInterrogative(a);
+    if (n) neg.push({ s, r: n });
+    if (q) inter.push({ s, r: q });
+  }
+  /* On choisit l'opération la mieux pourvue, pour que l'exercice ait
+     partout la même consigne. */
+  const prendre = (lot, consigne, titre) => {
+    const ch = spreadPick(lot, ctx.n);
+    return {
+      instruction: consigne,
+      body: ol(ch.map(x => esc(x.s))),
+      key: keyLine(ch.map(x => esc(x.r) + repereDe(x.s, ctx.text, ctx.lineNums))),
+      note: titre
+    };
+  };
+  if (neg.length >= 3 && neg.length >= inter.length)
+    return prendre(neg, 'Rewrite the following sentences in the negative form.',
+      'Answer key produced by the software: read it before the lesson.');
+  if (inter.length >= 3)
+    return prendre(inter, 'Turn the following sentences into questions (yes / no questions).',
+      'Answer key produced by the software: read it before the lesson.');
+  /* Trop peu de phrases transformables : on rend la consigne ouverte,
+     et l'on dit franchement que la réponse reste à écrire. */
+  const base = spreadPick(sentencesOf(ctx.text), ctx.n);
+  if (!base.length) return null;
+  return { instruction: `Rewrite the following sentences using ${ctx.grammar}.`,
+           body: ol(base.map(esc)), key: '',
+           note: 'The expected answers depend on the transformation asked for: write them yourself.' };
+}
+
+
+/* ------------------------------------------------------------------
+   Définitions.
+
+   Deux exercices, et c'est le second qui compte : on donne la définition,
+   l'élève cherche le mot dans le texte. La réponse est bien dans le texte,
+   mais rien ne s'y recopie — il faut avoir compris la définition pour
+   savoir où regarder. C'est le « word definition » que nomment les
+   instructions officielles.
+   ------------------------------------------------------------------ */
+function motsDefinissables(ctx, voulu) {
+  const sents = sentencesOf(ctx.text);
+  const vus = new Set(), out = [];
+  for (const s of sents)
+    for (const w of wordsOf(s)) {
+      const b = baseDefinissable(w);
+      if (!b || vus.has(b)) continue;
+      /* un mot de moins de quatre lettres ne fait pas un item de vocabulaire */
+      if (b.length < 4) continue;
+      /* « safe » et « safety » dans le même exercice se livrent l'un
+         l'autre : une famille n'y paraît qu'une fois. */
+      const d = deriveDe(b);
+      const fam = d ? d.base : (familles().parBase.has(b) ? b : null);
+      if (fam && vus.has('@' + fam)) continue;
+      /* La table des familles ne couvre pas tout : « safety » n'y est pas
+         rattaché à « safe ». Un mot qui commence par un autre déjà retenu
+         appartient presque toujours à la même famille. */
+      if (out.some(x => x.mot.startsWith(b.slice(0, 4)) || b.startsWith(x.mot.slice(0, 4)))) continue;
+      vus.add(b);
+      if (fam) vus.add('@' + fam);
+      const e = definitions().get(b);
+      out.push({ s, mot: b, def: e.def, rarete: e.rarete });
+    }
+  /* « school » et « home » se lisent dans tous les textes : ils ne font pas
+     un glossaire. On classe par rareté — le mot propre à cette leçon
+     d'abord, celui que tous les textes emploient en dernier — on ne garde
+     que les meilleurs, puis on leur rend l'ordre du texte, pour que les
+     items suivent la lecture. */
+  const rang = new Map(out.map((x, i) => [x.mot, i]));
+  const combien = Math.max(6, (voulu || 4) * 2);
+  return out
+    .slice()
+    .sort((a, b) => (b.rarete - a.rarete) || (rang.get(a.mot) - rang.get(b.mot)))
+    .slice(0, combien)
+    .sort((a, b) => rang.get(a.mot) - rang.get(b.mot));
+}
+
+function exFindWord(ctx) {
+  const cand = motsDefinissables(ctx, ctx.n);
+  if (cand.length < 3) return null;
+  const choisis = spreadPick(cand, ctx.n);
+  const items = [], key = [];
+  choisis.forEach(c => {
+    items.push(esc(c.def) + '.');
+    key.push(c.mot + repereDe(c.s, ctx.text, ctx.lineNums));
+  });
+  return {
+    instruction: 'Find in the text the word that has each of these meanings.',
+    body: ol(items), key: keyLine(key)
+  };
+}
+
+function exDefinition(ctx) {
+  const cand = motsDefinissables(ctx, Math.min(ctx.n, 5));
+  if (cand.length < 3) return null;
+  const choisis = spreadPick(cand, Math.min(ctx.n, 5));
+  /* Les définitions sont présentées dans un ordre qui ne suit pas celui
+     des mots : sans quoi l'appariement se ferait de proche en proche. */
+  const lettres = 'abcdefgh'.split('');
+  const droite = shuffledBy(choisis.map((c, i) => ({ i, def: c.def })), ctx.rnd);
+  const gauche = choisis.map((c, i) => `${i + 1}. ${esc(c.mot)}`);
+  const d2 = droite.map((r, j) => `${lettres[j]}) ${esc(r.def)}`);
+  const key = choisis.map((c, i) =>
+    `${i + 1}-${lettres[droite.findIndex(r => r.i === i)]}` + repereDe(c.s, ctx.text, ctx.lineNums));
+  return {
+    instruction: 'Match each word in column A with its meaning in column B.',
+    body: `<table class="grid"><thead><tr><th>A</th><th>B</th></tr></thead><tbody>`
+      + choisis.map((_, i) => `<tr><td>${gauche[i]}</td><td>${d2[i]}</td></tr>`).join('')
+      + `</tbody></table>`,
+    key: key.join(' · ')
+  };
+}
+
+
+/* ------------------------------------------------------------------
+   Expressions à compléter.
+
+   L'élève reçoit le premier mot d'une expression du texte et doit trouver
+   le second dans une boîte qui contient des intrus. Il ne peut pas recopier
+   une phrase : il lui faut savoir que la saison est « rainy » et non
+   « raining », et que l'énergie est « renewable ». C'est précisément ce
+   que l'élève reconstruit à tort mot à mot depuis le français.
+   ------------------------------------------------------------------ */
+function exCollocation(ctx) {
+  const col = collocations();
+  const bas = String(ctx.text || '').toLowerCase();
+  /* on ne retient que les expressions qui figurent vraiment dans ce texte */
+  const presentes = col.liste.filter(p => bas.indexOf(p) >= 0);
+  /* « mobile phone » et « mobile phones » poseraient deux fois la même
+     question, avec deux réponses dans la boîte : un premier mot ne donne
+     qu'un item, et l'on garde l'expression la plus longue. */
+  const parPremier = new Map();
+  for (const p of presentes) {
+    const a = p.slice(0, p.indexOf(' '));
+    const ancien = parPremier.get(a);
+    if (!ancien || p.length > ancien.length) parPremier.set(a, p);
+  }
+  const uniques = [...parPremier.values()];
+  if (uniques.length < 3) return null;
+  const choisies = spreadPick(uniques, Math.min(ctx.n, 6));
+  const reponses = choisies.map(p => p.slice(p.indexOf(' ') + 1));
+  /* Les intrus sont les seconds termes d'autres expressions : ils sont
+     plausibles, et c'est ce qui empêche de répondre au hasard. */
+  const autres = [...col.seconds].filter(w => reponses.indexOf(w) < 0 && bas.indexOf(w) < 0
+    && !reponses.some(r => r.startsWith(w) || w.startsWith(r)));
+  const intrus = shuffledBy(autres, ctx.rnd).slice(0, 2);
+  const banque = shuffledBy([...new Set([...reponses, ...intrus])], ctx.rnd);
+  const items = choisies.map(p => esc(p.slice(0, p.indexOf(' '))) + ' ' + BLANK);
+  const key = choisies.map(p => p.slice(p.indexOf(' ') + 1));
+  return {
+    instruction: 'Complete each expression from the text with a word from the box. Two words will not be used.',
+    body: '<p class="ex-bank">' + banque.map(esc).join(' &middot; ') + '</p>' + ol(items),
+    key: keyLine(key),
+    note: 'These expressions are learnt as one block: have them repeated aloud.'
+  };
+}
+
 const EX_BUILDERS = {
   'Gap filling': exGapFill,
   'Multiple choice': exMCQ,
@@ -8955,6 +10981,13 @@ const EX_BUILDERS = {
   'Matching': exMatching,
   'Word or phrase ordering': exOrdering,
   'Grammar transformation / substitution': exTransform,
+  'Word formation': exWordForm,
+  'Word family': exWordFamily,
+  'Opposites': exOpposite,
+  'Word definition': exFindWord,
+  'Vocabulary matching': exDefinition,
+  'Expressions': exCollocation,
+  'Synonyms': exSynonym,
   'Sentence completion': exCompletion,
   'WH-questions': exQuestions,
   'Sentence writing from prompts': exPrompts,
@@ -9035,7 +11068,7 @@ const SKILL_FLOW = {
     skillLabel: 'Guiding question',
     skillSteps: ['Teacher: Read the text and tell the main idea of the text.',
       'Correction of the guiding question: the answer is given orally by the learners and checked by the class.'],
-    controlled: ['Gap filling', 'True / False', 'Matching'],
+    controlled: ['Word definition', 'True / False', 'Word formation'],
     semi: ['WH-questions', 'Information transfer into a table or form']
   },
   'Listening Comprehension': {
@@ -9052,7 +11085,7 @@ const SKILL_FLOW = {
     skillLabel: 'Guiding question',
     skillSteps: ['Teacher: Listen to the text and tell the main idea of what you heard.',
       'Correction of the guiding question: the answer is given orally by the learners and checked by the class.'],
-    controlled: ['True / False', 'Multiple choice', 'Gap filling'],
+    controlled: ['True / False', 'Multiple choice', 'Word definition'],
     semi: ['WH-questions', 'Information transfer into a table or form']
   },
   'Speaking': {
@@ -9069,7 +11102,7 @@ const SKILL_FLOW = {
     skillSteps: ['The teacher performs the model exchange with one learner in front of the class.',
       'The learners say in which situation the exchange is used and who is speaking to whom.',
       'The teacher checks pronunciation, word stress and intonation before the practice activities.'],
-    controlled: ['Matching', 'Word or phrase ordering'],
+    controlled: ['Expressions', 'Word or phrase ordering'],
     semi: ['Guided dialogue / exchange', 'WH-questions']
   },
   'Writing': {
@@ -9086,7 +11119,7 @@ const SKILL_FLOW = {
     skillSteps: ['The learners observe the layout of the model text, the order of the ideas and the linking words.',
       'Teacher: Read the model text and tell how the ideas are organised.',
       'The class writes one model sentence together with the teacher before the practice activities.'],
-    controlled: ['Gap filling', 'Sentence completion'],
+    controlled: ['Gap filling', 'Word formation', 'Sentence completion'],
     semi: ['Sentence writing from prompts', 'Guided paragraph writing']
   },
   'Translation': {
@@ -9680,10 +11713,518 @@ function collect() {
     exAuto: !!$('exAuto')?.checked, exKey: !!$('exKey')?.checked,
     lineNums: !!$('lineNums')?.checked,
     exCount: Math.min(8, Math.max(2, parseInt($('exCount')?.value) || 4)),
+    compoText: $('compoText')?.value.trim() || '',
+    compoFormat: formatCompoActif(),
+    compoPts: lireCompoPts(FORMATS_COMPO[formatCompoActif()]),
+    compoEcrit: { pert: nbChamp('cePert', 1), lang: nbChamp('ceLang', 2),
+                  coh: nbChamp('ceCoh', 2), perf: nbChamp('cePerf', 1) },
+    compoTitre: $('compoTitre')?.value.trim() || '',
+    compoSession: $('compoSession')?.value.trim() || '',
+    compoDuree: $('compoDuree')?.value.trim() || '',
+    compoCoef: $('compoCoef')?.value.trim() || '',
+    compoCorrige: $('compoCorrige') ? !!$('compoCorrige').checked : true,
+    compoSeed: [c, u?.id, l?.name, $('sessionSelect').value, $('sessionDate').value].join('|'),
     w: weights()
   };
 }
 
+/* ======================================================================
+   COMPOSITION — sujet d'évaluation (v13.24)
+
+   Source : « Instructions relatives à l'élaboration des sujets de langues
+   vivantes étrangères : anglais », DG-EG / Direction des curricula pour le
+   BEPC, et DGECC du 15 octobre 2024 pour le baccalauréat.
+
+   Deux prescriptions de ces textes commandent toute la fonction :
+
+   1. Le texte support doit être INÉDIT : jamais étudié en classe, jamais
+      utilisé à un examen, ni tiré d'annales, d'ouvrages au programme, de
+      Wikipédia ou d'une intelligence artificielle. Les textes supports du
+      logiciel sont des textes d'étude : ils sont donc exclus d'un sujet.
+      C'est l'enseignant qui colle son propre texte.
+   2. Les barèmes officiels sont fixés par partie, mais la répartition des
+      points de la production écrite ne l'est pas : elle se décide en
+      concertation avant correction. Tous les barèmes sont donc modifiables.
+
+   Les classes intermédiaires suivent le format de leur classe d'examen :
+   modèle BEPC de la 6e à la 3e, modèle du baccalauréat au second cycle,
+   selon la série.
+   ====================================================================== */
+
+const FORMATS_COMPO = {
+  'BEPC': {
+    nom: 'BEPC — post-primaire', duree: '2 h', coef: '1', mots: [225, 275], motsCible: '250 mots (± 10 %)',
+    parties: [
+      { cle: 'comp', titre: 'COMPREHENSION', pts: 6,
+        types: ['True / False', 'Multiple choice', 'Gap filling', 'Matching', 'Sentence completion', 'WH-questions'] },
+      { cle: 'voc', titre: 'VOCABULARY', pts: 4,
+        types: ['Word definition', 'Word formation', 'Expressions', 'Opposites', 'Vocabulary matching', 'Gap filling', 'Synonyms', 'Word family', 'Matching'],
+        note: 'Le texte officiel admet aussi synonymes, antonymes et définitions : ajoutez-en si votre texte s’y prête.' },
+      { cle: 'gram', titre: 'GRAMMAR', pts: 4,
+        types: ['Grammar transformation / substitution', 'Gap filling', 'Multiple choice', 'Word or phrase ordering'] },
+      { cle: 'ecr', titre: 'WRITING', pts: 6, ecriture: true }
+    ] },
+  'BAC-A': {
+    nom: 'Baccalauréat série A', duree: '3 h', coef: '3', mots: [350, 400], motsCible: '350 à 400 mots',
+    parties: [
+      { cle: 'comp', titre: 'COMPREHENSION', pts: 8,
+        types: ['True / False', 'Multiple choice', 'Gap filling', 'WH-questions', 'Sentence completion', 'Matching'],
+        note: 'Le vocabulaire est intégré à la compréhension, conformément au texte officiel.' },
+      { cle: 'str', titre: 'STRUCTURE PRACTICE', pts: 3,
+        types: ['Grammar transformation / substitution', 'Word formation', 'Gap filling', 'Multiple choice'] },
+      { cle: 'trad', titre: 'TRANSLATION', pts: 3, traduction: true },
+      { cle: 'ecr', titre: 'ESSAY WRITING', pts: 6, ecriture: true }
+    ] },
+  'BAC-CD': {
+    nom: 'Baccalauréat séries C et D', duree: '2 h', coef: '2', mots: [350, 400], motsCible: '350 à 400 mots',
+    parties: [
+      { cle: 'comp', titre: 'COMPREHENSION', pts: 11,
+        types: ['True / False', 'Multiple choice', 'Gap filling', 'WH-questions', 'Sentence completion', 'Matching'],
+        note: 'Le vocabulaire est intégré à la compréhension, conformément au texte officiel.' },
+      { cle: 'str', titre: 'STRUCTURE PRACTICE', pts: 3,
+        types: ['Grammar transformation / substitution', 'Word formation', 'Gap filling', 'Multiple choice'] },
+      { cle: 'ecr', titre: 'ESSAY WRITING', pts: 6, ecriture: true }
+    ] }
+};
+
+const FORMAT_DE_CLASSE = {
+  '6e': 'BEPC', '5e': 'BEPC', '4e': 'BEPC', '3e': 'BEPC',
+  '2nde A': 'BAC-A', '1ere A': 'BAC-A', 'Terminale A': 'BAC-A',
+  '2nde C': 'BAC-CD', '1ere C-D': 'BAC-CD', 'Terminale C-D': 'BAC-CD'
+};
+
+const formatCompo = c => FORMATS_COMPO[FORMAT_DE_CLASSE[c] || 'BEPC'];
+/* Un exercice pour quatre points environ, trois au plus : c'est le rythme
+   des sujets réels, et il laisse à chaque item un poids défendable. */
+/* Un barème s'écrit en quarts de point : 0,92 pt par réponse ne se porte
+   sur aucune copie. Les points d'une partie se répartissent donc en points
+   entiers entre ses exercices — 11 points sur trois exercices font 4, 4 et
+   3 — et le nombre d'items s'ajuste pour que la note par réponse tombe
+   juste. Si l'enseignant a tapé un barème à virgule, on respecte son choix
+   et l'on se borne à lui rappeler les points de l'exercice. */
+const entier = x => Math.abs(x - Math.round(x)) < 1e-9;
+
+function repartirPoints(pts, n) {
+  if (n <= 1) return [pts];
+  if (!entier(pts)) return Array.from({ length: n }, () => pts / n);
+  const base = Math.floor(pts / n), reste = Math.round(pts - base * n);
+  return Array.from({ length: n }, (_, i) => base + (i < reste ? 1 : 0));
+}
+
+/* Les points d'une partie se répartissent au prorata des items réellement
+   produits : un exercice de deux questions ne saurait valoir autant qu'un
+   exercice de quatre. Quand la division tombe juste au quart de point,
+   chaque réponse vaut la même chose dans toute la partie, et c'est ainsi
+   qu'un barème se lit. Sinon, le reliquat va à l'exercice où il tombe juste. */
+function allouerPoints(pts, items) {
+  const n = items.length;
+  if (!n) return [];
+  const tot = items.reduce((s, k) => s + k, 0);
+  if (!tot) return items.map(() => pts / n);
+  const m = pts / tot;
+  if (entier(m * 4)) return items.map(k => Math.round(m * k * 100) / 100);
+  const q = Math.floor(m * 4) / 4;
+  const out = items.map(k => Math.round(q * k * 100) / 100);
+  const reste = Math.round((pts - out.reduce((s, x) => s + x, 0)) * 100) / 100;
+  if (reste > 0) {
+    let k = out.findIndex((v, i) => items[i] > 0 && entier(((v + reste) / items[i]) * 4));
+    if (k < 0) k = 0;
+    out[k] = Math.round((out[k] + reste) * 100) / 100;
+  }
+  return out;
+}
+
+function itemsPour(pts, voulu) {
+  if (!entier(pts) || pts <= 0) return voulu;
+  for (let d = 0; d <= 6; d++)
+    for (const k of [voulu - d, voulu + d]) {
+      if (k < 2 || k > 8) continue;
+      if ((pts * 4) % k === 0) return k;
+    }
+  return voulu;
+}
+
+/* Le nombre d'items se lit dans l'énoncé, pas dans la clé : un exercice de
+   transformation n'a pas de clé — la réponse dépend de la transformation
+   demandée — et son barème se répartirait alors sur un seul item. */
+function compterItems(built) {
+  const n = ((built.body || '').match(/<li\b/g) || []).length;
+  if (n) return n;
+  const k = (built.key || '').split(' · ').filter(Boolean).length;
+  return Math.max(1, k);
+}
+
+const nbExercices = pts => Math.max(1, Math.min(3, Math.round(pts / 4)));
+const pointsJolis = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
+
+/* Le passage à traduire : environ cinquante mots pris au cœur du texte, et
+   délimités comme le veut l'énoncé officiel — « from “…” down to “… .” ». */
+function passageTraduction(texte) {
+  const phrases = sentencesOf(texte);
+  if (!phrases.length) return null;
+  const depart = Math.max(0, Math.floor(phrases.length / 3));
+  const prises = [];
+  let total = 0;
+  for (let i = depart; i < phrases.length && total < 45; i++) { prises.push(phrases[i]); total += wordsOf(phrases[i]).length; }
+  if (!prises.length) return null;
+  const bloc = prises.join(' ');
+  const mots = wordsOf(bloc);
+  return { debut: mots.slice(0, 4).join(' '), fin: mots.slice(-4).join(' '), bloc, mots: mots.length };
+}
+
+function compositionHTML(d, u, l) {
+  const fmt = FORMATS_COMPO[d.compoFormat] || formatCompo(d.c);
+  /* Le partage se fait en peigne : l'exercice n° i prend une phrase sur K
+     à partir de la i-ième. Chacun balaie ainsi tout le texte, du début à la
+     fin, au lieu d'en recevoir un bloc. Si le texte est trop court pour que
+     chaque exercice garde trois phrases, on renonce au partage : mieux vaut
+     deux exercices qui se recoupent qu'un exercice que le logiciel ne peut
+     plus construire. */
+  let reserveDe = () => null;
+  /* Jamais d.supportText : un texte d'étude de la base ne peut pas servir
+     de support à un sujet. L'enseignant colle le sien. */
+  const texte = d.compoText || '';
+  const nbMots = wordsOf(texte).length;
+  const [lo, hi] = fmt.mots;
+
+  const avis = [];
+  if (!texte.trim()) avis.push('Collez d’abord votre texte support dans les réglages, rubrique « Composition ».');
+  else if (nbMots < lo || nbMots > hi)
+    avis.push(`Votre texte fait ${nbMots} mots. Le format ${fmt.nom} en demande ${fmt.motsCible}.`);
+  avis.push('Le texte support d’un sujet doit être inédit : jamais étudié en classe, jamais utilisé à un examen, ni tiré d’annales, d’ouvrages au programme, de Wikipédia ou d’une intelligence artificielle. Les textes du logiciel sont des textes d’étude : ils ne conviennent pas ici.');
+
+  const bareme = d.compoPts || {};
+  const total = fmt.parties.reduce((s, p) => s + (bareme[p.cle] != null ? bareme[p.cle] : p.pts), 0);
+
+  const toutesPhrases = sentencesOf(texte);
+
+  const corps = [], corrige = [];
+  /* Premier passage : combien d'exercices le sujet comptera-t-il ? On ne
+     peut partager les phrases qu'une fois ce nombre connu. */
+  const creneaux = [];
+  let romain = 0;
+  const ROMAINS = ['I', 'II', 'III', 'IV', 'V'];
+
+  /* Tour de reconnaissance. Il arrête le nombre d'exercices avant d'en
+     bâtir un seul, car les deux décisions se tiennent : plus il y a
+     d'exercices, moins chacun reçoit de phrases. On compte quatre phrases
+     par exercice ; en deçà, on en retire un plutôt que de les affamer
+     tous. Chaque partie garde au moins un exercice. */
+  const PHRASES_PAR_EX = 4;
+  const planParties = {}, recoursParties = {};
+  (() => {
+    const vus = new Set();
+    const souhaits = [];
+    for (const p of fmt.parties) {
+      if (p.ecriture || p.traduction) continue;
+      const pts = bareme[p.cle] != null ? bareme[p.cle] : p.pts;
+      const dispo = (p.types || []).filter(t => EX_BUILDERS[t] && !vus.has(t));
+      const n = Math.min(nbExercices(pts), Math.max(1, dispo.length));
+      const noms = dispo.slice(0, n);
+      noms.forEach(t => vus.add(t));
+      souhaits.push({ cle: p.cle, noms, recours: dispo.slice(n) });
+    }
+    /* On rogne par la fin, et seulement sur les parties qui ont plus d'un
+       exercice : la partie de grammaire n'en a qu'un, elle le garde. */
+    const plafond = Math.max(souhaits.length, Math.floor(toutesPhrases.length / PHRASES_PAR_EX));
+    let totalEx = souhaits.reduce((s, x) => s + x.noms.length, 0);
+    while (totalEx > plafond) {
+      const gros = souhaits.filter(x => x.noms.length > 1)
+        .sort((a, b) => b.noms.length - a.noms.length)[0];
+      if (!gros) break;
+      gros.noms.pop();
+      totalEx--;
+    }
+    souhaits.forEach(x => { planParties[x.cle] = x.noms; recoursParties[x.cle] = x.recours;
+      x.noms.forEach(t => creneaux.push(t)); });
+    const K = creneaux.length;
+    if (K > 1) {
+      const lots = Array.from({ length: K }, (_, i) =>
+        new Set(toutesPhrases.filter((_, j) => j % K === i)));
+      reserveDe = i => (i >= 0 && i < K ? lots[i] : null);
+    }
+  })();
+
+  for (const p of fmt.parties) {
+    const pts = bareme[p.cle] != null ? bareme[p.cle] : p.pts;
+    const titre = `${ROMAINS[romain++]}. ${p.titre} (${pointsJolis(pts)} ${pts > 1 ? 'pts' : 'pt'})`;
+
+    if (p.ecriture) {
+      const dp = { ...d, isProblem: true, isConso: false, isLearning: false, consigneCount: 3 };
+      let parts = null;
+      try { parts = integrationParts(dp, u, l); } catch (e) { parts = null; }
+      const cons = (parts?.consignes || []).slice(0, 3);
+      const enonce = parts ? parts.enonce : '';
+      const volDit = /\b\d{2,3}\s*words\b/i.test(enonce);
+      const vol = parts && parts.volume ? parts.volume
+        : (fmt.nom === 'BEPC — post-primaire' ? 'about 120 words' : 'about 150 words');
+      corps.push(`<section class="compo-partie"><h3>${esc(titre)}</h3>
+        <p>${parts ? esc(enonce) : 'La situation d’intégration se compose à partir de la leçon choisie.'}</p>
+        <p><b>${esc(parts?.amorce || 'In your production:')}</b></p>
+        <ol class="compo-cons">${cons.map(c => `<li>${esc(c)}</li>`).join('')}</ol>
+        ${volDit ? '' : `<p class="compo-vol">Write ${esc(vol)}.</p>`}</section>`);
+      const g = d.compoEcrit || { pert: 1, lang: 2, coh: 2, perf: 1 };
+      const somme = g.pert + g.lang + g.coh + g.perf;
+      corrige.push(`<div class="compo-cle"><b>${esc(titre)}</b>
+        <table class="grid"><thead><tr><th>Critère</th><th class="n">Points</th></tr></thead><tbody>
+        <tr><td>Pertinence de la production</td><td class="n">${pointsJolis(g.pert)}</td></tr>
+        <tr><td>Utilisation correcte de la langue</td><td class="n">${pointsJolis(g.lang)}</td></tr>
+        <tr><td>Cohérence du texte</td><td class="n">${pointsJolis(g.coh)}</td></tr>
+        <tr><td>Perfectionnement</td><td class="n">${pointsJolis(g.perf)}</td></tr>
+        <tr><td><b>Total</b></td><td class="n"><b>${pointsJolis(somme)}</b></td></tr></tbody></table>
+        ${somme !== pts ? `<p class="warn-note">Le total des critères (${pointsJolis(somme)}) ne correspond pas aux ${pointsJolis(pts)} points de la partie.</p>` : ''}
+        <p class="small-note">Les trois consignes sont notées séparément dans la pertinence. La répartition se décide en concertation avant la correction : modifiez-la dans les réglages.</p></div>`);
+      continue;
+    }
+
+    if (p.traduction) {
+      const pa = passageTraduction(texte);
+      corps.push(`<section class="compo-partie"><h3>${esc(titre)}</h3>
+        ${pa ? `<p>Translate into French the passage of the text from “<b>${esc(pa.debut)}</b>…” down to “…<b>${esc(pa.fin)}</b>.”</p>`
+             : '<p>Le passage à traduire se choisit dans le texte support.</p>'}</section>`);
+      corrige.push(`<div class="compo-cle"><b>${esc(titre)}</b>
+        ${pa ? `<p class="small-note">Passage retenu (${pa.mots} mots) :</p><p><i>${esc(pa.bloc)}</i></p>` : ''}
+        <p class="small-note">Le logiciel ne traduit pas : rédigez vous-même la traduction de référence, et prévoyez les variantes acceptables.</p></div>`);
+      continue;
+    }
+
+    const choisis = planParties[p.cle] || [];
+    if (!choisis.length) { romain--; continue; }
+
+    /* Premier temps : construire. On ne connaît le nombre d'items qu'une
+       fois l'exercice bâti — un générateur en rend parfois moins que demandé. */
+    const pressentis = repartirPoints(pts, choisis.length);
+    const recours = [...(recoursParties[p.cle] || [])];
+    const batir = (nom, voulu, graine, restreint) => {
+      PHRASES_RESERVEES = restreint;
+      let r = null;
+      try { r = EX_BUILDERS[nom]({ ...d, text: texte, n: voulu, lineNums: d.lineNums,
+        grammar: inferGrammar(d.session, d.lesson, d.fn),
+        topic: [u ? cleanTheme(u.label) : '', d.lesson, d.session].filter(Boolean).join(' '),
+        early: ['6e', '5e'].indexOf(d.c) >= 0,
+        rnd: rngFrom(hashStr((d.compoSeed || '') + '|' + graine + '|' + nom)) }); } catch (e) { r = null; }
+      PHRASES_RESERVEES = null;
+      return r;
+    };
+    const batis = choisis.map((nom, i) => {
+      const rang = creneaux.indexOf(nom);
+      const voulu = itemsPour(pressentis[i], d.exCount);
+      let built = batir(nom, voulu, 'compo', reserveDe(rang));
+      let items = built ? compterItems(built) : 0;
+      /* Un exercice de moins de trois items n'est pas un exercice : on le
+         rebâtit sur tout le texte, quitte à recouper un autre exercice. */
+      if (items < 3 && toutesPhrases.length >= 6) {
+        const large = batir(nom, Math.max(4, voulu), 'large', null);
+        const n2 = large ? compterItems(large) : 0;
+        if (n2 > items) { built = large; items = n2; }
+      }
+      /* Si ce type ne donne rien sur le texte de l'enseignant — un texte
+         sans mot dérivé ne nourrit pas la formation de mots — on prend le
+         type suivant prévu pour cette partie. Un cadre vide à remplir à la
+         main n'est pas un sujet. */
+      while (items < 2 && recours.length) {
+        const autre = recours.shift();
+        if (choisis.indexOf(autre) >= 0) continue;
+        const r = batir(autre, voulu, 'compo', reserveDe(rang)) || batir(autre, Math.max(4, voulu), 'large', null);
+        const n3 = r ? compterItems(r) : 0;
+        if (n3 >= 2) return { nom: autre, built: r, items: n3 };
+      }
+      return { nom, built, items };
+    });
+
+    /* Deuxième temps : répartir les points au prorata des items obtenus. */
+    const lots = allouerPoints(pts, batis.map(x => x.items));
+
+    const blocs = [], cles = [];
+    batis.forEach((x, i) => {
+      const { nom, built } = x;
+      const part = lots[i];
+      const lettre = String.fromCharCode(97 + i);
+      const unite = v => pointsJolis(v) + (v > 1 ? ' pts' : ' pt');
+      if (!built) {
+        blocs.push(`<div class="compo-ex"><p class="compo-ex-t">${lettre}) ${esc(nom)} — ${unite(part)}</p>
+          <p class="small-note">Le logiciel n’a pas pu construire cet exercice sur ce texte. Rédigez-le vous-même.</p><div class="fillbox"></div></div>`);
+        cles.push(`<p><b>${lettre}) ${esc(nom)}</b></p><p class="small-note">À rédiger.</p>`);
+        return;
+      }
+      const parRep = part / Math.max(1, x.items);
+      const bar = entier(parRep * 4)
+        ? x.items + ' × ' + unite(parRep) + ' = ' + unite(part)
+        : x.items + ' items — répartissez les ' + unite(part);
+      blocs.push(`<div class="compo-ex"><p class="compo-ex-t">${lettre}) ${esc(nom)} — ${unite(part)}
+        <span class="compo-bar">${esc(bar)}</span></p>
+        <p class="instr"><b>Instruction:</b> ${esc(built.instruction)}</p>${built.body}</div>`);
+      const annexes = [built.note, built.warn].filter(Boolean)
+        .map(t => `<p class="small-note">${esc(t)}</p>`).join('');
+      cles.push(`<p><b>${lettre}) ${esc(nom)} — ${unite(part)}</b>${
+        built.key ? ' — ' + esc(built.key) : ''}</p>${annexes}`);
+    });
+    corps.push(`<section class="compo-partie"><h3>${esc(titre)}</h3>
+      ${p.note ? `<p class="small-note">${esc(p.note)}</p>` : ''}${blocs.join('')}</section>`);
+    /* Pour la partie de grammaire, le correcteur reçoit en outre le rappel
+       de la règle et de la faute attendue : c'est ce qui harmonise une
+       correction menée à plusieurs. */
+    if (p.cle === 'gram' || p.cle === 'str') {
+      const g = miniGrammaire(inferGrammar(d.session, d.lesson, d.fn));
+      if (g) cles.push(`<p class="small-note"><b>Rappel</b> — ${esc(g.regle)}<br>`
+        + `<b>Faute à attendre</b> — ${esc(g.faute)}</p>`);
+    }
+    corrige.push(`<div class="compo-cle"><b>${esc(titre)}</b>${cles.join('') || '<p class="small-note">À rédiger.</p>'}</div>`);
+  }
+
+  PHRASES_RESERVEES = null;
+  const ligne = (a, b) => `<tr><td>${a}</td><td>${b}</td></tr>`;
+  return `
+  <div class="compo-avis">${avis.map(a => `<p>${esc(a)}</p>`).join('')}</div>
+  <div class="compo-sujet">
+    <div class="compo-tete">
+      <div>
+        <p class="compo-etab">${esc(d.school || '……………………………………………')}</p>
+        <p class="compo-mini">${esc(d.province || '')}</p>
+      </div>
+      <div class="compo-droite">
+        <p class="compo-mini">${esc(d.compoSession || 'Session de ……………………')}</p>
+        <p class="compo-mini">Classe : <b>${esc(levelInfo(d.c).label)}</b></p>
+      </div>
+    </div>
+    <h2 class="compo-titre">${esc(d.compoTitre || 'ÉPREUVE D’ANGLAIS')}</h2>
+    <table class="compo-bandeau"><tbody>
+      ${ligne('Durée', esc(d.compoDuree || fmt.duree))}
+      ${ligne('Coefficient', esc(d.compoCoef || fmt.coef))}
+      ${ligne('Format', esc(fmt.nom))}
+      ${ligne('Total', pointsJolis(total) + ' points')}
+    </tbody></table>
+    ${total !== 20 ? `<p class="warn-note">Le total du barème fait ${pointsJolis(total)} points et non 20.</p>` : ''}
+
+    <h3 class="compo-h-texte">TEXT</h3>
+    ${texte.trim() ? (d.lineNums ? texteNumerote(texte) : `<div class="box">${esc(texte).replace(/\n/g, '<br>')}</div>`)
+                   : '<div class="fillbox"></div>'}
+    <p class="compo-source">Source : ……………………………………………………………… (titre, auteur, année, page). Préciser si le texte a été adapté.</p>
+    ${corps.join('')}
+  </div>
+  <div class="compo-corrige">
+    <h2 class="compo-titre">CORRIGÉ ET BARÈME</h2>
+    <p class="small-note">Exemplaire du correcteur. Il ne se distribue pas aux candidats.</p>
+    ${corrige.join('')}
+  </div>`;
+}
+
+
+/* ------------------------------------------------------------------
+   Réglages de la composition.
+   Le format se déduit de la classe — modèle BEPC de la 6e à la 3e,
+   modèle du baccalauréat au second cycle selon la série — et reste
+   remplaçable à la main. Les barèmes sont tous modifiables : les textes
+   officiels fixent les points par partie, mais leur répartition fine se
+   décide en concertation avant la correction.
+   ------------------------------------------------------------------ */
+function nbChamp(id, dft) {
+  const v = parseFloat($(id)?.value);
+  return isFinite(v) && v >= 0 ? v : dft;
+}
+
+/* Le nombre de mots du texte support est la première chose que vérifie un
+   validateur de sujet : on l'affiche en permanence, avec la fourchette due. */
+function majCompoMots() {
+  const n = $('compoWordCount');
+  if (!n) return;
+  const t = $('compoText')?.value || '';
+  const m = t.trim() ? wordsOf(t).length : 0;
+  const fmt = FORMATS_COMPO[formatCompoActif()];
+  if (!m) { n.textContent = 'Aucun texte coll\u00e9. Le format ' + fmt.nom + ' demande ' + fmt.motsCible + '.'; n.classList.remove('warn-note'); return; }
+  const [lo, hi] = fmt.mots;
+  const faux = m < lo || m > hi;
+  n.textContent = m + ' mots. Le format ' + fmt.nom + ' demande ' + fmt.motsCible + '.';
+  n.classList.toggle('warn-note', faux);
+}
+
+function formatCompoActif() {
+  const v = $('compoFormat')?.value || 'auto';
+  if (v !== 'auto' && FORMATS_COMPO[v]) return v;
+  return FORMAT_DE_CLASSE[$('classLevel').value] || 'BEPC';
+}
+
+function lireCompoPts(fmt) {
+  const o = {};
+  if (!fmt) return o;
+  fmt.parties.forEach(p => {
+    const el = $('compoPt_' + p.cle);
+    const v = el ? parseFloat(el.value) : NaN;
+    o[p.cle] = isFinite(v) && v >= 0 ? Math.min(20, v) : p.pts;
+  });
+  return o;
+}
+
+function majCompoNotes() {
+  const cle = $('compoBareme')?.dataset.format;
+  const fmt = FORMATS_COMPO[cle];
+  if (!fmt) return;
+  const pts = lireCompoPts(fmt);
+  const total = fmt.parties.reduce((s, p) => s + pts[p.cle], 0);
+  const n = $('compoTotalNote');
+  if (n) {
+    const faux = Math.abs(total - 20) > 0.001;
+    n.textContent = 'Total : ' + pointsJolis(total) + ' points.'
+      + (faux ? ' Le barème officiel fait 20 points.' : '');
+    n.classList.toggle('warn-note', faux);
+  }
+  /* La grille de production écrite doit totaliser les points de sa partie. */
+  const pEcr = fmt.parties.find(p => p.ecriture);
+  const m = $('compoEcritNote');
+  if (m && pEcr) {
+    const somme = nbChamp('cePert', 1) + nbChamp('ceLang', 2) + nbChamp('ceCoh', 2) + nbChamp('cePerf', 1);
+    const voulu = pts[pEcr.cle];
+    const faux = Math.abs(somme - voulu) > 0.001;
+    m.textContent = 'Total des critères : ' + pointsJolis(somme) + ' sur les '
+      + pointsJolis(voulu) + ' points de la partie.'
+      + (faux ? ' Ajustez pour que les deux coïncident.' : '');
+    m.classList.toggle('warn-note', faux);
+  }
+}
+
+function buildCompoBareme(forcer) {
+  const box = $('compoBareme');
+  if (!box) return;
+  const cle = formatCompoActif();
+  if (!forcer && box.dataset.format === cle) { majCompoNotes(); return; }
+  const fmt = FORMATS_COMPO[cle];
+  box.dataset.format = cle;
+  box.innerHTML = fmt.parties.map(p =>
+    '<div class="f"><label for="compoPt_' + p.cle + '">' + esc(p.titre) + '</label>'
+    + '<input type="number" id="compoPt_' + p.cle + '" data-cle="' + p.cle
+    + '" min="0" max="20" step="0.5" value="' + p.pts + '"></div>').join('');
+  box.querySelectorAll('input[data-cle]').forEach(i =>
+    i.addEventListener('input', () => {
+      clearTimeout(typingTimer);
+      majCompoNotes();
+      typingTimer = setTimeout(autoGenerate, 400);
+    }));
+  /* La grille de production écrite suit le format : on la remet à une
+     répartition qui totalise bien les points de la partie. */
+  const pEcr = fmt.parties.find(p => p.ecriture);
+  if (pEcr) {
+    const q = pEcr.pts / 6;
+    $('cePert').value = pointsJolis(1 * q).replace(',', '.');
+    $('ceLang').value = pointsJolis(2 * q).replace(',', '.');
+    $('ceCoh').value = pointsJolis(2 * q).replace(',', '.');
+    $('cePerf').value = pointsJolis(1 * q).replace(',', '.');
+  }
+  majCompoNotes();
+  majCompoMots();
+}
+
+/* Trois vues se partagent la scène : la fiche, la fiche d'accompagnement
+   et le sujet de composition. Une seule à la fois, sans quoi l'impression
+   sortirait les trois. */
+function montrerVue(nom) {
+  $('output').hidden = nom !== 'plan';
+  $('supportSheet').hidden = nom !== 'sheet';
+  $('compoSheet').hidden = nom !== 'compo';
+  $('btnSheet').textContent = nom === 'sheet' ? 'Back to the plan' : "Teacher's sheet";
+  $('btnCompo').textContent = nom === 'compo' ? 'Back to the plan' : 'Composition';
+  $('btnEdit').disabled = nom !== 'plan';
+  window.scrollTo(0, 0);
+}
 /* ------------------------------------------------------------------
    Fiche d'accompagnement du professeur.
    Elle ne fait pas partie de la fiche de leçon et ne s'imprime qu'à la
@@ -9691,6 +12232,137 @@ function collect() {
    erreurs prévisibles, ni la prononciation. C'est un appui pour celui qui
    fait cours, pas une rubrique pour l'inspection.
    ------------------------------------------------------------------ */
+/* ======================================================================
+   ÉTAGE 2 — MINI-LEÇONS DE GRAMMAIRE
+
+   Une par fait de langue du programme. Elles ne s'impriment pas dans la
+   fiche de leçon — le canevas officiel n'en prévoit pas — mais dans la
+   fiche d'accompagnement du professeur, qui est faite pour cela.
+
+   Chacune tient en quatre lignes : la règle telle qu'on l'écrit au
+   tableau, deux exemples pris au contexte burkinabè, la faute que font
+   régulièrement les élèves francophones, et la correction à donner sur le
+   moment. C'est la faute qui compte : un professeur sait la règle, il perd
+   du temps à retrouver pourquoi l'élève s'est trompé.
+   ====================================================================== */
+const MINI_GRAMMAIRE = {
+  'the verb "be", personal pronouns and common greeting formulas': {
+    regle: 'I am / you are / he, she, it is / we, you, they are. The pronoun is never left out in English.',
+    ex: ['I am a pupil in 6ème.', 'She is my English teacher.'],
+    faute: '« Is a teacher » or « He teacher » — the French drops the pronoun or the verb « être » before a noun.',
+    remede: 'Write the three columns on the board: pronoun + be + the rest. Have them read a full line aloud before answering.'
+  },
+  'imperatives and the modals can, could and may': {
+    regle: 'The imperative uses the bare verb: Open your books. The negative is Do not / Don\'t open. For permission: Can I…? May I…? Could I…?',
+    ex: ['Open your books at page twelve.', 'May I come in, please?'],
+    faute: '« Can I to go out? » and « Don\'t to speak » — the infinitive « to » is carried over from French.',
+    remede: 'After a modal and after « do not », the verb never takes « to ». Say the rule once, then drill five short orders.'
+  },
+  'the simple present for routines and time expressions': {
+    regle: 'The simple present says what is habitual. He, she, it adds -s. Time expressions: every day, on Mondays, at six o\'clock, in the morning.',
+    ex: ['School begins at seven o\'clock.', 'She goes to the market on Fridays.'],
+    faute: '« He go to school » — the -s of the third person is the commonest omission of all.',
+    remede: 'Make them say the subject aloud before the verb. If it is he, she or it, the verb takes -s. Correct it every single time.'
+  },
+  'the simple present and present continuous for actions': {
+    regle: 'Simple present: a habit. Present continuous (be + -ing): what is happening now.',
+    ex: ['He plays football every Sunday.', 'He is playing football now.'],
+    faute: '« He is playing football every Sunday » — the continuous is used for a habit.',
+    remede: 'Oppose two sentences on the board with « every Sunday » and « now ». Let them choose the tense themselves.'
+  },
+  'countable and uncountable nouns, articles and expressions of preference': {
+    regle: 'Uncountable nouns take no plural and no a/an: water, rice, milk, bread, meat, salt, oil, money, food, information, advice, news, work, furniture, luggage, homework.',
+    ex: ['I would like some rice and some meat.', 'She gave me good advice.'],
+    faute: '« Informations », « advices », « a bread » — French counts what English does not.',
+    remede: 'Give the quantity instead: a piece of advice, a loaf of bread, a glass of water. Write the three on the board and keep them there.'
+  },
+  'adjectives and comparative structures': {
+    regle: 'The adjective comes before the noun and never takes -s. Short adjectives: -er … than. Long adjectives: more … than. Irregular: good/better, bad/worse.',
+    ex: ['She is taller than her sister.', 'This road is more dangerous than that one.'],
+    faute: '« A car red » and « more tall » — the French order of the adjective, and the double comparison « more taller ».',
+    remede: 'One rule at a time: adjective before noun today, comparative tomorrow. Never both in the same session.'
+  },
+  'possessive adjectives, possessive pronouns and the possessive case': {
+    regle: 'my, your, his, her, its, our, their agree with the owner, not with the thing owned. The possessive case: Awa\'s book, the pupils\' books.',
+    ex: ['Awa lost her pen.', 'This is my brother\'s bicycle.'],
+    faute: '« Awa lost his pen » — in French « son » agrees with the object, in English with the owner.',
+    remede: 'Ask: who owns it? A girl, so « her ». Make them answer that question aloud before they write.'
+  },
+  'would like to, can, and polite expressions for invitations': {
+    regle: 'Would you like to…? — Yes, I\'d love to. / I\'m sorry, I can\'t. « Want » is direct; « would like » is polite.',
+    ex: ['Would you like to come to my birthday?', 'I\'m sorry, I can\'t. I have to help my mother.'],
+    faute: '« I want that you come » — the French subjunctive construction after « vouloir ».',
+    remede: 'Teach the whole formula as one block: I would like you to come. No analysis in 6ème and 5ème.'
+  },
+  'prepositions of place and imperative forms for directions': {
+    regle: 'in, on, at, under, behind, in front of, next to, between, opposite. Directions in the imperative: go straight on, turn left, take the second street.',
+    ex: ['The school is opposite the market.', 'Turn right at the roundabout.'],
+    faute: '« In the right » and « on the market » — prepositions are the hardest point to carry over from French.',
+    remede: 'Do not teach a list. Place objects on the desk and make them say where each one is.'
+  },
+  'the simple present, cause-and-effect expressions and should': {
+    regle: 'Cause and effect: because, so, that is why, leads to, causes. Advice: you should / you should not + bare verb.',
+    ex: ['He is ill because he drank dirty water.', 'You should boil the water before drinking it.'],
+    faute: '« You should to wash » and « because of he is ill » — « to » after the modal, and « because of » before a clause.',
+    remede: '« Because » takes a sentence, « because of » takes a noun. Give one example of each and keep them on the board.'
+  },
+  'the simple present, cause-and-effect expressions and advice': {
+    regle: 'The simple present states a general truth. Cause: because, due to, as a result of. Advice: should, ought to, must.',
+    ex: ['Plastic bags pollute the soil.', 'We must stop burning them in the open.'],
+    faute: '« The pollution she is dangerous » — the subject is repeated by a pronoun, as in spoken French.',
+    remede: 'Cross out the extra pronoun on the board. Say it once: in English the subject is said only once.'
+  },
+  'the simple past and time markers': {
+    regle: 'Regular verbs take -ed. Irregular verbs are learnt by heart. Markers: yesterday, last week, in 1960, two years ago. In the negative and the question the verb returns to its bare form: did not go, Did you go?',
+    ex: ['Burkina Faso became independent in 1960.', 'She did not go to the wedding.'],
+    faute: '« He did not went » and « He has gone yesterday » — the past kept after « did », and the present perfect with a date.',
+    remede: 'After « did », the verb has no past. Write did + base on the board and point at it each time the mistake comes back.'
+  },
+  'will, be going to and expressions of future plans': {
+    regle: '« will » for a decision or a prediction; « be going to » for an intention already formed. Both are followed by the bare verb.',
+    ex: ['I will help you with your luggage.', 'She is going to open a small shop next year.'],
+    faute: '« I will to be a doctor » and the present used for the future, as in French.',
+    remede: 'Ask them what they intend to do after the bac. Every answer must contain « going to ».'
+  },
+  'conditional structures and expressions of cause and consequence': {
+    regle: 'If + present, … will + bare verb (a real possibility). If + past, … would + bare verb (an imagined one). Never « will » inside the « if » clause.',
+    ex: ['If it rains, the harvest will be good.', 'If I had a computer, I would learn faster.'],
+    faute: '« If it will rain » — the French future after « si » does not exist in English.',
+    remede: 'Underline the « if » clause and write PRESENT above it. The mistake disappears when they see the two halves separately.'
+  },
+  'expressions for giving opinions, reasons, agreement and disagreement': {
+    regle: 'I think (that)…, In my opinion…, I agree with you, I do not agree, It seems to me that… Reasons: because, since, as, for this reason.',
+    ex: ['In my opinion, early marriage harms girls\' schooling.', 'I do not agree with you, because the law is clear.'],
+    faute: '« I am agree » — a word-for-word copy of « je suis d\'accord ».',
+    remede: '« Agree » is already a verb and needs no « be ». Write I agree / I do not agree and have the class repeat it.'
+  },
+  'comparative structures and expressions of equality': {
+    regle: 'Equality: as … as. Inequality: more/less … than, not as … as. The same … as, different from.',
+    ex: ['Girls are as capable as boys.', 'Women do not earn as much as men for the same work.'],
+    faute: '« As capable than » and « different than » — the comparison word of the wrong structure.',
+    remede: 'Two structures, two words: « as … as » and « more … than ». Never mix them in the same exercise.'
+  },
+  'the layout of a personal letter and the formulas of opening and closing': {
+    regle: 'A personal letter: the writer\u2019s town and the date at the top right, then Dear + first name, the body, and a closing formula \u2014 Yours, Love from, Best wishes \u2014 followed by the first name.',
+    ex: ['Ouagadougou, 12 March 2026', 'Dear Awa, \u2026 Write back soon. Love from Salif.'],
+    faute: '\u00ab Dear Mr Awa \u00bb and the French date order \u2014 the title before a first name, and 12/03 read as December.',
+    remede: 'Draw the empty layout on the board before any writing. Let them place the five parts themselves, then fill them in.'
+  },
+  'there is / there are, the plural of nouns and the vocabulary of the topic': {
+    regle: 'there is + singular, there are + plural. Most plurals take -s; some are irregular: children, women, men, people, feet, teeth. Uncountable nouns have no plural.',
+    ex: ['There is a market near the school.', 'There are three hospitals in the town.'],
+    faute: '\u00ab It has a market \u00bb \u2014 a word-for-word copy of \u00ab il y a \u00bb \u2014 and \u00ab there is three hospitals \u00bb.',
+    remede: 'Count aloud with them: one, so \u00ab there is \u00bb; more than one, so \u00ab there are \u00bb. Make them say the number before the sentence.'
+  },
+  'modals of obligation and necessity, and expressions of advice': {
+    regle: 'must and have to express an obligation; need to a necessity; should advice. In the negative: must not forbids, do not have to simply releases.',
+    ex: ['An entrepreneur must keep a record of every sale.', 'You do not have to borrow money to begin.'],
+    faute: '« You must not to pay » and the confusion between « must not » and « do not have to ».',
+    remede: 'Give the pair: you must not smoke here (it is forbidden) / you do not have to come (you are free). The contrast fixes it.'
+  }
+};
+const miniGrammaire = pt => MINI_GRAMMAIRE[pt] || null;
+
 function teacherSheet(d, u, l) {
   const b = lessonSupport(d.c, u?.id, l?.name);
   if (!b) return `<div class="title"><h2>Teacher's sheet</h2></div>
@@ -9713,7 +12385,25 @@ function teacherSheet(d, u, l) {
       <tbody>${b.pron.map(e => `<tr><td><b>${esc(e[0])}</b></td><td>${esc(e[1])}</td><td>${esc(e[2])}</td></tr>`).join('')}</tbody></table>
 
     <h3>Expressions of the language function</h3>
-    ${li(b.exp)}`;
+    ${li(b.exp)}
+    ${blocGrammaire(inferGrammar(d.session, d.lesson, d.fn))}`;
+}
+
+/* La mini-leçon du fait de langue de la séance. Elle ne figure pas dans la
+   fiche de leçon — le canevas officiel ne la prévoit pas — mais elle a sa
+   place ici : ce qu'un professeur cherche à la dernière minute, ce n'est
+   pas la règle, c'est la raison pour laquelle l'élève se trompe. */
+function blocGrammaire(pt) {
+  const g = miniGrammaire(pt);
+  if (!g) return '';
+  return `
+    <h3>Grammar point — ${esc(pt)}</h3>
+    <table class="grid"><tbody>
+      <tr><td style="width:22%"><b>Règle</b></td><td>${esc(g.regle)}</td></tr>
+      <tr><td><b>Exemples</b></td><td>${g.ex.map(x => esc(x)).join('<br>')}</td></tr>
+      <tr><td><b>La faute à attendre</b></td><td>${esc(g.faute)}</td></tr>
+      <tr><td><b>Ce qu'il faut faire</b></td><td>${esc(g.remede)}</td></tr>
+    </tbody></table>`;
 }
 
 function generate() {
@@ -9873,6 +12563,8 @@ function generate() {
     ${d.notes ? `<h3>Teacher's notes</h3><p>${esc(d.notes).replace(/\n/g, '<br>')}</p>` : ''}`;
 
   $('supportSheet').innerHTML = teacherSheet(d, u, l);
+  $('compoSheet').innerHTML = compositionHTML(d, u, l);
+  $('compoSheet').classList.toggle('sans-corrige', !d.compoCorrige);
   $('stageTitle').textContent = heading;
   planDirty = false; unsavedEdits = false; $('dirtyNotice').hidden = true;
   $('output').contentEditable = 'false';
@@ -9883,8 +12575,10 @@ function generate() {
 /* ---------------- préférences ---------------- */
 const PREF_FIELDS = ['teacher', 'school', 'province', 'duration', 'sessionType', 'classLevel',
   'unitSelect', 'lessonSelect', 'sessionSelect', 'mainSkill', 'integratedSkill', 'termSelect',
-  'wRel', 'wLang', 'wCoh', 'wRef', 'classSize', 'boys', 'girls', 'attendance', 'specialNeeds', 'methods', 'teachingAids', 'exCount', 'textVersion', 'consigneCount'];
-const CHECK_FIELDS = ['exAuto', 'exKey', 'lineNums'];
+  'wRel', 'wLang', 'wCoh', 'wRef', 'classSize', 'boys', 'girls', 'attendance', 'specialNeeds', 'methods', 'teachingAids', 'exCount', 'textVersion', 'consigneCount',
+  'compoFormat', 'compoText', 'compoTitre', 'compoSession', 'compoDuree', 'compoCoef',
+  'cePert', 'ceLang', 'ceCoh', 'cePerf'];
+const CHECK_FIELDS = ['exAuto', 'exKey', 'lineNums', 'compoCorrige'];
 
 function savePrefs() {
   const p = {};
@@ -9901,6 +12595,8 @@ function loadPrefs() {
   // Ces champs étaient enregistrés mais jamais rechargés.
   ['classSize', 'boys', 'girls', 'specialNeeds', 'methods', 'teachingAids', 'exCount'].forEach(f => { if (p[f] && $(f)) $(f).value = p[f]; });
   CHECK_FIELDS.forEach(f => { if (p[f] !== undefined && $(f)) $(f).checked = p[f] === '1'; });
+  if (p.compoFormat && $('compoFormat')) $('compoFormat').value = p.compoFormat;
+  ['compoText', 'compoTitre', 'compoSession', 'compoDuree', 'compoCoef'].forEach(f => { if (p[f] && $(f)) $(f).value = p[f]; });
   if (p.textVersion) $('textVersion').value = p.textVersion;
   if (p.sessionType) $('sessionType').value = p.sessionType;
   if (p.termSelect) $('termSelect').value = p.termSelect;
@@ -10090,6 +12786,27 @@ function planStyles() {
   .ex{margin:8pt 0 10pt;padding-left:8pt;border-left:1.5pt solid #ccc}
   .ex h4{font-size:10.5pt;margin:0 0 3pt}
   .ex-list{margin:3pt 0 4pt 18pt}
+  .ex-bank{background:none;border:1px solid #999;padding:4pt 6pt;margin:3pt 0 5pt}
+  .compo-avis{display:none!important}
+  .compo-tete{border-bottom:1px solid #999;padding-bottom:5pt}
+  .compo-etab{font-weight:bold;text-transform:uppercase;font-size:10pt;margin:0}
+  .compo-mini{font-size:9.5pt;color:#444;margin:1pt 0}
+  .compo-titre{text-align:center;letter-spacing:.06em;margin:12pt 0 7pt;font-size:13.5pt}
+  table.compo-bandeau{width:auto;margin:0 auto 9pt;font-size:9.5pt}
+  table.compo-bandeau td{border:1px solid #999;padding:2pt 8pt}
+  .compo-h-texte{text-align:center;letter-spacing:.14em;margin:10pt 0 4pt;font-size:11pt}
+  .compo-source{font-size:9pt;color:#555;margin:4pt 0 12pt}
+  .compo-partie{margin:11pt 0 0}
+  .compo-partie>h3{border-bottom:1pt solid #999;padding-bottom:2pt}
+  .compo-ex{margin:6pt 0 9pt;padding-left:8pt;border-left:1.5pt solid #ccc}
+  .compo-ex-t{margin:0 0 2pt;font-weight:bold;font-size:10.5pt}
+  .compo-bar{float:right;font-weight:normal;font-size:9pt;color:#555}
+  .compo-cons{margin:3pt 0 5pt 18pt}
+  .compo-vol{font-style:italic;font-size:9.5pt;color:#555}
+  .compo-corrige{page-break-before:always;border-top:none;margin-top:0;padding-top:0}
+  .compo-cle{margin:7pt 0;padding:6pt 9pt;border:1px solid #bbb;font-size:9.5pt}
+  .compo-cle b{display:block;margin-bottom:3pt}
+
   .corr{font-size:9.5pt;color:#c47d15;font-weight:bold}
   .warn-note{font-size:9pt;color:#a52a2a}
   .keybox{border:1pt dashed #777;padding:7pt 10pt;margin:10pt 0;font-size:9.5pt}
@@ -10160,7 +12877,7 @@ function autoGenerate() {
   generate();
 }
 $('classLevel').addEventListener('change', () => {
-  buildUnits(); refreshDynamicEditor(true); autoGenerate();
+  buildUnits(); buildCompoBareme(); refreshDynamicEditor(true); autoGenerate();
   if (!$('progression').hidden) renderProgression();
 });
 $('unitSelect').addEventListener('change', () => { buildLessons(); updateTermNote(); refreshDynamicEditor(true); autoGenerate(); });
@@ -10174,7 +12891,34 @@ $('termSelect').addEventListener('change', () => { updateTermNote(); updateWordC
 ['functionSelect', 'mainSkill', 'integratedSkill', 'duration'].forEach(id =>
   $(id).addEventListener('change', () => { if(id==='functionSelect'||id==='mainSkill') refreshDynamicEditor(true); autoGenerate(); }));
 
-['exAuto', 'exKey'].forEach(id => $(id).addEventListener('change', autoGenerate));
+/* v13.23 — « lineNums » manquait : cocher la numérotation des lignes ne
+   refaisait pas la fiche, et l'enseignant croyait l'option sans effet. Elle
+   commande désormais la forme des références du corrigé. */
+['exAuto', 'exKey', 'lineNums'].forEach(id => $(id).addEventListener('change', autoGenerate));
+
+/* --- composition --- */
+$('compoFormat').addEventListener('change', () => { buildCompoBareme(true); autoGenerate(); });
+$('compoCorrige').addEventListener('change', () => {
+  $('compoSheet').classList.toggle('sans-corrige', !$('compoCorrige').checked);
+});
+$('btnCompoReset').addEventListener('click', () => {
+  buildCompoBareme(true);
+  autoGenerate();
+  toast('Bar\u00e8me officiel r\u00e9tabli.');
+});
+['cePert', 'ceLang', 'ceCoh', 'cePerf'].forEach(id =>
+  $(id).addEventListener('input', () => {
+    clearTimeout(typingTimer); majCompoNotes();
+    typingTimer = setTimeout(autoGenerate, 400);
+  }));
+$('compoText').addEventListener('input', () => {
+  clearTimeout(typingTimer); majCompoMots();
+  typingTimer = setTimeout(autoGenerate, 500);
+});
+['compoTitre', 'compoSession', 'compoDuree', 'compoCoef'].forEach(id =>
+  $(id).addEventListener('input', () => {
+    clearTimeout(typingTimer); typingTimer = setTimeout(autoGenerate, 400);
+  }));
 $('exCount').addEventListener('input', () => { clearTimeout(typingTimer); typingTimer = setTimeout(autoGenerate, 400); });
 
 ['wRel', 'wLang', 'wCoh', 'wRef'].forEach(id =>
@@ -10254,14 +12998,8 @@ $('btnWord').addEventListener('click', downloadWord);
 $('btnCopy').addEventListener('click', copyPlan);
 $('btnSave').addEventListener('click', savePlan);
 
-$('btnSheet').addEventListener('click', () => {
-  const on = $('supportSheet').hidden;
-  $('supportSheet').hidden = !on;
-  $('output').hidden = on;
-  $('btnSheet').textContent = on ? 'Back to the plan' : "Teacher's sheet";
-  $('btnEdit').disabled = on;
-  window.scrollTo(0, 0);
-});
+$('btnSheet').addEventListener('click', () => montrerVue($('supportSheet').hidden ? 'sheet' : 'plan'));
+$('btnCompo').addEventListener('click', () => montrerVue($('compoSheet').hidden ? 'compo' : 'plan'));
 $('btnEdit').addEventListener('click', () => {
   const on = $('output').contentEditable !== 'true';
   $('output').contentEditable = on ? 'true' : 'false';
@@ -10297,6 +13035,13 @@ document.querySelectorAll('.mobtabs [data-view]').forEach(b =>
   buildClasses();
   buildSkills();
   if (!loadPrefs()) { $('classLevel').value = '6e'; buildUnits(); }
+  buildCompoBareme(true);
+  ['cePert', 'ceLang', 'ceCoh', 'cePerf'].forEach(f => {
+    const p = LS.get(PREFS_KEY, null);
+    if (p && p[f] && $(f)) $(f).value = p[f];
+  });
+  majCompoNotes();
+  majCompoMots();
   if (!$('sessionDate').value) $('sessionDate').value = new Date().toISOString().slice(0, 10);
   updateWeightNote();
   updateTermNote();
