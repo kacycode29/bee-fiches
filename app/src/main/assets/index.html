@@ -130,7 +130,16 @@ table.compo-bandeau td:first-child{font-weight:600;color:var(--ink-soft)}
 .compo-cle{margin:10px 0;padding:8px 12px;background:#fbfcfd;border:1px solid var(--rule);border-radius:6px;font-size:12.5px}
 .compo-cle b{display:block;margin-bottom:4px}
 #compoSheet.sans-corrige .compo-corrige{display:none}
+/* Une seule vue à la fois, quoi qu'il arrive : si une règle de mise en page
+   venait à l'emporter sur l'attribut « hidden », les trois volets
+   s'empileraient et le professeur ne retrouverait plus sa fiche. */
+#output[hidden],#supportSheet[hidden],#compoSheet[hidden]{display:none!important}
 #compoBareme .f label{font-size:10.5px;text-transform:uppercase;letter-spacing:.03em}
+.facultatif{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;
+  background:#e7eef1;color:var(--ink-soft);font-size:10px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;vertical-align:1px}
+#compoDetails>summary{cursor:pointer;padding:6px 0;font-size:13px;color:var(--green-dark);font-weight:600}
+#compoDetails[open]>summary{margin-bottom:6px;border-bottom:1px solid var(--rule)}
 
 .corr{font-size:12.5px;color:var(--amber);font-weight:600;margin:4px 0 0}
 .warn-note{font-size:12px;color:var(--alert);margin:4px 0}
@@ -330,7 +339,7 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
 
 <!-- ============ RÉGLAGES ============ -->
 <aside class="panel" id="panel">
-  <div class="brand"><b>📘 BEE</b><span>Burkina English Express · Lesson Plan Generator<br><small style="opacity:.7">version 13.26</small></span></div>
+  <div class="brand"><b>📘 BEE</b><span>Burkina English Express · Lesson Plan Generator<br><small style="opacity:.7">version 13.27</small></span></div>
 
   <fieldset>
     <legend>Teacher and school</legend>
@@ -445,7 +454,11 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
 
 
   <fieldset id="compoFieldset">
-    <legend>Composition &mdash; sujet d'&eacute;valuation</legend>
+    <legend>Composition &mdash; sujet d'&eacute;valuation <span class="facultatif">facultatif</span></legend>
+    <details id="compoDetails">
+    <summary>Ouvrir pour pr&eacute;parer un sujet d&rsquo;&eacute;valuation</summary>
+    <p class="note">Cette rubrique ne sert qu&rsquo;aux sujets d&rsquo;&eacute;valuation. Vous pouvez l&rsquo;ignorer&nbsp;:
+      elle n&rsquo;a aucun effet sur votre fiche de le&ccedil;on, qui se produit sans elle.</p>
     <p class="note">BEE b&acirc;tit le sujet autour de <b>votre</b> texte. Ce champ est ind&eacute;pendant du texte de la le&ccedil;on&nbsp;:
       changer de classe ou de le&ccedil;on ne l'effacera pas. Les instructions officielles exigent un texte in&eacute;dit &mdash;
       jamais &eacute;tudi&eacute; en classe, jamais pass&eacute; &agrave; un examen, ni tir&eacute; d'annales, d'ouvrages au programme,
@@ -479,6 +492,7 @@ table.grid td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:n
     </div>
     <p class="note" id="compoEcritNote"></p>
     <label class="choice" style="margin-top:8px"><input type="checkbox" id="compoCorrige" checked> <span>Imprimer aussi le corrig&eacute; et le bar&egrave;me (exemplaire du correcteur)</span></label>
+    </details>
   </fieldset>
   <fieldset>
     <legend>Teacher's notes</legend>
@@ -12002,8 +12016,9 @@ function compositionHTML(d, u, l) {
         grammar: inferGrammar(d.session, d.lesson, d.fn),
         topic: [u ? cleanTheme(u.label) : '', d.lesson, d.session].filter(Boolean).join(' '),
         early: ['6e', '5e'].indexOf(d.c) >= 0,
-        rnd: rngFrom(hashStr((d.compoSeed || '') + '|' + graine + '|' + nom)) }); } catch (e) { r = null; }
-      PHRASES_RESERVEES = null;
+        rnd: rngFrom(hashStr((d.compoSeed || '') + '|' + graine + '|' + nom)) }); }
+      catch (e) { r = null; }
+      finally { PHRASES_RESERVEES = null; }   /* jamais de réserve résiduelle */
       return r;
     };
     const batis = choisis.map((nom, i) => {
@@ -12197,7 +12212,7 @@ function buildCompoBareme(forcer) {
     i.addEventListener('input', () => {
       clearTimeout(typingTimer);
       majCompoNotes();
-      typingTimer = setTimeout(autoGenerate, 400);
+      typingTimer = setTimeout(compoChange, 400);
     }));
   /* La grille de production écrite suit le format : on la remet à une
      répartition qui totalise bien les points de la partie. */
@@ -12216,7 +12231,27 @@ function buildCompoBareme(forcer) {
 /* Trois vues se partagent la scène : la fiche, la fiche d'accompagnement
    et le sujet de composition. Une seule à la fois, sans quoi l'impression
    sortirait les trois. */
+/* Le sujet de composition se bâtit à l'ouverture du volet, et seulement
+   là. Tant que l'enseignant ne le demande pas, il ne coûte rien et ne peut
+   rien perturber. */
+let compoAJour = false;
+function batirComposition() {
+  if (compoAJour) return;
+  const sheet = $('compoSheet');
+  try {
+    const d = collect();
+    sheet.innerHTML = compositionHTML(d, currentUnit(), currentLesson());
+    sheet.classList.toggle('sans-corrige', !d.compoCorrige);
+  } catch (e) {
+    PHRASES_RESERVEES = null;
+    sheet.innerHTML = '<p class="note">Le sujet n\u2019a pas pu \u00eatre construit sur ce texte. '
+      + 'V\u00e9rifiez le texte coll\u00e9 dans les r\u00e9glages, rubrique \u00ab Composition \u00bb.</p>';
+  }
+  compoAJour = true;
+}
+
 function montrerVue(nom) {
+  if (nom === 'compo') batirComposition();
   $('output').hidden = nom !== 'plan';
   $('supportSheet').hidden = nom !== 'sheet';
   $('compoSheet').hidden = nom !== 'compo';
@@ -12562,9 +12597,14 @@ function generate() {
     ${lastAnswerKey}
     ${d.notes ? `<h3>Teacher's notes</h3><p>${esc(d.notes).replace(/\n/g, '<br>')}</p>` : ''}`;
 
-  $('supportSheet').innerHTML = teacherSheet(d, u, l);
-  $('compoSheet').innerHTML = compositionHTML(d, u, l);
-  $('compoSheet').classList.toggle('sans-corrige', !d.compoCorrige);
+  /* La fiche d'accompagnement et le sujet de composition ne doivent jamais
+     empêcher la fiche de leçon de sortir : elle est le cœur du logiciel, ils
+     n'en sont que des annexes. */
+  try { $('supportSheet').innerHTML = teacherSheet(d, u, l); }
+  catch (e) { $('supportSheet').innerHTML = '<p class="note">La fiche d\u2019accompagnement n\u2019a pas pu \u00eatre produite pour cette s\u00e9ance.</p>'; }
+  /* Le sujet de composition est facultatif : on ne le bâtit qu'à l'ouverture
+     du volet, et jamais au passage. */
+  compoAJour = false;
   $('stageTitle').textContent = heading;
   planDirty = false; unsavedEdits = false; $('dirtyNotice').hidden = true;
   $('output').contentEditable = 'false';
@@ -12877,7 +12917,7 @@ function autoGenerate() {
   generate();
 }
 $('classLevel').addEventListener('change', () => {
-  buildUnits(); buildCompoBareme(); refreshDynamicEditor(true); autoGenerate();
+  buildUnits(); buildCompoBareme(); compoAJour = false; refreshDynamicEditor(true); autoGenerate();
   if (!$('progression').hidden) renderProgression();
 });
 $('unitSelect').addEventListener('change', () => { buildLessons(); updateTermNote(); refreshDynamicEditor(true); autoGenerate(); });
@@ -12897,27 +12937,29 @@ $('termSelect').addEventListener('change', () => { updateTermNote(); updateWordC
 ['exAuto', 'exKey', 'lineNums'].forEach(id => $(id).addEventListener('change', autoGenerate));
 
 /* --- composition --- */
-$('compoFormat').addEventListener('change', () => { buildCompoBareme(true); autoGenerate(); });
+const compoChange = () => { compoAJour = false; if (!$('compoSheet').hidden) batirComposition(); savePrefs(); };
+$('compoFormat').addEventListener('change', () => { buildCompoBareme(true); compoChange(); });
 $('compoCorrige').addEventListener('change', () => {
   $('compoSheet').classList.toggle('sans-corrige', !$('compoCorrige').checked);
+  savePrefs();
 });
 $('btnCompoReset').addEventListener('click', () => {
   buildCompoBareme(true);
-  autoGenerate();
+  compoChange();
   toast('Bar\u00e8me officiel r\u00e9tabli.');
 });
 ['cePert', 'ceLang', 'ceCoh', 'cePerf'].forEach(id =>
   $(id).addEventListener('input', () => {
     clearTimeout(typingTimer); majCompoNotes();
-    typingTimer = setTimeout(autoGenerate, 400);
+    typingTimer = setTimeout(compoChange, 400);
   }));
 $('compoText').addEventListener('input', () => {
   clearTimeout(typingTimer); majCompoMots();
-  typingTimer = setTimeout(autoGenerate, 500);
+  typingTimer = setTimeout(compoChange, 500);
 });
 ['compoTitre', 'compoSession', 'compoDuree', 'compoCoef'].forEach(id =>
   $(id).addEventListener('input', () => {
-    clearTimeout(typingTimer); typingTimer = setTimeout(autoGenerate, 400);
+    clearTimeout(typingTimer); typingTimer = setTimeout(compoChange, 400);
   }));
 $('exCount').addEventListener('input', () => { clearTimeout(typingTimer); typingTimer = setTimeout(autoGenerate, 400); });
 
