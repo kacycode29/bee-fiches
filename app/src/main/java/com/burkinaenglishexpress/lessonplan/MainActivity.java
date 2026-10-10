@@ -1,9 +1,11 @@
 package com.burkinaenglishexpress.lessonplan;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.webkit.WebViewAssetLoader;
 
 import java.io.File;
@@ -53,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private ActivityResultLauncher<Intent> fileChooserLauncher;
+    /** Demande d'autorisation d'écriture (Android 6 à 9 seulement). */
+    private ActivityResultLauncher<String> storagePermissionLauncher;
+    /** Fichier en attente pendant que l'enseignant répond à la demande d'autorisation. */
+    private String pendingDataUrl;
+    private String pendingName;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -72,6 +80,23 @@ public class MainActivity extends AppCompatActivity {
                     }
                     filePathCallback.onReceiveValue(uris);
                     filePathCallback = null;
+                });
+
+        storagePermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    String dataUrl = pendingDataUrl;
+                    String name = pendingName;
+                    pendingDataUrl = null;
+                    pendingName = null;
+                    if (dataUrl == null) return;
+                    if (granted) {
+                        saveDataUrlNow(dataUrl, name);
+                    } else {
+                        toast("Enregistrement impossible : vous avez refusé l'autorisation "
+                                + "d'écrire dans le téléphone. Recommencez et appuyez sur "
+                                + "« Autoriser ».");
+                    }
                 });
 
         webView = new WebView(this);
@@ -250,17 +275,47 @@ public class MainActivity extends AppCompatActivity {
             "  xhr.onload = function(){" +
             "    if (this.status === 200) {" +
             "      var r = new FileReader();" +
-            "      r.onloadend = function(){" +
+            "      r.onload = function(){" +
             "        AndroidBridge.saveBase64(r.result, window.__lastDownloadName || '');" +
             "      };" +
+            "      r.onerror = function(){ AndroidBridge.saveFailed(); };" +
             "      r.readAsDataURL(this.response);" +
-            "    }" +
+            "    } else { AndroidBridge.saveFailed(); }" +
             "  };" +
+            "  xhr.onerror = function(){ AndroidBridge.saveFailed(); };" +
             "  xhr.send();" +
             "})();";
     }
 
-    private void saveDataUrl(String dataUrl, String suggestedName) {
+    /** Android 6 à 9 : l'écriture dans Téléchargements exige une autorisation demandée à l'utilisateur. */
+    private boolean needsStoragePermission() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                && ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void saveDataUrl(final String dataUrl, final String suggestedName) {
+        if (needsStoragePermission()) {
+            runOnUiThread(() -> {
+                pendingDataUrl = dataUrl;
+                pendingName = suggestedName;
+                try {
+                    storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                } catch (Exception e) {
+                    pendingDataUrl = null;
+                    pendingName = null;
+                    toast("Enregistrement impossible : l'autorisation d'écrire dans le "
+                            + "téléphone n'a pas pu être demandée.");
+                }
+            });
+            return;
+        }
+        saveDataUrlNow(dataUrl, suggestedName);
+    }
+
+    private void saveDataUrlNow(String dataUrl, String suggestedName) {
         try {
             int comma = dataUrl.indexOf(',');
             if (comma < 0) throw new IllegalArgumentException("data URL invalide");
@@ -274,15 +329,21 @@ public class MainActivity extends AppCompatActivity {
                     ? Base64.decode(payload, Base64.DEFAULT)
                     : Uri.decode(payload).getBytes("UTF-8");
 
-            String name = (suggestedName == null || suggestedName.trim().isEmpty())
-                    ? defaultFileName(mime)
-                    : suggestedName.trim();
+            String name = cleanFileName(suggestedName, mime);
 
             writeToDownloads(name, mime, bytes);
             toast("Enregistré dans Téléchargements : " + name);
         } catch (Exception e) {
-            toast("Échec de l'enregistrement : " + e.getMessage());
+            toast("L'enregistrement a échoué. Vérifiez l'espace libre du téléphone et "
+                    + "l'autorisation de stockage, puis recommencez.");
         }
+    }
+
+    /** Garde seulement un nom de fichier simple (sans dossier ni caractère interdit). */
+    private String cleanFileName(String suggestedName, String mime) {
+        if (suggestedName == null) return defaultFileName(mime);
+        String name = new File(suggestedName.trim()).getName().replaceAll("[\\\\/:*?\"<>|]", "_");
+        return name.isEmpty() ? defaultFileName(mime) : name;
     }
 
     private void writeToDownloads(String name, String mime, byte[] bytes) throws Exception {
@@ -357,6 +418,13 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void saveBase64(String dataUrl, String suggestedName) {
             saveDataUrl(dataUrl, suggestedName);
+        }
+
+        /** Appelé par le script de lecture quand le fichier n'a pas pu être lu. */
+        @JavascriptInterface
+        public void saveFailed() {
+            toast("L'enregistrement a échoué. Recommencez ; si le problème continue, "
+                    + "vérifiez l'espace libre du téléphone.");
         }
 
         /**
