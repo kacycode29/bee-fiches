@@ -93,9 +93,10 @@ public class MainActivity extends AppCompatActivity {
                     if (granted) {
                         saveDataUrlNow(dataUrl, name);
                     } else {
-                        toast("Enregistrement impossible : vous avez refusé l'autorisation "
-                                + "d'écrire dans le téléphone. Recommencez et appuyez sur "
-                                + "« Autoriser ».");
+                        toast("Enregistrement impossible : l'autorisation d'écrire dans le "
+                                + "téléphone est refusée. Recommencez et appuyez sur « Autoriser » ; "
+                                + "si la demande n'apparaît plus, autorisez le stockage dans "
+                                + "Réglages > Applications > BEE Fiches > Autorisations.");
                     }
                 });
 

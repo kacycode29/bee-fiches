@@ -141,6 +141,23 @@ Si votre logiciel comporte plusieurs pages, images, feuilles de style ou
 polices, placez-les tous dans `app/src/main/assets/`, en conservant la même
 structure de dossiers. La page de démarrage doit s'appeler `index.html`.
 
+### Contrôles automatiques avant de publier
+
+Le dossier `tests/` contient trois scripts (Node.js + Playwright, sur un
+ordinateur) qui génèrent toutes les fiches du logiciel et vérifient les règles
+pédagogiques (textes dans les fourchettes, trois consignes, grille, « a/an »,
+« he » génériques, rythme des situations d'intégration…) :
+
+```
+node tests/generer-toutes-les-fiches.js app/src/main/assets/index.html fiches.json
+node tests/verifier-les-fiches.js fiches.json .
+node tests/essai-licence-et-interface.js app/src/main/assets/index.html
+```
+
+La copie compilée est `app/src/main/assets/index.html` ; les deux autres copies
+(`index.html` à la racine et `app/src/index.html`) doivent lui rester
+identiques (le contrôle ci-dessus le vérifie).
+
 ---
 
 ## Ce que l'application gère
